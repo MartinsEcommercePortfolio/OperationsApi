@@ -4,10 +4,10 @@ namespace OperationsApi.Utilities;
 
 internal static class HttpExtentions
 {
-    public static Employee GetEmployee( this HttpContext http )
+    public static Employee Employee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return Employee.Null();
-        return userObj as Employee ?? Employee.Null();
+            return Domain.Warehouses.Employee.Null();
+        return userObj as Employee ?? Domain.Warehouses.Employee.Null();
     }
 }

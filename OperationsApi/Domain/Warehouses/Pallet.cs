@@ -11,6 +11,10 @@ internal sealed class Pallet
     public Employee? ReceivedBy { get; private set; }
     public Area? Area { get; private set; }
     public Racking? Racking { get; private set; }
+    public double Length { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public double Weight { get; set; }
 
     public bool IsOwned() => 
         Owner is not null;

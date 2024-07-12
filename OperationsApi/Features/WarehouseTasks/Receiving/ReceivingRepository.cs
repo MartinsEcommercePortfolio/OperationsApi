@@ -16,7 +16,8 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         try
         {
             var task = await _database.PendingReceivingTasks
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
             
             return task is not null
                 ? ReceivingTaskSummary.FromModel( task )
@@ -43,11 +44,12 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
             task.Start( employee );
             _database.PendingReceivingTasks.Remove( task );
 
-            await _database.ActiveReceivingTasks
+            var addResult = await _database.ActiveReceivingTasks
                 .AddAsync( task )
                 .ConfigureAwait( false );
 
-            return await SaveAsync( transaction );
+            return addResult.State == EntityState.Added
+                && await SaveAsync( transaction );
         }
         catch ( Exception e )
         {
@@ -61,10 +63,9 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         try
         {
             var task = employee.GetTask<ReceivingTask>();
-            bool received =
-                task.ReceiveTrailerPallet( employee, palletId ) &&
-                await SaveAsync( transaction );
-            return received;
+            
+            return task.ReceiveTrailerPallet( employee, palletId )
+                && await SaveAsync( transaction );
         }
         catch ( Exception e )
         {
@@ -78,10 +79,9 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         try
         {
             var task = employee.GetTask<ReceivingTask>();
-            bool staged =
-                task.StageReceivedPallet( employee, palletId, areaId ) &&
-                await SaveAsync( transaction );
-            return staged;
+            
+            return task.StageReceivedPallet( employee, palletId, areaId ) 
+                && await SaveAsync( transaction );
         }
         catch ( Exception e )
         {

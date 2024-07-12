@@ -1,6 +1,4 @@
-using OperationsApi.Domain.Warehouses;
-
-namespace OperationsApi.Domain.WarehouseTasks;
+namespace OperationsApi.Domain.Warehouses.Replenishing;
 
 internal sealed class ReplenishingTask : WarehouseTask
 {

@@ -1,5 +1,5 @@
 using OperationsApi.Database;
-using OperationsApi.Domain.WarehouseTasks;
+using OperationsApi.Domain.Warehouses.Loading;
 
 namespace OperationsApi.Features.WarehouseTasks.Loading;
 

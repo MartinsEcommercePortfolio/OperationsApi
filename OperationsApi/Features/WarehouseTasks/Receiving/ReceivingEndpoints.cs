@@ -41,14 +41,14 @@ internal static class ReceivingEndpoints
     }
     static async Task<IResult> ReceiveTrailerPallet( Guid palletId, HttpContext http, ReceivingRepository receiving )
     {
-        var result = await receiving.ReceiveTrailerPallet( http.Employee(), palletId );
+        var result = await receiving.ReceivePallet( http.Employee(), palletId );
         return result
             ? Results.Ok( result )
             : Results.Problem();
     }
     static async Task<IResult> StageReceivedPallet( PalletStagedDto dto, HttpContext http, ReceivingRepository receiving )
     {
-        var result = await receiving.StageReceivedPallet( http.Employee(), dto.PalletId, dto.AreaId );
+        var result = await receiving.StagePallet( http.Employee(), dto.PalletId, dto.AreaId );
         return result
             ? Results.Ok( result )
             : Results.Problem();

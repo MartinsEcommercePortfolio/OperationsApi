@@ -1,4 +1,4 @@
-namespace OperationsApi.Domain.Warehouses;
+namespace OperationsApi.Domain.Employees;
 
 internal enum EmployeeWorkMode
 {

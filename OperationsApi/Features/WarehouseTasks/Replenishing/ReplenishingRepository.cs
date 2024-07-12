@@ -1,4 +1,4 @@
-using OperationsApi.Domain.WarehouseTasks;
+using OperationsApi.Domain.Warehouses.Replenishing;
 
 namespace OperationsApi.Features.WarehouseTasks.Replenishing;
 

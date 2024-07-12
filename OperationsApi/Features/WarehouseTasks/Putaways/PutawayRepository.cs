@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsApi.Database;
+using OperationsApi.Domain.Employees;
 using OperationsApi.Domain.Warehouses;
+using OperationsApi.Domain.Warehouses.Putaways;
 using OperationsApi.Features._Shared;
 
 namespace OperationsApi.Features.WarehouseTasks.Putaways;
@@ -41,6 +43,18 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
         catch ( Exception e )
         {
             return await ProcessDbException<RackingDto?>( e, transaction, null );
+        }
+    }
+    public async Task<bool> ConfirmPutaway( Employee employee, Guid palletId, Racking Id )
+    {
+        await using var transaction = await GetTransaction();
+        try
+        {
+            return false;
+        }
+        catch ( Exception e )
+        {
+            return await ProcessDbException( e, transaction, false );
         }
     }
 }

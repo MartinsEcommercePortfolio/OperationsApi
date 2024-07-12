@@ -1,6 +1,5 @@
-using OperationsApi.Domain.Warehouses;
 
-namespace OperationsApi.Domain.WarehouseTasks;
+namespace OperationsApi.Domain.Warehouses.Putaways;
 
 internal sealed class PutawayTask : WarehouseTask
 {

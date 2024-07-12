@@ -1,9 +1,8 @@
 using OperationsApi.Domain.Shipping;
-using OperationsApi.Domain.Warehouses;
 
-namespace OperationsApi.Domain.WarehouseTasks;
+namespace OperationsApi.Domain.Warehouses.Receiving;
 
-internal sealed class LoadingTask : WarehouseTask
+internal sealed class ReceivingTask : WarehouseTask
 {
     public Trailer Trailer { get; set; } = null!;
     public Dock Dock { get; set; } = null!;
@@ -14,5 +13,4 @@ internal sealed class LoadingTask : WarehouseTask
     public Guid DockId { get; set; }
     public Guid AreaId { get; set; }
     public Guid ShipmentId { get; set; }
-    public List<Guid> PalletIds { get; set; } = null!;
 }

@@ -1,6 +1,6 @@
-using OperationsApi.Domain.Warehouses;
+using OperationsApi.Domain.Employees;
 
-namespace OperationsApi.Domain.WarehouseTasks;
+namespace OperationsApi.Domain.Warehouses;
 
 internal abstract class WarehouseTask
 {

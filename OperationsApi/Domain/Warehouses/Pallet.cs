@@ -1,3 +1,5 @@
+using OperationsApi.Domain.Employees;
+
 namespace OperationsApi.Domain.Warehouses;
 
 internal sealed class Pallet
@@ -18,7 +20,7 @@ internal sealed class Pallet
 
     public bool IsOwned() => 
         Owner is not null;
-    public bool IsOwner( Employee employee ) =>
+    public bool IsOwnedBy( Employee employee ) =>
         Owner == employee;
     public bool IsReceived() => 
         ReceivedBy is not null;
@@ -57,9 +59,15 @@ internal sealed class Pallet
         SetRacking( null );
         SetOwner( employee );
     }
-    public bool Stage( Employee employee, Area area )
+    public void AssignTo( Racking racking )
     {
-        if (IsOwner( employee ) || !IsReceived())
+        SetOwner( null );
+        RackingId = racking.Id;
+        Racking = racking;
+    }
+    public bool Stage( Area area )
+    {
+        if (!IsReceived())
             return false;
         
         SetArea( area );

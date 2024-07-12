@@ -1,4 +1,4 @@
-using OperationsApi.Domain.WarehouseTasks.Receiving;
+using OperationsApi.Domain.Warehouses.Receiving;
 
 namespace OperationsApi.Features.WarehouseTasks.Receiving.Dtos;
 

@@ -1,4 +1,4 @@
-using OperationsApi.Domain.WarehouseTasks;
+using OperationsApi.Domain.Warehouses.Picking;
 
 namespace OperationsApi.Features.WarehouseTasks.Picking;
 

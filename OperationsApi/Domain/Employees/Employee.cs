@@ -1,20 +1,19 @@
-using OperationsApi.Domain.WarehouseTasks;
-namespace OperationsApi.Domain.Warehouses;
+using OperationsApi.Domain.Warehouses;
+
+namespace OperationsApi.Domain.Employees;
 
 internal sealed class Employee
 {
-    public Guid Id { get; private set; }
-    public Guid DeviceId { get; private set; }
-    public Guid ForkliftId { get; private set; }
-    public Guid TaskId { get; private set; }
-    public WarehouseTask? Task { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public EmployeeWorkMode WorkMode { get; private set; }
+    public Guid Id { get; set; }
+    public Guid DeviceId { get; set; }
+    public Guid ForkliftId { get; set; }
+    public Guid TaskId { get; set; }
+    public WarehouseTask? Task { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public EmployeeWorkMode WorkMode { get; set; }
 
     public T GetTask<T>() where T : WarehouseTask, new() => 
         Task as T ?? WarehouseTask.Null<T>();
-
-    public Employee() {}
 
     public static Employee Null() =>
         new() {

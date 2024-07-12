@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsApi.Database;
-using OperationsApi.Domain.Warehouses;
-using OperationsApi.Domain.WarehouseTasks.Receiving;
+using OperationsApi.Domain.Employees;
+using OperationsApi.Domain.Warehouses.Receiving;
 using OperationsApi.Features.WarehouseTasks.Receiving.Dtos;
 
 namespace OperationsApi.Features.WarehouseTasks.Receiving;
@@ -34,21 +34,14 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         
         try
         {
-            ReceivingTask? task = await _database.PendingReceivingTasks
-                .FirstOrDefaultAsync( t => t.Id == taskId )
+            var warehouse = await _database.Warehouses
+                .Include( static w => w.PendingReceivingTasks )
+                .Include( static w => w.ActiveReceivingTasks )
+                .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            if (task is null)
-                return false;
-            
-            task.Start( employee );
-            _database.PendingReceivingTasks.Remove( task );
-
-            var addResult = await _database.ActiveReceivingTasks
-                .AddAsync( task )
-                .ConfigureAwait( false );
-
-            return addResult.State == EntityState.Added
+            return warehouse is not null
+                && warehouse.StartReceivingTask( employee, taskId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )
@@ -56,15 +49,19 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
             return await ProcessDbException( e, transaction, false );
         }
     }
-    public async Task<bool> ReceiveTrailerPallet( Employee employee, Guid palletId )
+    public async Task<bool> ReceivePallet( Employee employee, Guid palletId )
     {
         await using var transaction = await GetTransaction();
         
         try
         {
-            var task = employee.GetTask<ReceivingTask>();
+            var warehouse = await _database.Warehouses
+                .Include( static w => w.Pallets )
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
             
-            return task.ReceiveTrailerPallet( employee, palletId )
+            return warehouse is not null 
+                && warehouse.ReceivePallet( employee, palletId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )
@@ -72,15 +69,20 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
             return await ProcessDbException( e, transaction, false );
         }
     }
-    public async Task<bool> StageReceivedPallet( Employee employee, Guid palletId, Guid areaId )
+    public async Task<bool> StagePallet( Employee employee, Guid palletId, Guid areaId )
     {
         await using var transaction = await GetTransaction();
-
+        
         try
         {
-            var task = employee.GetTask<ReceivingTask>();
-            
-            return task.StageReceivedPallet( employee, palletId, areaId ) 
+            var warehouse = await _database.Warehouses
+                .Include( static w => w.Pallets )
+                .Include( static w => w.Areas )
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
+
+            return warehouse is not null
+                && warehouse.StagePallet( employee, palletId, areaId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )

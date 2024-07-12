@@ -1,8 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using OperationsApi.Domain.Employees;
+using OperationsApi.Domain.Equipment;
 using OperationsApi.Domain.Shipping;
 using OperationsApi.Domain.Warehouses;
-using OperationsApi.Domain.WarehouseTasks;
-using OperationsApi.Domain.WarehouseTasks.Receiving;
+using OperationsApi.Domain.Warehouses.Loading;
+using OperationsApi.Domain.Warehouses.Picking;
+using OperationsApi.Domain.Warehouses.Putaways;
+using OperationsApi.Domain.Warehouses.Receiving;
+using OperationsApi.Domain.Warehouses.Replenishing;
 
 namespace OperationsApi.Database;
 

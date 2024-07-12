@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsApi.Domain.Shipping;
-using OperationsApi.Domain.Tasks;
-using OperationsApi.Domain.Tasks.Receiving;
-using OperationsApi.Types.Tasks;
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
+using OperationsApi.Domain.WarehouseTasks;
+using OperationsApi.Domain.WarehouseTasks.Receiving;
 
 namespace OperationsApi.Database;
 
@@ -26,13 +25,13 @@ internal class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options 
     public required DbSet<PickingTask> PendingPickingTasks { get; init; }
     public required DbSet<PutawayTask> PendingPutawayTasks { get; init; }
     public required DbSet<ReceivingTask> PendingReceivingTasks { get; init; }
-    public required DbSet<ReplenTask> PendingReplenTasks { get; init; }
+    public required DbSet<ReplenishingTask> PendingReplenTasks { get; init; }
     
     public required DbSet<LoadingTask> ActiveLoadingTasks { get; init; }
     public required DbSet<PickingTask> ActivePickingTasks { get; init; }
     public required DbSet<PutawayTask> ActivePutawayTasks { get; init; }
     public required DbSet<ReceivingTask> ActiveReceivingTasks { get; init; }
-    public required DbSet<ReplenTask> ActiveReplenTasks { get; init; }
+    public required DbSet<ReplenishingTask> ActiveReplenTasks { get; init; }
     
     // WAREHOUSE
     public required DbSet<Area> Areas { get; init; }

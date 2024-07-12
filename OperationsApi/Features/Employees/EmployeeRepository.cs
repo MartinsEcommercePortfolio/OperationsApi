@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsApi.Database;
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
 
 namespace OperationsApi.Features.Employees;
 

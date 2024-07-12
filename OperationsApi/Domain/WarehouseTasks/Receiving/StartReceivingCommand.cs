@@ -1,4 +1,4 @@
-namespace OperationsApi.Domain.Tasks.Receiving;
+namespace OperationsApi.Domain.WarehouseTasks.Receiving;
 
 internal readonly record struct StartReceivingCommand(
     Guid TrailerId,

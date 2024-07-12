@@ -1,7 +1,5 @@
-using OperationsApi.Domain.Tasks;
-using OperationsApi.Types.Tasks;
-
-namespace OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.WarehouseTasks;
+namespace OperationsApi.Domain.Warehouses;
 
 internal sealed class Employee
 {

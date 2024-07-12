@@ -1,4 +1,4 @@
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
 
 namespace OperationsApi.Domain.Shipping;
 

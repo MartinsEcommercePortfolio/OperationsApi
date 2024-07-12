@@ -1,4 +1,4 @@
-namespace OperationsApi.Domain.Tasks.Dtos;
+namespace OperationsApi.Domain.WarehouseTasks.Dtos;
 
 internal readonly record struct StartTaskRequest(
     Guid UserId,

@@ -1,8 +1,8 @@
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
 
-namespace OperationsApi.Domain.Tasks;
+namespace OperationsApi.Domain.WarehouseTasks;
 
-internal sealed class ReplenTask : WarehouseTask
+internal sealed class ReplenishingTask : WarehouseTask
 {
     public Pallet Pallet { get; set; } = null!;
     public Racking FromRacking { get; set; } = null!;

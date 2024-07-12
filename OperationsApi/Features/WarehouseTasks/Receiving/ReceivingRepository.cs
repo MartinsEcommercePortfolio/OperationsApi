@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsApi.Database;
-using OperationsApi.Domain.Tasks.Receiving;
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
+using OperationsApi.Domain.WarehouseTasks.Receiving;
+using OperationsApi.Features.WarehouseTasks.Receiving.Dtos;
 
 namespace OperationsApi.Features.WarehouseTasks.Receiving;
 
@@ -10,16 +11,20 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
 {
     readonly WarehouseDbContext _database = dbContext;
 
-    public async Task<ReceivingTask?> GetNextReceivingTask()
+    public async Task<ReceivingTaskSummary?> GetNextReceivingTask()
     {
         try
         {
-            return await _database.PendingReceivingTasks
+            var task = await _database.PendingReceivingTasks
                 .FirstOrDefaultAsync();
+            
+            return task is not null
+                ? ReceivingTaskSummary.FromModel( task )
+                : null;
         }
         catch ( Exception e )
         {
-            return ProcessDbException<ReceivingTask?>( e, null );
+            return ProcessDbException<ReceivingTaskSummary?>( e, null );
         }
     }
     public async Task<bool> StartReceiving( Employee employee, Guid taskId )
@@ -49,7 +54,7 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
             return await ProcessDbException( e, transaction, false );
         }
     }
-    public async Task<bool> UnloadTrailerPallet( Employee employee, Guid palletId )
+    public async Task<bool> ReceiveTrailerPallet( Employee employee, Guid palletId )
     {
         await using var transaction = await GetTransaction();
         

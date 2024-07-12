@@ -1,6 +1,6 @@
-using OperationsApi.Types.Warehouses;
+using OperationsApi.Domain.Warehouses;
 
-namespace OperationsApi.Domain.Tasks;
+namespace OperationsApi.Domain.WarehouseTasks;
 
 internal sealed class PickingTask : WarehouseTask
 {

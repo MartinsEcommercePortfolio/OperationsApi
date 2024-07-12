@@ -1,11 +1,10 @@
-using OperationsApi.Domain.Tasks;
-using OperationsApi.Types.Tasks;
+using OperationsApi.Domain.WarehouseTasks;
 
 namespace OperationsApi.Features.WarehouseTasks.Replenishing;
 
 internal sealed class ReplenishingRepository
 {
-    public async Task<ReplenTask?> GetNextTask( Guid employeeId )
+    public async Task<ReplenishingTask?> GetNextTask( Guid employeeId )
     {
         return null;
     }

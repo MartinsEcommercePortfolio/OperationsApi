@@ -2,6 +2,7 @@ namespace OperationsApi.Types.Warehouses;
 
 internal sealed class Racking
 {
+    public Guid Id { get; set; }
     public int Aisle { get; set; }
     public int Bay { get; set; }
     public int Level { get; set; }

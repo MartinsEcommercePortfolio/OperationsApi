@@ -1,4 +1,4 @@
-namespace OperationsApi.Types.Shipping;
+namespace OperationsApi.Domain.Shipping;
 
 internal sealed class Delivery
 {

@@ -1,6 +1,6 @@
 using OperationsApi.Types.Warehouses;
 
-namespace OperationsApi.Types.Shipping;
+namespace OperationsApi.Domain.Shipping;
 
 internal sealed class Load
 {

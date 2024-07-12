@@ -9,9 +9,14 @@ internal sealed class Area
 
     public bool StagePallet( Pallet pallet )
     {
-        bool staged = IsAvailable 
-            && !Pallets.Contains( pallet ) 
-            && pallet.Stage( this );
-        return staged;
+        bool staged = IsAvailable
+            && !Pallets.Contains( pallet );
+
+        if (!staged)
+            return false;
+        
+        pallet.Stage( this ); 
+        Pallets.Add( pallet );
+        return true;
     }
 }

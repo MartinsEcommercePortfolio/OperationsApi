@@ -5,15 +5,15 @@ namespace OperationsApi.Domain.Warehouses;
 
 internal sealed class Pallet
 {
-    public Guid Id { get; private set; }
+    public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
-    public Guid ReceivedById { get; private set; }
-    public Guid AreaId { get; private set; }
-    public Guid RackingId { get; private set; }
+    public Guid ReceivedById { get; set; }
+    public Guid AreaId { get; set; }
+    public Guid RackingId { get; set; }
     public Employee? Owner { get; set; }
-    public Employee? ReceivedBy { get; private set; }
-    public Area? Area { get; private set; }
-    public Racking? Racking { get; private set; }
+    public Employee? ReceivedBy { get; set; }
+    public Area? Area { get; set; }
+    public Racking? Racking { get; set; }
     public double Length { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
@@ -25,36 +25,32 @@ internal sealed class Pallet
         Owner == employee;
     public bool IsReceived() => 
         ReceivedBy is not null;
+    public bool IsStaged() =>
+        Area is not null;
     public bool IsCorrectArea( Guid areaId ) =>
         AreaId == areaId;
 
-    public bool Receive( Employee employee )
-    {
-        if (IsOwned() || IsReceived())
-            return false;
+    public bool CanBePutAway() =>
+        IsReceived() &&
+        !IsOwned() &&
+        IsStaged();
 
+    public void Receive( Employee employee )
+    {
+        ClearOwners();
+        SetOwner( employee );
         ReceivedBy = employee;
         ReceivedById = employee.Id;
-        AssignTo( employee );
-        return true;
     }
-    public bool Stage( Area area )
+    public void Stage( Area area )
     {
-        if (!IsReceived())
-            return false;
-
         ClearOwners();
         SetArea( area );
-        return true;
     }
-    public bool Place( Racking racking )
+    public void PutAway( Racking racking )
     {
-        if (!IsReceived())
-            return false;
-
         ClearOwners();
         SetRacking( racking );
-        return true;
     }
     public bool Load( Trailer trailer )
     {

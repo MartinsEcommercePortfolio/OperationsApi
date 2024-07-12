@@ -18,27 +18,27 @@ internal static class ReceivingExtentions
         
         return true;
     }
-    public static bool ReceivePallet( this Warehouse w, Employee employee, Pallet pallet )
+    public static bool ReceivePallet( this Warehouse w, Employee employee, Guid palletId )
     {
-        bool received = employee
+        var pallet = employee
             .GetTask<ReceivingTask>()
-            .ReceivePallet( employee, pallet );
+            .ReceivePallet( palletId );
 
-        if (received)
-            w.Pallets.Add( pallet );
-
-        return received;
+        if (pallet is null || w.Pallets.Contains( pallet ))
+            return false;
+        
+        w.Pallets.Add( pallet );
+        return true;
     }
     public static bool StagePallet( this Warehouse w, Employee employee, Guid palletId, Guid areaId )
     {
-        var pallet = w.GetPalletById( palletId );
-        var area = w.GetAreaById( areaId );
+        var task = employee
+            .GetTask<ReceivingTask>();
 
-        if (pallet is null || area is null)
-            return false;
+        var staged = task
+            .StagePallet( palletId, areaId );
 
-        return employee
-            .GetTask<ReceivingTask>()
-            .StagePallet( employee, pallet, area );
+        return staged && 
+            w.ActiveReceivingTasks.Remove( task );
     }
 }

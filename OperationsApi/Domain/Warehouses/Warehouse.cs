@@ -1,5 +1,6 @@
 using OperationsApi.Domain.Employees;
 using OperationsApi.Domain.Shipping;
+using OperationsApi.Domain.Warehouses.Putaways;
 using OperationsApi.Domain.Warehouses.Receiving;
 
 namespace OperationsApi.Domain.Warehouses;
@@ -17,9 +18,12 @@ internal sealed class Warehouse
 
     public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
     public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
+    public List<PutawayTask> ActivePutawayTasks { get; set; } = [];
 
     public Area? GetAreaById( Guid areaId ) =>
         Areas.FirstOrDefault( a => a.Id == areaId );
+    public Racking? GetRackingById( Guid rackingId ) =>
+        Racks.FirstOrDefault( r => r.Id == rackingId );
     public Pallet? GetPalletById( Guid palletId ) =>
         Pallets.FirstOrDefault( p => p.Id == palletId );
 }

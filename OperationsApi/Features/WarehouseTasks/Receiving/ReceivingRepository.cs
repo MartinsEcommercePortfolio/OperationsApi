@@ -60,12 +60,8 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            var pallet = warehouse?
-                .GetPalletById( palletId );
-
             return warehouse is not null
-                && pallet is not null
-                && warehouse.ReceivePallet( employee, pallet )
+                && warehouse.ReceivePallet( employee, palletId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )

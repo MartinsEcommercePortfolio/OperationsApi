@@ -14,25 +14,33 @@ internal sealed class ReceivingTask : WarehouseTask
     public Guid DockId { get; set; }
     public Guid AreaId { get; set; }
     
-    public bool ReceivePallet( Employee employee, Pallet pallet )
+    public Pallet? ReceivePallet( Guid palletId )
     {
-        bool received = CurrentPallet is null 
-            && Trailer.UnloadPallet( pallet );
-        
-        if (received)
-            pallet.AssignTo( employee );
-        
-        return received;
-    }
-    public bool StagePallet( Employee employee, Pallet pallet, Area area )
-    {
-        bool staged = CurrentPallet == pallet
-            && Area == area
-            && Area.StagePallet( pallet );
+        Pallet? pallet = Trailer.CheckPallet( palletId );
 
-        if (staged)
-            pallet.UnassignFrom( employee );
+        bool unloaded = pallet is not null
+            && CurrentPallet is null
+            && Trailer.UnloadPallet( pallet );
+
+        if (!unloaded)
+            return null;
         
-        return staged;
+        pallet?.Receive( Employee );
+        CurrentPallet = pallet;
+        return pallet;
+    }
+    public bool StagePallet( Guid palletId, Guid areaId )
+    {
+        bool staged = CurrentPallet is not null
+            && palletId == CurrentPallet.Id
+            && areaId == Area.Id
+            && Area.StagePallet( CurrentPallet );
+
+        if (!staged)
+            return false;
+        
+        CurrentPallet?.Stage( Area );
+        Employee.FinishTask();
+        return true;
     }
 }

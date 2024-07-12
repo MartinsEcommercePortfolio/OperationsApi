@@ -4,11 +4,17 @@ namespace OperationsApi.Domain.Warehouses;
 
 internal abstract class WarehouseTask
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid EmployeeId { get; set; }
-    public Employee? Employee { get; set; }
+    public Employee Employee { get; set; } = new();
     public bool Started { get; set; }
 
+    protected void SetEmployee( Employee employee )
+    {
+        EmployeeId = employee.Id;
+        Employee = employee;
+    }
+    
     public static T Null<T>()
         where T : WarehouseTask, new() =>
         new() {
@@ -23,6 +29,6 @@ internal abstract class WarehouseTask
         EmployeeId = employee.Id;
         Employee = employee;
         Started = true;
-        employee.AssignToTask( this );
+        employee.StartTask( this );
     }
 }

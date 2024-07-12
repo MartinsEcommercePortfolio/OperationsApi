@@ -10,12 +10,12 @@ internal static class PutawaysEndpoints
     {
         app.MapPost( "api/tasks/putaways/start",
             static async ( [FromBody] Guid palletId, HttpContext http, PutawayRepository putaways ) =>
-            await StartPutaway( palletId, http.Employee(), putaways ) );
+            await StartPutaway( http.Employee(), palletId, putaways ) );
     }
 
-    static async Task<IResult> StartPutaway( Guid palletId, Employee employee, PutawayRepository putaways )
+    static async Task<IResult> StartPutaway( Employee employee, Guid palletId, PutawayRepository putaways )
     {
-        var result = await putaways.AssignPutaway( palletId, employee );
+        var result = await putaways.BeginPutaway( employee, palletId );
         return result is not null
             ? Results.Ok( result )
             : Results.Problem();

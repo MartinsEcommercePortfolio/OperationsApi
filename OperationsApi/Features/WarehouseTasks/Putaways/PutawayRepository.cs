@@ -12,7 +12,7 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
 {
     readonly WarehouseDbContext _database = dbContext;
     
-    public async Task<RackingDto?> AssignPutaway( Guid palletId, Employee employee )
+    public async Task<RackingDto?> BeginPutaway( Employee employee, Guid palletId )
     {
         await using var transaction = await GetTransaction();
         try
@@ -22,27 +22,38 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
                 .Include( static w => w.Racks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
-
             var pallet = warehouse?.GetPalletById( palletId );
-            if (pallet is null)
+            
+            if (warehouse is null || pallet is null)
                 return null;
 
-            var racking = await warehouse!.AssignPutaway( employee, pallet );
-            return racking is not null
-                ? RackingDto.FromModel( racking )
-                : null;
+            var assignedRacking = await warehouse
+                .BeginPutaway( employee, pallet );
+            
+            return assignedRacking is not null &&
+                await SaveAsync( transaction )
+                    ? RackingDto.FromModel( assignedRacking )
+                    : null;
         }
         catch ( Exception e )
         {
             return await ProcessDbException<RackingDto?>( e, transaction, null );
         }
     }
-    public async Task<bool> ConfirmPutaway( Employee employee, Guid palletId, Racking Id )
+    public async Task<bool> CompletePutaway( Employee employee, Guid palletId, Guid rackingId )
     {
         await using var transaction = await GetTransaction();
         try
         {
-            return false;
+            var warehouse = await _database.Warehouses
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
+
+            if (warehouse is null)
+                return false;
+
+            return warehouse.CompletePutaway( employee, palletId, rackingId ) &&
+                await SaveAsync( transaction );
         }
         catch ( Exception e )
         {

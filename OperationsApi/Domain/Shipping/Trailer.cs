@@ -8,12 +8,8 @@ internal sealed class Trailer
     public string Number { get; set; } = string.Empty;
     public List<Pallet> Pallets { get; set; } = [];
 
-    public Pallet? CheckPallet( Guid palletId )
-    {
-        return Pallets.FirstOrDefault();
-    }
-    public bool UnloadPallet( Pallet pallet )
-    {
-        return Pallets.Remove( pallet );
-    }
+    public Pallet? CheckPallet( Guid palletId ) =>
+        Pallets.FirstOrDefault( p => p.Id == palletId );
+    public bool UnloadPallet( Pallet pallet ) => 
+        Pallets.Remove( pallet );
 }

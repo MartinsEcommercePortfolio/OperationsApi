@@ -32,9 +32,18 @@ internal sealed class Employee
         task = t ?? WarehouseTask.Null<T>();
 ;       return t is not null;
     }
-    public void AssignToTask( WarehouseTask task )
+    public bool StartTask( WarehouseTask task )
     {
+        if (Task is not null)
+            return false;
+        
         TaskId = task.Id;
         Task = task;
+        return true;
+    }
+    public void FinishTask()
+    {
+        TaskId = Guid.Empty;
+        Task = null;
     }
 }

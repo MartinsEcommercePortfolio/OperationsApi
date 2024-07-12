@@ -14,6 +14,7 @@ internal sealed class Racking
     public double Capacity { get; private set; }
     public Guid OwnerId { get; private set; }
     public Employee? Owner { get; private set; }
+    public Pallet? Pallet { get; set; }
 
     public bool IsOwnedBy( Employee employee ) =>
         Owner == employee;
@@ -22,6 +23,7 @@ internal sealed class Racking
         Width > pallet.Width &&
         Height > pallet.Height &&
         Capacity > pallet.Weight;
+    
     public void AssignTo( Employee employee )
     {
         OwnerId = employee.Id;

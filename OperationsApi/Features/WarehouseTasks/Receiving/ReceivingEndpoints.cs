@@ -10,7 +10,7 @@ internal static class ReceivingEndpoints
     {
         app.MapGet( "api/tasks/receiving/next",
             static async ( ReceivingRepository repo ) =>
-            await GetNextReceivingTask( repo ) );
+            await GetNextTask( repo ) );
 
         app.MapPost( "api/tasks/receiving/start",
             static async ( [FromBody] Guid taskId, HttpContext http, ReceivingRepository receiving ) =>
@@ -18,14 +18,14 @@ internal static class ReceivingEndpoints
 
         app.MapPost( "api/tasks/receiving/unload",
             static async ( [FromBody] Guid taskId, HttpContext http, ReceivingRepository receiving ) =>
-            await ReceiveTrailerPallet( taskId, http, receiving ) );
+            await ReceivePallet( taskId, http, receiving ) );
 
         app.MapPost( "api/tasks/receiving/stage",
             static async ( [FromBody] PalletStagedDto dto, HttpContext http, ReceivingRepository receiving ) =>
-            await StageReceivedPallet( dto, http, receiving ) );
+            await StagePallet( dto, http, receiving ) );
     }
 
-    static async Task<IResult> GetNextReceivingTask( ReceivingRepository receiving )
+    static async Task<IResult> GetNextTask( ReceivingRepository receiving )
     {
         var result = await receiving.GetNextReceivingTask();
         return result is not null
@@ -39,14 +39,14 @@ internal static class ReceivingEndpoints
             ? Results.Ok( result )
             : Results.Problem();
     }
-    static async Task<IResult> ReceiveTrailerPallet( Guid palletId, HttpContext http, ReceivingRepository receiving )
+    static async Task<IResult> ReceivePallet( Guid palletId, HttpContext http, ReceivingRepository receiving )
     {
         var result = await receiving.ReceivePallet( http.Employee(), palletId );
         return result
             ? Results.Ok( result )
             : Results.Problem();
     }
-    static async Task<IResult> StageReceivedPallet( PalletStagedDto dto, HttpContext http, ReceivingRepository receiving )
+    static async Task<IResult> StagePallet( PalletStagedDto dto, HttpContext http, ReceivingRepository receiving )
     {
         var result = await receiving.StagePallet( http.Employee(), dto.PalletId, dto.AreaId );
         return result

@@ -18,6 +18,8 @@ internal sealed class Warehouse
     public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
     public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
 
+    public Area? GetAreaById( Guid areaId ) =>
+        Areas.FirstOrDefault( a => a.Id == areaId );
     public Pallet? GetPalletById( Guid palletId ) =>
         Pallets.FirstOrDefault( p => p.Id == palletId );
 }

@@ -12,32 +12,24 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
 {
     readonly WarehouseDbContext _database = dbContext;
     
-    public async Task<RackingDto?> StartPutaway( Employee employee, Guid palletId )
+    public async Task<RackingDto?> AssignPutaway( Guid palletId, Employee employee )
     {
         await using var transaction = await GetTransaction();
         try
         {
-            var pallet = await _database.Pallets
-                .FirstOrDefaultAsync( p => p.Id == palletId )
-                .ConfigureAwait( false );
-            
-            if (pallet is null)
-                return null;
-
             var warehouse = await _database.Warehouses
+                .Include( static w => w.Pallets )
                 .Include( static w => w.Racks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            if (warehouse is null)
+            var pallet = warehouse?.GetPalletById( palletId );
+            if (pallet is null)
                 return null;
 
-            var result = await warehouse
-                .AssignPutaway( employee, pallet )
-                .ConfigureAwait( false );
-            
-            return result is not null && await SaveAsync( transaction )
-                ? RackingDto.FromModel( result )
+            var racking = await warehouse!.AssignPutaway( employee, pallet );
+            return racking is not null
+                ? RackingDto.FromModel( racking )
                 : null;
         }
         catch ( Exception e )

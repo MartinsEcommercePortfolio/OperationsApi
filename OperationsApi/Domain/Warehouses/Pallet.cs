@@ -1,4 +1,5 @@
 using OperationsApi.Domain.Employees;
+using OperationsApi.Domain.Shipping;
 
 namespace OperationsApi.Domain.Warehouses;
 
@@ -17,7 +18,7 @@ internal sealed class Pallet
     public double Width { get; set; }
     public double Height { get; set; }
     public double Weight { get; set; }
-
+    
     public bool IsOwned() => 
         Owner is not null;
     public bool IsOwnedBy( Employee employee ) =>
@@ -27,6 +28,66 @@ internal sealed class Pallet
     public bool IsCorrectArea( Guid areaId ) =>
         AreaId == areaId;
 
+    public bool Receive( Employee employee )
+    {
+        if (IsOwned() || IsReceived())
+            return false;
+
+        ReceivedBy = employee;
+        ReceivedById = employee.Id;
+        AssignTo( employee );
+        return true;
+    }
+    public bool Stage( Area area )
+    {
+        if (!IsReceived())
+            return false;
+
+        ClearOwners();
+        SetArea( area );
+        return true;
+    }
+    public bool Place( Racking racking )
+    {
+        if (!IsReceived())
+            return false;
+
+        ClearOwners();
+        SetRacking( racking );
+        return true;
+    }
+    public bool Load( Trailer trailer )
+    {
+        if (!IsReceived())
+            return false;
+        
+        ClearOwners();
+        return true;
+    }
+    
+    public void AssignTo( Employee employee )
+    {
+        ClearOwners();
+        SetOwner( employee );
+    }
+    public void UnassignFrom( Employee employee )
+    {
+        ClearOwners();
+    }
+    public void AssignTo( Racking racking )
+    {
+        SetOwner( null );
+        RackingId = racking.Id;
+        Racking = racking;
+    }
+
+    void ClearOwners()
+    {
+        SetArea( null );
+        SetOwner( null );
+        SetRacking( null );
+    }
+    
     void SetOwner( Employee? employee )
     {
         Owner = employee;
@@ -41,37 +102,5 @@ internal sealed class Pallet
     {
         Racking = racking;
         RackingId = racking?.Id ?? Guid.Empty;
-    }
-    
-    public bool Receive( Employee employee )
-    {
-        if (IsOwned() || IsReceived())
-            return false;
-
-        ReceivedBy = employee;
-        ReceivedById = employee.Id;
-        AssignTo( employee );
-        return true;
-    }
-    public void AssignTo( Employee employee )
-    {
-        SetArea( null );
-        SetRacking( null );
-        SetOwner( employee );
-    }
-    public void AssignTo( Racking racking )
-    {
-        SetOwner( null );
-        RackingId = racking.Id;
-        Racking = racking;
-    }
-    public bool Stage( Area area )
-    {
-        if (!IsReceived())
-            return false;
-        
-        SetArea( area );
-        SetOwner( null );
-        return true;
     }
 }

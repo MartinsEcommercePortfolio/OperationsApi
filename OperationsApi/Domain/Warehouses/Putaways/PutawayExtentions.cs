@@ -22,4 +22,11 @@ internal static class PutawayExtentions
             return racking;
         } );
     }
+    public static bool ConfirmPutaway( this Warehouse w, Employee employee, Guid palletId, Guid rackingId )
+    {
+        var task = employee.GetTask<PutawayTask>();
+        return task.Pallet.Id == palletId
+            && task.ToRacking.Id == rackingId
+            && task.Pallet.Place( task.ToRacking );
+    }
 }

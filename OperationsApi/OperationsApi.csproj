@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Employees\" />
+      <Folder Include="Endpoints\Employees\" />
     </ItemGroup>
 
 </Project>

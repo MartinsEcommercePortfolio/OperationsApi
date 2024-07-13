@@ -5,7 +5,7 @@ using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseBuilding;
 using OperationsDomain.Domain.WarehouseSections.Putaways;
 
-namespace OperationsApi.Features.WarehouseTasks;
+namespace OperationsApi.Endpoints.WarehouseTasks;
 
 internal static class PutawaysEndpoints
 {
@@ -13,12 +13,12 @@ internal static class PutawaysEndpoints
     {
         app.MapPost( "api/tasks/putaways/start",
             static async ( [FromBody] Guid palletId, HttpContext http, IPutawayRepository putaways ) =>
-            await StartPutaway( http.Employee(), palletId, putaways ) );
+            await StartPutawayTask( http.Employee(), palletId, putaways ) );
     }
 
-    static async Task<IResult> StartPutaway( Employee employee, Guid palletId, IPutawayRepository putaways )
+    static async Task<IResult> StartPutawayTask( Employee employee, Guid palletId, IPutawayRepository putaways )
     {
-        Racking? putawayRacking = await putaways.BeginPutaway( employee, palletId );
+        Racking? putawayRacking = await putaways.StartPutawayTask( employee, palletId );
         return putawayRacking is not null
             ? Results.Ok( RackingDto.FromModel( putawayRacking ) )
             : Results.Problem();

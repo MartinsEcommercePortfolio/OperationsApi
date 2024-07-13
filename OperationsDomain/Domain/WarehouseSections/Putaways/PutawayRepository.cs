@@ -11,7 +11,7 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
 {
     readonly WarehouseDbContext _database = dbContext;
     
-    public async Task<Racking?> BeginPutaway( Employee employee, Guid palletId )
+    public async Task<Racking?> StartPutawayTask( Employee employee, Guid palletId )
     {
         await using var transaction = await GetTransaction();
         try

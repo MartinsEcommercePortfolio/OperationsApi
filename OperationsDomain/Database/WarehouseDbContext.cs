@@ -5,6 +5,7 @@ using OperationsDomain.Domain.Equipment;
 using OperationsDomain.Domain.WarehouseBuilding;
 using OperationsDomain.Domain.WarehouseSections.Loading;
 using OperationsDomain.Domain.WarehouseSections.Picking;
+using OperationsDomain.Domain.WarehouseSections.Picking.Types;
 using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
 using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
 using OperationsDomain.Domain.WarehouseSections.Replenishing.Types;

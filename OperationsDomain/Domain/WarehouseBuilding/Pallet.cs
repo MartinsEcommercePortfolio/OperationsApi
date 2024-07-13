@@ -18,7 +18,9 @@ public sealed class Pallet
     public double Width { get; set; }
     public double Height { get; set; }
     public double Weight { get; set; }
-    
+
+    public bool IsEmpty() =>
+        Items.Count <= 0;
     public bool IsOwned() => 
         Owner is not null;
     public bool IsOwnedBy( Employee employee ) =>
@@ -69,13 +71,14 @@ public sealed class Pallet
         ClearOwners();
         return true;
     }
-    public Item? Pick( Guid itemId )
+    public bool PickItem( Item item )
     {
-        Item? item = Items.FirstOrDefault( i => i.Id == itemId );
-        if (item is not null)
-            Items.Remove( item );
-        return item;
+        if (!Items.Contains( item ))
+            return false;
+        Items.Remove( item );
+        return true;
     }
+    
     
     public void AssignTo( Employee employee )
     {

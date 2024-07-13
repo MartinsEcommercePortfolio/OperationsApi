@@ -4,7 +4,7 @@ using OperationsApi.Features.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Domain.WarehouseSections.Receiving;
 
-namespace OperationsApi.Features.WarehouseTasks;
+namespace OperationsApi.Endpoints.WarehouseTasks;
 
 internal static class ReceivingEndpoints
 {

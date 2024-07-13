@@ -1,4 +1,4 @@
-namespace OperationsApi.Features;
+namespace OperationsApi.Endpoints;
 
 internal static class Endpoints
 {

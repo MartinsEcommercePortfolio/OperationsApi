@@ -1,5 +1,4 @@
-using OperationsApi.Database;
-using OperationsApi.Domain.Employees;
+using OperationsDomain.Domain.Employees;
 
 namespace OperationsApi.Middleware;
 
@@ -7,7 +6,7 @@ internal sealed class EmployeeAuthenticationMiddleware( RequestDelegate next )
 {
     readonly RequestDelegate _next = next;
 
-    public async Task InvokeAsync( HttpContext context, WarehouseDbContext dbContext )
+    public async Task InvokeAsync( HttpContext context, IEmployeeRepository employees )
     {
         Guid userId = Guid.Empty;
         bool validUrl =
@@ -20,7 +19,7 @@ internal sealed class EmployeeAuthenticationMiddleware( RequestDelegate next )
             return;
         }
 
-        Employee? user = await dbContext.Employees.FindAsync( userId );
+        Employee? user = await employees.GetEmployeeById( userId );
         
         if (user is null)
         {

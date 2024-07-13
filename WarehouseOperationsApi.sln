@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationsApi", "OperationsApi\OperationsApi.csproj", "{C1DD7BC4-C59E-4B34-9E1D-6EE7846C600C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationsDomain", "OperationsDomain\OperationsDomain.csproj", "{DEE2DFE5-9C2D-4ECD-A180-B7555925B1D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{C1DD7BC4-C59E-4B34-9E1D-6EE7846C600C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1DD7BC4-C59E-4B34-9E1D-6EE7846C600C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1DD7BC4-C59E-4B34-9E1D-6EE7846C600C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE2DFE5-9C2D-4ECD-A180-B7555925B1D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE2DFE5-9C2D-4ECD-A180-B7555925B1D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE2DFE5-9C2D-4ECD-A180-B7555925B1D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE2DFE5-9C2D-4ECD-A180-B7555925B1D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

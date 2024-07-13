@@ -13,7 +13,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Domain\Supplier\" />
+      <ProjectReference Include="..\OperationsDomain\OperationsDomain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\Employees\" />
     </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using OperationsDomain.Domain.WarehouseBuilding;
 using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
 using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
 
-namespace OperationsDomain.Domain.Warehouses;
+namespace OperationsDomain.Domain;
 
 public sealed class Warehouse
 {

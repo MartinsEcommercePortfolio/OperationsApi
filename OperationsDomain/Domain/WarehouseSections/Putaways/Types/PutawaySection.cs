@@ -6,11 +6,13 @@ namespace OperationsDomain.Domain.WarehouseSections.Putaways.Types;
 public sealed class PutawaySection
 {
     public List<Racking> Rackings { get; set; } = [];
+    public List<Pallet> Pallets { get; set; } = [];
     public List<PutawayTask> PutawayTasks { get; set; } = [];
     
-    public async Task<Racking?> BeginPutaway( Employee employee, Pallet pallet )
+    public async Task<Racking?> BeginPutaway( Employee employee, Guid palletId )
     {
-        if (!pallet.CanBePutAway())
+        Pallet? pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
+        if (pallet is null || !pallet.CanBePutAway())
             return null;
         
         return await Task.Run( () => {

@@ -1,5 +1,3 @@
-using OperationsApi.Domain.Warehouses;
-
 namespace OperationsDomain.Domain.Employees;
 
 public sealed class Employee
@@ -29,8 +27,8 @@ public sealed class Employee
     public bool HasTask<T>( out T task ) where T : WarehouseTask, new()
     {
         T? t = Task as T;
-        task = t ?? WarehouseTask.Null<T>();
-;       return t is not null;
+        task = t ?? WarehouseTask.Null<T>(); 
+        return t is not null;
     }
     public bool StartTask( WarehouseTask task )
     {

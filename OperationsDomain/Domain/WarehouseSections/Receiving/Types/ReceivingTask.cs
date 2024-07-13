@@ -1,4 +1,3 @@
-using OperationsApi.Domain.Warehouses;
 using OperationsDomain.Domain.WarehouseBuilding;
 
 namespace OperationsDomain.Domain.WarehouseSections.Receiving.Types;

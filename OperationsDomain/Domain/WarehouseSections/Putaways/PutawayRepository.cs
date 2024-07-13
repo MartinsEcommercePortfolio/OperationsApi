@@ -17,16 +17,17 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
         try
         {
             var putaways = await _database.Putaways
+                .Include( static p => p.Pallets )
                 .Include( static p => p.Rackings )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
-            Pallet? pallet = null;// putaways?.GetPalletById( palletId );
             
-            if (putaways is null || pallet is null)
+            if (putaways is null)
                 return null;
 
             var assignedRacking = await putaways
-                .BeginPutaway( employee, pallet );
+                .BeginPutaway( employee, palletId )
+                .ConfigureAwait( false );
             
             return assignedRacking is not null &&
                 await SaveAsync( transaction )
@@ -46,12 +47,10 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
             var putaways = await _database.Putaways
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
-
-            if (putaways is null)
-                return false;
-
-            return putaways.CompletePutaway( employee, palletId, rackingId ) &&
-                await SaveAsync( transaction );
+            
+            return putaways is not null
+                && putaways.CompletePutaway( employee, palletId, rackingId )
+                && await SaveAsync( transaction );
         }
         catch ( Exception e )
         {

@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.Employees;
 
-namespace OperationsApi.Domain.Warehouses;
+namespace OperationsDomain.Domain;
 
 public abstract class WarehouseTask
 {
@@ -20,7 +20,7 @@ public abstract class WarehouseTask
         new() {
             Id = Guid.Empty,
             EmployeeId = Guid.Empty,
-            Employee = null,
+            Employee = new Employee(),
             Started = false
         };
     

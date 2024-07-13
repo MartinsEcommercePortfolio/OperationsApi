@@ -1,7 +1,6 @@
 using OperationsDomain.Domain.WarehouseBuilding;
-using OperationsDomain.Domain.Warehouses;
 
-namespace OperationsApi.Domain.Warehouses.Picking;
+namespace OperationsDomain.Domain.WarehouseSections.Picking;
 
 public sealed class PickLine
 {

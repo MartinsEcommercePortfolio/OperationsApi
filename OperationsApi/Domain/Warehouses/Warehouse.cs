@@ -12,18 +12,17 @@ internal sealed class Warehouse
     public List<Trailer> Trailers { get; set; } = [];
     public List<Dock> Docks { get; set; } = [];
     public List<Area> Areas { get; set; } = [];
-    public List<Racking> Racks { get; set; } = [];
+    public List<Racking> Rackings { get; set; } = [];
     public List<Pallet> Pallets { get; set; } = [];
     public List<Item> Items { get; set; } = [];
 
-    public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
-    public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
-    public List<PutawayTask> ActivePutawayTasks { get; set; } = [];
+    public ReceivingSection ReceivingSection { get; set; } = default!;
+    public PutawaySection PutawaySection { get; set; } = default!;
 
     public Area? GetAreaById( Guid areaId ) =>
         Areas.FirstOrDefault( a => a.Id == areaId );
     public Racking? GetRackingById( Guid rackingId ) =>
-        Racks.FirstOrDefault( r => r.Id == rackingId );
+        Rackings.FirstOrDefault( r => r.Id == rackingId );
     public Pallet? GetPalletById( Guid palletId ) =>
         Pallets.FirstOrDefault( p => p.Id == palletId );
 }

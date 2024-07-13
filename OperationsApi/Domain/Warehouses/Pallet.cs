@@ -14,6 +14,7 @@ internal sealed class Pallet
     public Employee? ReceivedBy { get; set; }
     public Area? Area { get; set; }
     public Racking? Racking { get; set; }
+    public List<Item> Items { get; set; } = [];
     public double Length { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
@@ -35,17 +36,26 @@ internal sealed class Pallet
         !IsOwned() &&
         IsStaged();
 
-    public void Receive( Employee employee )
+    public bool ReceiveBy( Employee employee )
     {
+        if (IsReceived())
+            return false;
+        
         ClearOwners();
         SetOwner( employee );
         ReceivedBy = employee;
         ReceivedById = employee.Id;
+
+        return true;
     }
-    public void Stage( Area area )
+    public bool PutIn( Area area )
     {
+        if (Area is not null || Racking is not null || Owner is null)
+            return false;
+        
         ClearOwners();
         SetArea( area );
+        return true;
     }
     public void PutAway( Racking racking )
     {
@@ -59,6 +69,13 @@ internal sealed class Pallet
         
         ClearOwners();
         return true;
+    }
+    public Item? Pick( Guid itemId )
+    {
+        Item? item = Items.FirstOrDefault( i => i.Id == itemId );
+        if (item is not null)
+            Items.Remove( item );
+        return item;
     }
     
     public void AssignTo( Employee employee )

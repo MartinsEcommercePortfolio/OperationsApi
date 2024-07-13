@@ -1,10 +1,15 @@
 
+using OperationsApi.Domain.Employees;
+
 namespace OperationsApi.Domain.Warehouses.Picking;
 
 internal sealed class PickingTask : WarehouseTask
 {
-    public int CurrentPickIndex { get; set; }
-    public Pallet? CurrentPickingFrom { get; set; }
-    public List<Racking> PickLocations { get; set; } = [];
-    public List<int> PickAmounts { get; set; } = [];
+    public PickLine? CurrentPickLine { get; set; }
+    public List<PickLine> PickLines { get; set; } = [];
+
+    public bool PickItem( Employee employee, Guid itemId, Guid rackingId )
+    {
+        return false;
+    }
 }

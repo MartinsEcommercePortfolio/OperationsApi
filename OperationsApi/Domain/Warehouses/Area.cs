@@ -15,7 +15,6 @@ internal sealed class Area
         if (!staged)
             return false;
         
-        pallet.Stage( this ); 
         Pallets.Add( pallet );
         return true;
     }

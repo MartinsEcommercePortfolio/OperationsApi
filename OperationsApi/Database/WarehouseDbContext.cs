@@ -48,4 +48,7 @@ internal class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options 
     public required DbSet<Racking> Rackings { get; init; }
     public required DbSet<Scanner> Scanners { get; init; }
     public required DbSet<Warehouse> Warehouses { get; init; }
+
+    public required DbSet<ReceivingSection> Receiving { get; set; }
+    public required DbSet<PutawaySection> Putaways { get; set; }
 }

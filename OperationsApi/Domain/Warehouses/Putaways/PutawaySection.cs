@@ -2,15 +2,18 @@ using OperationsApi.Domain.Employees;
 
 namespace OperationsApi.Domain.Warehouses.Putaways;
 
-internal static class PutawayExtentions
+internal sealed class PutawaySection
 {
-    public static async Task<Racking?> BeginPutaway( this Warehouse w, Employee employee, Pallet pallet )
+    public List<Racking> Rackings { get; set; } = [];
+    public List<PutawayTask> PutawayTasks { get; set; } = [];
+    
+    public async Task<Racking?> BeginPutaway( Employee employee, Pallet pallet )
     {
         if (!pallet.CanBePutAway())
             return null;
         
         return await Task.Run( () => {
-            var racking = w.Racks.FirstOrDefault(
+            var racking = Rackings.FirstOrDefault(
                 r => r.CanTakePallet( pallet ) );
             
             if (racking is null)
@@ -22,11 +25,11 @@ internal static class PutawayExtentions
             if (task is null)
                 return null;
 
-            w.ActivePutawayTasks.Add( task );
+            PutawayTasks.Add( task );
             return racking;
         } );
     }
-    public static bool CompletePutaway( this Warehouse w, Employee employee, Guid palletId, Guid rackingId )
+    public bool CompletePutaway( Employee employee, Guid palletId, Guid rackingId )
     {
         var task = employee
             .GetTask<PutawayTask>();
@@ -34,7 +37,7 @@ internal static class PutawayExtentions
             .Complete( palletId, rackingId );
 
         if (completed)
-            w.ActivePutawayTasks.Remove( task );
+            PutawayTasks.Remove( task );
 
         return completed;
     }

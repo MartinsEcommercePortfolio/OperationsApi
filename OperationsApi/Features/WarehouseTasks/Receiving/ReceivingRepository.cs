@@ -34,14 +34,14 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         
         try
         {
-            var warehouse = await _database.Warehouses
+            var receiving = await _database.Receiving
                 .Include( static w => w.PendingReceivingTasks )
                 .Include( static w => w.ActiveReceivingTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            return warehouse is not null
-                && warehouse.StartReceivingTask( employee, taskId )
+            return receiving is not null
+                && receiving.BeginReceivingTask( employee, taskId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )
@@ -55,13 +55,13 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         
         try
         {
-            var warehouse = await _database.Warehouses
-                .Include( static w => w.Pallets )
+            var receiving = await _database.Receiving
+                .Include( static r => r.Pallets )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            return warehouse is not null
-                && warehouse.ReceivePallet( employee, palletId )
+            return receiving is not null
+                && receiving.ReceivePallet( employee, palletId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )
@@ -75,14 +75,12 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         
         try
         {
-            var warehouse = await _database.Warehouses
-                .Include( static w => w.Pallets )
-                .Include( static w => w.Areas )
+            var receiving = await _database.Receiving
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
-            return warehouse is not null
-                && warehouse.StagePallet( employee, palletId, areaId )
+            return receiving is not null
+                && receiving.StageReceivedPallet( employee, palletId, areaId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )

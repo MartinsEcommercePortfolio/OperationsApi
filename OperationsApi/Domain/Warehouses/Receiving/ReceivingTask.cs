@@ -1,4 +1,3 @@
-using OperationsApi.Domain.Employees;
 using OperationsApi.Domain.Shipping;
 
 namespace OperationsApi.Domain.Warehouses.Receiving;
@@ -20,12 +19,12 @@ internal sealed class ReceivingTask : WarehouseTask
 
         bool unloaded = pallet is not null
             && CurrentPallet is null
-            && Trailer.UnloadPallet( pallet );
+            && Trailer.UnloadPallet( pallet )
+            && pallet.ReceiveBy( Employee );
 
         if (!unloaded)
             return null;
         
-        pallet?.Receive( Employee );
         CurrentPallet = pallet;
         return pallet;
     }
@@ -34,13 +33,18 @@ internal sealed class ReceivingTask : WarehouseTask
         bool staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id
             && areaId == Area.Id
-            && Area.StagePallet( CurrentPallet );
+            && Area.StagePallet( CurrentPallet )
+            && CurrentPallet.PutIn( Area );
 
         if (!staged)
             return false;
         
-        CurrentPallet?.Stage( Area );
-        Employee.FinishTask();
-        return true;
+        if (IsFinished())
+            Employee.FinishTask();
+
+        CurrentPallet = null;
+        return staged;
     }
+    public bool IsFinished() =>
+        CurrentPallet is null && Trailer.IsEmpty();
 }

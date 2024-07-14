@@ -25,7 +25,7 @@ public sealed class PutawayTask : WarehouseTask
             PutawayRackingId = racking.Id
         };
 
-        pallet.AssignTo( employee );
+        pallet.GiveTo( employee );
         racking.AssignTo( employee );
         return employee.StartTask( task )
             ? task
@@ -36,7 +36,8 @@ public sealed class PutawayTask : WarehouseTask
     {
         if (palletId != Pallet.Id || rackingId != PutawayRacking.Id)
             return false;
-        
+
+        PutawayRacking.TakePallet( Pallet );
         Pallet.PutAway( PutawayRacking );
         Employee.FinishTask();
         return true;

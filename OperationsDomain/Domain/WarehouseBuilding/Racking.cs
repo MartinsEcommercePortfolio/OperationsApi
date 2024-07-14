@@ -25,10 +25,16 @@ public sealed class Racking
         Length > pallet.Length &&
         Width > pallet.Width &&
         Height > pallet.Height;
-    public bool CanTakePallet( Pallet pallet ) =>
-        IsAvailable() &&
-        PalletFits( pallet ) &&
-        Capacity > pallet.Weight;
+    public bool TakePallet( Pallet pallet )
+    {
+        bool canTake = IsAvailable() &&
+            PalletFits( pallet ) &&
+            Capacity > pallet.Weight;
+        if (canTake)
+            Pallet = pallet;
+        return canTake;
+    }
+
     public void AssignTo( Employee employee )
     {
         OwnerId = employee.Id;

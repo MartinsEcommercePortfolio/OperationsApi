@@ -1,14 +1,16 @@
+using OperationsDomain.Domain.Catalog;
+using OperationsDomain.Domain.WarehouseBuilding;
+
 namespace OperationsDomain.Domain.WarehouseSections.Picking.Types;
 
 public readonly record struct PickingResponse(
-    PickResponseType ResponseType,
-    Guid? RackingId,
-    Guid? ProductId )
+    int? PicksRemaining,
+    Product? Product,
+    Racking? Racking,
+    Area? Area )
 {
-    public static PickingResponse FailedToStart() =>
-        new( PickResponseType.FailedToStart, null, null );
-    public static PickingResponse ItemNotFound() =>
-        new( PickResponseType.InvalidPick, null, null );
-    public static PickingResponse ItemPicked() =>
-        new( PickResponseType.ItemPicked, null, null );
+    public static PickingResponse ReadyToStage( Area area ) =>
+        new( null, null, null, area );
+    public static PickingResponse Started( Racking racking ) =>
+        new( null, null, racking, null );
 }

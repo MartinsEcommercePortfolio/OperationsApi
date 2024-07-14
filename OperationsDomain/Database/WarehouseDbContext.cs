@@ -4,7 +4,6 @@ using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.Equipment;
 using OperationsDomain.Domain.WarehouseBuilding;
 using OperationsDomain.Domain.WarehouseSections.Loading;
-using OperationsDomain.Domain.WarehouseSections.Picking;
 using OperationsDomain.Domain.WarehouseSections.Picking.Types;
 using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
 using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
@@ -37,6 +36,7 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<Warehouse> Warehouses { get; init; }
     public required DbSet<ReceivingSection> Receiving { get; set; }
     public required DbSet<PutawaySection> Putaways { get; set; }
+    public required DbSet<PickingSection> Picking { get; set; }
     public required DbSet<Trailer> Trailers { get; init; }
     public required DbSet<Dock> Docks { get; init; }
     public required DbSet<Area> Areas { get; init; }

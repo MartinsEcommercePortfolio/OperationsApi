@@ -9,12 +9,6 @@ public abstract class WarehouseTask
     public Employee Employee { get; set; } = new();
     public bool IsStarted { get; set; }
     public bool IsCompleted { get; set; }
-
-    protected void SetEmployee( Employee employee )
-    {
-        EmployeeId = employee.Id;
-        Employee = employee;
-    }
     
     public static T Null<T>()
         where T : WarehouseTask, new() =>

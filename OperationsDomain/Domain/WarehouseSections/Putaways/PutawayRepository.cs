@@ -39,7 +39,7 @@ internal sealed class PutawayRepository( WarehouseDbContext dbContext, ILogger<P
             return await ProcessDbException<Racking?>( e, transaction, null );
         }
     }
-    public async Task<bool> CompletePutaway( Employee employee, Guid palletId, Guid rackingId )
+    public async Task<bool> CompletePutawayTask( Employee employee, Guid palletId, Guid rackingId )
     {
         await using var transaction = await GetTransaction();
         try

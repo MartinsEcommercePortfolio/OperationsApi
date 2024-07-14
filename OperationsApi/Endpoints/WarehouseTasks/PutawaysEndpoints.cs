@@ -14,6 +14,10 @@ internal static class PutawaysEndpoints
         app.MapPost( "api/tasks/putaways/start",
             static async ( [FromBody] Guid palletId, HttpContext http, IPutawayRepository putaways ) =>
             await StartPutawayTask( http.Employee(), palletId, putaways ) );
+
+        app.MapPost( "api/tasks/putaways/complete",
+            static async ( [FromBody] Guid palletId, HttpContext http, IPutawayRepository putaways ) =>
+            await StartPutawayTask( http.Employee(), palletId, putaways ) );
     }
 
     static async Task<IResult> StartPutawayTask( Employee employee, Guid palletId, IPutawayRepository putaways )
@@ -21,6 +25,13 @@ internal static class PutawaysEndpoints
         Racking? putawayRacking = await putaways.StartPutawayTask( employee, palletId );
         return putawayRacking is not null
             ? Results.Ok( RackingDto.FromModel( putawayRacking ) )
+            : Results.Problem();
+    }
+    static async Task<IResult> CompletePutawayTask( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository putaways )
+    {
+        var success = await putaways.CompletePutawayTask( employee, palletId, rackingId );
+        return success
+            ? Results.Ok( true )
             : Results.Problem();
     }
 }

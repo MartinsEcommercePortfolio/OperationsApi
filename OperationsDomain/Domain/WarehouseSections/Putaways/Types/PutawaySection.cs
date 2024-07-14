@@ -17,7 +17,7 @@ public sealed class PutawaySection
         
         return await Task.Run( () => {
             var racking = Rackings.FirstOrDefault(
-                r => r.CanTakePallet( pallet ) );
+                r => r.TakePallet( pallet ) );
             
             if (racking is null)
                 return null;

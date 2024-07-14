@@ -71,38 +71,40 @@ public sealed class Pallet
         ClearOwners();
         return true;
     }
-    public bool PickItem( Item item )
+    public bool PickItem( Employee employee, Guid itemId, out Item? item )
     {
-        if (!Items.Contains( item ))
+        item = Items.FirstOrDefault( i => i.Id == itemId );
+        if (item is null)
             return false;
         Items.Remove( item );
+        item.GiveTo( employee );
         return true;
     }
     
-    
-    public void AssignTo( Employee employee )
+    public void GiveTo( Employee employee )
     {
         ClearOwners();
         SetOwner( employee );
     }
-    public void UnassignFrom( Employee employee )
+    public void TakeFrom( Employee employee )
     {
         ClearOwners();
     }
-    public void AssignTo( Racking racking )
-    {
-        SetOwner( null );
-        RackingId = racking.Id;
-        Racking = racking;
-    }
 
+    public static Pallet NewEmpty( Employee employee )
+    {
+        Pallet pallet = new();
+        pallet.Id = Guid.NewGuid();
+        pallet.GiveTo( employee );
+        return pallet;
+    }
+    
     void ClearOwners()
     {
         SetArea( null );
         SetOwner( null );
         SetRacking( null );
     }
-    
     void SetOwner( Employee? employee )
     {
         Owner = employee;

@@ -11,19 +11,19 @@ public sealed class ReceivingSection
     public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
     public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
     
-    public bool BeginReceivingTask( Employee employee, Guid taskId )
+    public bool StartReceivingTask( Employee employee, Guid taskId )
     {
         var task = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
 
-        if (task is null)
-            return false;
+        bool taskStarted = task is not null
+            && task.Start( employee )
+            && PendingReceivingTasks.Remove( task );
 
-        task.Start( employee );
-        PendingReceivingTasks.Remove( task );
-        ActiveReceivingTasks.Add( task );
+        if (taskStarted)
+            ActiveReceivingTasks.Add( task! );
         
-        return true;
+        return taskStarted;
     }
     public bool ReceivePallet( Employee employee, Guid palletId )
     {
@@ -31,23 +31,25 @@ public sealed class ReceivingSection
             .GetTask<ReceivingTask>()
             .ReceivePallet( palletId );
 
-        if (pallet is null || Pallets.Contains( pallet ))
-            return false;
+        bool received = pallet is not null &&
+            !Pallets.Contains( pallet );
+
+        if (received)
+            Pallets.Add( pallet! );
         
-        Pallets.Add( pallet );
-        return true;
+        return received;
     }
-    public bool StageReceivedPallet( Employee employee, Guid palletId, Guid areaId )
+    public bool CompleteReceivingTask( Employee employee )
     {
         var receivingTask = employee
             .GetTask<ReceivingTask>();
-
-        var staged = receivingTask
-            .StagePallet( palletId, areaId );
-
-        if (receivingTask.IsFinished())
-            ActiveReceivingTasks.Remove( receivingTask );
         
-        return staged;
+        if (!receivingTask.IsFinished()) 
+            return false;
+        
+        ActiveReceivingTasks.Remove( receivingTask );
+        employee.FinishTask();
+
+        return true;
     }
 }

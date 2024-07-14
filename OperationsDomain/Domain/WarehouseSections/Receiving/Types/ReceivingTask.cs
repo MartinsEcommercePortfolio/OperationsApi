@@ -22,27 +22,22 @@ public sealed class ReceivingTask : WarehouseTask
             && Trailer.UnloadPallet( pallet )
             && pallet.ReceiveBy( Employee );
 
-        if (!unloaded)
-            return null;
-        
         CurrentPallet = pallet;
-        return pallet;
+        return unloaded
+            ? CurrentPallet
+            : null;
     }
     public bool StagePallet( Guid palletId, Guid areaId )
     {
         bool staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id
             && areaId == Area.Id
-            && Area.StagePallet( CurrentPallet )
+            && Area.TakePallet( CurrentPallet )
             && CurrentPallet.PutIn( Area );
 
-        if (!staged)
-            return false;
+        if (staged)
+            CurrentPallet = null;
         
-        if (IsFinished())
-            Employee.FinishTask();
-
-        CurrentPallet = null;
         return staged;
     }
     public bool IsFinished() =>

@@ -7,15 +7,14 @@ public sealed class Area
     public bool IsAvailable { get; set; }
     public List<Pallet> Pallets { get; set; } = [];
 
-    public bool StagePallet( Pallet pallet )
+    public bool TakePallet( Pallet pallet )
     {
         bool staged = IsAvailable
             && !Pallets.Contains( pallet );
 
-        if (!staged)
-            return false;
-        
-        Pallets.Add( pallet );
-        return true;
+        if (staged)
+            Pallets.Add( pallet );
+
+        return staged;
     }
 }

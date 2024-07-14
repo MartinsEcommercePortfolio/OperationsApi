@@ -24,7 +24,7 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
             return ProcessDbException<ReceivingTask?>( e, null );
         }
     }
-    public async Task<bool> StartReceiving( Employee employee, Guid taskId )
+    public async Task<bool> StartReceivingTask( Employee employee, Guid taskId )
     {
         await using var transaction = await GetTransaction();
         
@@ -37,7 +37,7 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
                 .ConfigureAwait( false );
 
             return receiving is not null
-                && receiving.BeginReceivingTask( employee, taskId )
+                && receiving.StartReceivingTask( employee, taskId )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )
@@ -71,12 +71,31 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         
         try
         {
+            var staged = employee
+                .GetTask<ReceivingTask>()
+                .StagePallet( palletId, areaId );
+
+            return staged
+                && await SaveAsync( transaction );
+        }
+        catch ( Exception e )
+        {
+            return await ProcessDbException( e, transaction, false );
+        }
+    }
+    public async Task<bool> CompleteReceivingTask( Employee employee )
+    {
+        await using var transaction = await GetTransaction();
+
+        try
+        {
             var receiving = await _database.Receiving
+                .Include( static r => r.ActiveReceivingTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
             return receiving is not null
-                && receiving.StageReceivedPallet( employee, palletId, areaId )
+                && receiving.CompleteReceivingTask( employee )
                 && await SaveAsync( transaction );
         }
         catch ( Exception e )

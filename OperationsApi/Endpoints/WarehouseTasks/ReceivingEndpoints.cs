@@ -11,7 +11,7 @@ internal static class ReceivingEndpoints
 {
     internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapPost( "api/tasks/receiving/refreshTask",
+        app.MapGet( "api/tasks/receiving/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
@@ -20,12 +20,18 @@ internal static class ReceivingEndpoints
             await GetNextReceivingTask( repository ) );
 
         app.MapPost( "api/tasks/receiving/startTask",
-            static async ( [FromQuery] Guid taskId, HttpContext http, IReceivingRepository repository ) =>
-            await StartReceivingTask( http.Employee(), taskId, repository ) );
+            static async ( 
+                    [FromQuery] Guid taskId,
+                    [FromQuery] Guid trailerId,
+                    [FromQuery] Guid dockId, 
+                    [FromQuery] Guid areaId, 
+                    HttpContext http, 
+                    IReceivingRepository repository ) =>
+            await StartReceivingTask( http.Employee(), taskId, trailerId, dockId, areaId, repository ) );
 
         app.MapPost( "api/tasks/receiving/unloadPallet",
-            static async ( [FromQuery] Guid taskId, HttpContext http, IReceivingRepository repository ) =>
-            await ReceiveUnloadedPallet( http.Employee(), taskId, repository ) );
+            static async ( [FromQuery] Guid trailerId, [FromQuery] Guid palletId, HttpContext http, IReceivingRepository repository ) =>
+            await ReceiveUnloadedPallet( http.Employee(), trailerId, palletId, repository ) );
 
         app.MapPost( "api/tasks/receiving/stagePallet",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid areaId, HttpContext http, IReceivingRepository repository ) =>
@@ -53,24 +59,24 @@ internal static class ReceivingEndpoints
             ? Results.Ok( ReceivingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartReceivingTask( Employee employee, Guid taskId, IReceivingRepository repository )
+    static async Task<IResult> StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, IReceivingRepository repository )
     {
         var receiving = await repository.GetReceivingSectionWithTasks();
         
         var taskStarted = receiving is not null
-            && receiving.StartReceivingTask( employee, taskId )
+            && receiving.StartReceivingTask( employee, taskId, trailerId, dockId, areaId )
             && await repository.SaveAsync();
         
         return taskStarted
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> ReceiveUnloadedPallet( Employee employee, Guid palletId, IReceivingRepository repository )
+    static async Task<IResult> ReceiveUnloadedPallet( Employee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )
     {
         var receiving = await repository.GetReceivingSectionWithPallets();
 
         var palletReceived = receiving is not null
-            && receiving.ReceiveUnloadedPallet( employee, palletId )
+            && receiving.ReceiveUnloadedPallet( employee, trailerId, palletId )
             && await repository.SaveAsync();
         
         return palletReceived

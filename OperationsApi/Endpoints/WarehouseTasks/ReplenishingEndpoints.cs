@@ -11,7 +11,7 @@ internal static class ReplenishingEndpoints
 {
     internal static void MapReplenishingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapPost( "api/tasks/replenishing/refreshTask",
+        app.MapGet( "api/tasks/replenishing/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         

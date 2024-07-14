@@ -13,13 +13,18 @@ public sealed class ReceivingSection
 
     public ReceivingTask? GetNextReceivingTask() =>
         PendingReceivingTasks.FirstOrDefault();
-    public bool StartReceivingTask( Employee employee, Guid taskId )
+    public bool StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
         var task = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
 
-        bool taskStarted = task is not null
+        var stagingArea = GetReceivingArea( areaId );
+
+        var taskStarted = task is not null
+            && stagingArea is not null
             && task.Start( employee )
+            && task.InitializeStagingArea( trailerId, dockId, stagingArea )
+            && task.IsStarted
             && PendingReceivingTasks.Remove( task );
 
         if (taskStarted)
@@ -27,11 +32,11 @@ public sealed class ReceivingSection
         
         return taskStarted;
     }
-    public bool ReceiveUnloadedPallet( Employee employee, Guid palletId )
+    public bool ReceiveUnloadedPallet( Employee employee, Guid trailerId, Guid palletId )
     {
         var pallet = employee
             .GetTask<ReceivingTask>()
-            .ReceivePallet( palletId );
+            .ReceivePallet( trailerId, palletId );
 
         bool received = pallet is not null &&
             !Pallets.Contains( pallet );
@@ -53,5 +58,13 @@ public sealed class ReceivingSection
         employee.FinishTask();
 
         return true;
+    }
+
+    Area? GetReceivingArea( Guid areaId )
+    {
+        var area = Areas.FirstOrDefault( a => a.Id == areaId );
+        return area is not null && area.CanUse()
+            ? area
+            : null;
     }
 }

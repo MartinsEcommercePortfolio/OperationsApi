@@ -17,4 +17,9 @@ public sealed class Area
 
         return staged;
     }
+
+    public bool CanUse()
+    {
+        return IsAvailable;
+    }
 }

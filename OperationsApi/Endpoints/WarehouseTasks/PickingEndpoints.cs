@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
@@ -12,7 +11,7 @@ internal static class PickingEndpoints
 {
     internal static void MapPickingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapPost( "api/tasks/picking/refreshTask",
+        app.MapGet( "api/tasks/picking/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         

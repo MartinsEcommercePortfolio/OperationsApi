@@ -11,7 +11,7 @@ internal static class PutawaysEndpoints
 {
     internal static void MapPutawaysEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapPost( "api/tasks/putaways/refreshTask",
+        app.MapGet( "api/tasks/putaways/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         

@@ -39,6 +39,19 @@ public sealed class PickingTask : WarehouseTask
             && CurrentPickLine.PickItem( Employee, itemId );
         return picked;
     }
+    public bool FinishPickingLocation( Guid palletId, Guid rackingId )
+    {
+        if (CurrentPickLine is null || CurrentPickLine.IsComplete())
+            return false;
+
+        CurrentPickLine = PickLines.FirstOrDefault( p =>
+            p.Racking.Id == rackingId &&
+            p.Racking.Pallet is not null &&
+            p.Racking.Pallet.Id == palletId );
+
+        return CurrentPickLine?
+            .ConfirmPickLocation( palletId, rackingId ) ?? false;
+    }
     public bool StagePick( Guid areaId )
     {
         bool staged = IsStaging

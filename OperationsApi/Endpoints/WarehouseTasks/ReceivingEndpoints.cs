@@ -61,14 +61,17 @@ internal static class ReceivingEndpoints
     }
     static async Task<IResult> StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, IReceivingRepository repository )
     {
-        var receiving = await repository.GetReceivingSectionWithTasks();
+        var receiving = await repository
+            .GetReceivingSectionWithTasks();
+
+        var task = receiving?
+            .StartReceivingTask( employee, taskId, trailerId, dockId, areaId );
+
+        var taskStarted = task is not null
+            && task.IsStarted;
         
-        var taskStarted = receiving is not null
-            && receiving.StartReceivingTask( employee, taskId, trailerId, dockId, areaId )
-            && await repository.SaveAsync();
-        
-        return taskStarted
-            ? Results.Ok( true )
+        return taskStarted && await repository.SaveAsync()
+            ? Results.Ok( ReceivingTaskSummary.FromModel( task! ) )
             : Results.Problem();
     }
     static async Task<IResult> ReceiveUnloadedPallet( Employee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )

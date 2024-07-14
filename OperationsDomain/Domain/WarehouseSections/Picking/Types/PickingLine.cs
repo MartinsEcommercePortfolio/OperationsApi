@@ -11,11 +11,18 @@ public sealed class PickingLine
     public Racking Racking { get; set; } = default!;
     public List<Item> PickedItems { get; set; } = [];
     public int Quantity { get; set; }
+    public bool Completed { get; set; }
 
     public bool ConfirmPickLocation( Guid palletId, Guid rackingId ) =>
         Racking.Id == rackingId && Racking.Pallet is not null && Racking.Pallet.Id == palletId;
-    public int ItemsRemainingInPick() =>
-        Quantity - PickedItems.Count;
+    public bool StartPicking( Employee employee )
+    {
+        if (!Racking.CanBePickedFrom())
+            return false;
+        
+        Racking.AssignTo( employee );
+        return true;
+    }
     public bool PickItem( Employee employee, Guid itemId )
     {
         Item? item = null;
@@ -30,6 +37,14 @@ public sealed class PickingLine
         
         return picked;
     }
+    public bool Complete( Employee employee )
+    {
+        if (PickedItems.Count != Quantity)
+            return false;
+        Completed = true;
+        Racking.Free( employee );
+        return true;
+    }
     public bool IsComplete() =>
-        PickedItems.Count >= Quantity;
+        Completed && PickedItems.Count >= Quantity;
 }

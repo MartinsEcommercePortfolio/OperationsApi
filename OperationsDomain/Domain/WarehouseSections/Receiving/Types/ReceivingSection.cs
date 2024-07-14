@@ -13,7 +13,7 @@ public sealed class ReceivingSection
 
     public ReceivingTask? GetNextReceivingTask() =>
         PendingReceivingTasks.FirstOrDefault();
-    public bool StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    public ReceivingTask? StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
         var task = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
@@ -29,8 +29,8 @@ public sealed class ReceivingSection
 
         if (taskStarted)
             ActiveReceivingTasks.Add( task! );
-        
-        return taskStarted;
+
+        return task;
     }
     public bool ReceiveUnloadedPallet( Employee employee, Guid trailerId, Guid palletId )
     {

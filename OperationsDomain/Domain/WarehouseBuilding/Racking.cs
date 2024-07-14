@@ -21,6 +21,10 @@ public sealed class Racking
     public bool IsAvailable() =>
         Owner is null &&
         Pallet is null;
+    public bool CanBePickedFrom() =>
+        Owner is null &&
+        Pallet is not null &&
+        Pallet.CanBePickedFrom();
     public bool PalletFits( Pallet pallet ) =>
         Length > pallet.Length &&
         Width > pallet.Width &&
@@ -34,10 +38,13 @@ public sealed class Racking
             Pallet = pallet;
         return palletTaken;
     }
-
     public void AssignTo( Employee employee )
     {
         OwnerId = employee.Id;
         Owner = employee;
+    }
+    public void Free( Employee employee )
+    {
+        
     }
 }

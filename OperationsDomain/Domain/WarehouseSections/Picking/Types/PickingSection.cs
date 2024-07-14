@@ -12,13 +12,13 @@ public sealed class PickingSection
 
     public PickingTask? GetNextPickingTask() => 
         PendingPickingTasks.FirstOrDefault();
-    public bool StartPickingTask( Employee employee, Guid taskId )
+    public PickingTask? StartPickingTask( Employee employee, Guid taskId )
     {
         var task = PendingPickingTasks
             .FirstOrDefault( t => t.Id == taskId );
         
         if (task is null)
-            return false;
+            return null;
 
         bool started = !ActivePickingTasks.Contains( task )
             && task.Start( employee )
@@ -26,13 +26,13 @@ public sealed class PickingSection
             && PendingPickingTasks.Remove( task );
 
         if (!started)
-            return false;
+            return null;
         
         ActivePickingTasks.Add( task );
         Pallets.Add( task.Pallet );
-        return true;
+        return task;
     }
-    public bool CompletePickingTask( Employee employee, Guid areaId )
+    public bool StageAndFinishPickingOrder( Employee employee, Guid areaId )
     {
         var task = employee.GetTask<PickingTask>();
         var staged = task.StagePick( areaId );

@@ -38,6 +38,8 @@ public sealed class Pallet
         IsStaged();
     public bool CanBePickedUp() =>
         true;
+    public bool CanBePickedFrom() =>
+        true;
 
     public bool ReceiveBy( Employee employee )
     {

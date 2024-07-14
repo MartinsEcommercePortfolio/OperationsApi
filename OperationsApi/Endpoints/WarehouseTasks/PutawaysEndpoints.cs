@@ -21,7 +21,7 @@ internal static class PutawaysEndpoints
 
         app.MapPost( "api/tasks/putaways/completeTask",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPutawayRepository repository ) =>
-            await CompletePutawayTask( http.Employee(), palletId, rackingId, repository ) );
+            await CompletePutaway( http.Employee(), palletId, rackingId, repository ) );
     }
 
     static IResult RefreshTask( Employee employee )
@@ -44,11 +44,11 @@ internal static class PutawaysEndpoints
             .BeginPutaway( employee, palletId )
             .ConfigureAwait( false );
         
-        return putawayTask is not null && await repository.SaveAsync()
+        return putawayTask is not null && putawayTask.IsStarted && await repository.SaveAsync()
             ? Results.Ok( PutawayTaskSummary.FromModel( putawayTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> CompletePutawayTask( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
+    static async Task<IResult> CompletePutaway( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
     {
         var putaways = await repository.GetPutawaysSectionWithTasks();
 

@@ -31,9 +31,13 @@ internal static class PickingEndpoints
             static async ( [FromQuery] Guid itemId, HttpContext http, IPickingRepository repository ) =>
             await PickItem( http.Employee(), itemId, repository ) );
 
-        app.MapPost( "api/tasks/picking/completeTask",
+        app.MapPost( "api/tasks/picking/finishPick",
+            static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPickingRepository repository ) =>
+            await FinishPickingLocation( http.Employee(), palletId, rackingId, repository ) );
+
+        app.MapPost( "api/tasks/picking/stagePick",
             static async ( [FromQuery] Guid areaId, HttpContext http, IPickingRepository repository ) =>
-            await StagePickingOrder( http.Employee(), areaId, repository ) );
+            await StageAndFinishPickingOrder( http.Employee(), areaId, repository ) );
     }
 
     static IResult RefreshTask( Employee employee )
@@ -60,12 +64,15 @@ internal static class PickingEndpoints
     {
         var picking = await repository
             .GetPickingSectionWithTasks();
+        
+        var task = picking?
+            .StartPickingTask( employee, taskId );
 
-        var pickStarted = picking is not null
-            && picking.StartPickingTask( employee, taskId );
+        var pickStarted = task is not null
+            && task.IsStarted;
         
         return pickStarted && await repository.SaveAsync()
-            ? Results.Ok( true )
+            ? Results.Ok( task )
             : Results.Problem();
     }
     static async Task<IResult> StartPickingLocation( Employee employee, Guid palletId, Guid rackingId, IPickingRepository repository )
@@ -89,13 +96,23 @@ internal static class PickingEndpoints
             : Results.Problem();
 
     }
-    static async Task<IResult> StagePickingOrder( Employee employee, Guid areaId, IPickingRepository repository )
+    static async Task<IResult> FinishPickingLocation( Employee employee, Guid palletId, Guid rackingId, IPickingRepository repository )
+    {
+        var task = employee
+            .GetTask<PickingTask>()
+            .FinishPickingLocation( palletId, rackingId );
+
+        return task && await repository.SaveAsync()
+            ? Results.Ok( true )
+            : Results.Problem();
+    }
+    static async Task<IResult> StageAndFinishPickingOrder( Employee employee, Guid areaId, IPickingRepository repository )
     {
         var picking = await repository
             .GetPickingSectionWithTasks();
 
         var taskCompleted = picking is not null
-            && picking.CompletePickingTask( employee, areaId );
+            && picking.StageAndFinishPickingOrder( employee, areaId );
 
         return taskCompleted && await repository.SaveAsync()
             ? Results.Ok( true )

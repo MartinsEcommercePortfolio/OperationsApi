@@ -10,7 +10,9 @@ public sealed class ReceivingSection
     public List<Pallet> Pallets { get; set; } = [];
     public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
     public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
-    
+
+    public ReceivingTask? GetNextReceivingTask() =>
+        PendingReceivingTasks.FirstOrDefault();
     public bool StartReceivingTask( Employee employee, Guid taskId )
     {
         var task = PendingReceivingTasks
@@ -25,7 +27,7 @@ public sealed class ReceivingSection
         
         return taskStarted;
     }
-    public bool ReceivePallet( Employee employee, Guid palletId )
+    public bool ReceiveUnloadedPallet( Employee employee, Guid palletId )
     {
         var pallet = employee
             .GetTask<ReceivingTask>()

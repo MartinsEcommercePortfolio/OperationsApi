@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
-using OperationsApi.Features._Shared;
 using OperationsApi.Utilities;
+using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseSections.Receiving;
+using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -11,58 +12,79 @@ internal static class ReceivingEndpoints
     internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
     {
         app.MapGet( "api/tasks/receiving/nextTask",
-            static async ( IReceivingRepository repo ) =>
-            await GetNextReceivingTask( repo ) );
+            static async ( IReceivingRepository repository ) =>
+            await GetNextReceivingTask( repository ) );
 
-        app.MapPost( "api/tasks/receiving/startTask",
-            static async ( [FromBody] Guid taskId, HttpContext http, IReceivingRepository receiving ) =>
-            await StartReceivingTask( taskId, http, receiving ) );
+        app.MapPost( "api/tasks/receiving/startReceiving",
+            static async ( [FromQuery] Guid taskId, HttpContext http, IReceivingRepository repository ) =>
+            await StartReceivingTask( http.Employee(), taskId, repository ) );
 
         app.MapPost( "api/tasks/receiving/unloadPallet",
-            static async ( [FromBody] Guid taskId, HttpContext http, IReceivingRepository receiving ) =>
-            await UnloadPallet( taskId, http, receiving ) );
+            static async ( [FromQuery] Guid taskId, HttpContext http, IReceivingRepository repository ) =>
+            await ReceiveUnloadedPallet( http.Employee(), taskId, repository ) );
 
         app.MapPost( "api/tasks/receiving/stagePallet",
-            static async ( [FromBody] PalletStagedDto dto, HttpContext http, IReceivingRepository receiving ) =>
-            await StagePallet( dto, http, receiving ) );
+            static async ( [FromQuery] Guid palletId, [FromQuery] Guid areaId, HttpContext http, IReceivingRepository repository ) =>
+            await StageReceivedPallet( http.Employee(), palletId, areaId, repository ) );
 
         app.MapGet( "api/tasks/receiving/completeTask",
-            static async ( HttpContext http, IReceivingRepository receiving ) =>
-            await CompleteReceivingTask( http, receiving ) );
+            static async ( HttpContext http, IReceivingRepository repository ) =>
+            await CompleteReceivingTask( http.Employee(), repository ) );
     }
     
-    static async Task<IResult> GetNextReceivingTask( IReceivingRepository receiving )
+    static async Task<IResult> GetNextReceivingTask( IReceivingRepository repository )
     {
-        var receivingTask = await receiving.GetNextReceivingTask();
-        return receivingTask is not null
-            ? Results.Ok( ReceivingTaskSummary.FromModel( receivingTask ) )
+        ReceivingSection? receiving = await repository.GetReceivingSectionWithTasks();
+        var nextTask = receiving?.GetNextReceivingTask();
+        
+        return nextTask is not null
+            ? Results.Ok( ReceivingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartReceivingTask( Guid taskId, HttpContext http, IReceivingRepository receiving )
+    static async Task<IResult> StartReceivingTask( Employee employee, Guid taskId, IReceivingRepository repository )
     {
-        bool taskStarted = await receiving.StartReceivingTask( http.Employee(), taskId );
+        var receiving = await repository.GetReceivingSectionWithTasks();
+        
+        var taskStarted = receiving is not null
+            && receiving.StartReceivingTask( employee, taskId )
+            && await repository.SaveAsync();
+        
         return taskStarted
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> UnloadPallet( Guid palletId, HttpContext http, IReceivingRepository receiving )
+    static async Task<IResult> ReceiveUnloadedPallet( Employee employee, Guid palletId, IReceivingRepository repository )
     {
-        bool palletReceived = await receiving.ReceivePallet( http.Employee(), palletId );
+        var receiving = await repository.GetReceivingSectionWithPallets();
+
+        var palletReceived = receiving is not null
+            && receiving.ReceiveUnloadedPallet( employee, palletId )
+            && await repository.SaveAsync();
+        
         return palletReceived
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> StagePallet( PalletStagedDto dto, HttpContext http, IReceivingRepository receiving )
+    static async Task<IResult> StageReceivedPallet( Employee employee, Guid palletId, Guid areaId, IReceivingRepository repository )
     {
-        bool palletStaged = await receiving.StagePallet( http.Employee(), dto.PalletId, dto.AreaId );
-        return palletStaged
+        var staged = employee
+            .GetTask<ReceivingTask>()
+            .StagePallet( palletId, areaId );
+
+        return staged && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> CompleteReceivingTask( HttpContext http, IReceivingRepository receiving )
+    static async Task<IResult> CompleteReceivingTask( Employee employee, IReceivingRepository repository )
     {
-        bool completed = await receiving.CompleteReceivingTask( http.Employee() );
-        return completed
+        var receiving = await repository
+            .GetReceivingSectionWithTasks();
+
+        var taskStarted = receiving is not null
+            && receiving.CompleteReceivingTask( employee )
+            && await repository.SaveAsync();
+
+        return taskStarted
             ? Results.Ok( true )
             : Results.Problem();
     }

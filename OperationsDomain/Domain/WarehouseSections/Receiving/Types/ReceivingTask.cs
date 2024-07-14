@@ -33,7 +33,7 @@ public sealed class ReceivingTask : WarehouseTask
             && palletId == CurrentPallet.Id
             && areaId == Area.Id
             && Area.TakePallet( CurrentPallet )
-            && CurrentPallet.PutIn( Area );
+            && CurrentPallet.PlaceInArea( Area );
 
         if (staged)
             CurrentPallet = null;

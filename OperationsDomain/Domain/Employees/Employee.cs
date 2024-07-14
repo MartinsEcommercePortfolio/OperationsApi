@@ -39,9 +39,10 @@ public sealed class Employee
         Task = task;
         return true;
     }
-    public void FinishTask()
+    public bool FinishTask()
     {
         TaskId = Guid.Empty;
         Task = null;
+        return true;
     }
 }

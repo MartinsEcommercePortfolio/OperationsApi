@@ -38,7 +38,7 @@ public sealed class PutawayTask : WarehouseTask
             return false;
 
         PutawayRacking.TakePallet( Pallet );
-        Pallet.PutAway( PutawayRacking );
+        Pallet.PutInRacking( PutawayRacking );
         Employee.FinishTask();
         return true;
     }

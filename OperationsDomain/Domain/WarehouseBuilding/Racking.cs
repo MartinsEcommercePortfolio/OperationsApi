@@ -27,12 +27,12 @@ public sealed class Racking
         Height > pallet.Height;
     public bool TakePallet( Pallet pallet )
     {
-        bool canTake = IsAvailable() &&
+        bool palletTaken = IsAvailable() &&
             PalletFits( pallet ) &&
             Capacity > pallet.Weight;
-        if (canTake)
+        if (palletTaken)
             Pallet = pallet;
-        return canTake;
+        return palletTaken;
     }
 
     public void AssignTo( Employee employee )

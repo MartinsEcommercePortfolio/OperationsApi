@@ -4,15 +4,11 @@ namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 
 internal readonly record struct PickingLineSummary(
     Guid ProductId,
-    int Quantity,
-    string Aisle,
-    string Bay,
-    string Level )
+    int Quantity, 
+    RackingDto Racking )
 {
     internal static PickingLineSummary FromModel( PickingLine model ) => new(
         model.Id,
         model.Quantity,
-        model.Racking.Aisle,
-        model.Racking.Bay,
-        model.Racking.Level );
+        RackingDto.FromModel( model.Racking ) );
 }

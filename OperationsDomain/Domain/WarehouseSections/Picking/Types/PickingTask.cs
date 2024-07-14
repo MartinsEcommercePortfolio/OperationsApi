@@ -56,7 +56,7 @@ public sealed class PickingTask : WarehouseTask
             && StagingArea.Id == areaId
             && CurrentPickLine is null
             && StagingArea.TakePallet( Pallet )
-            && Pallet.PutIn( StagingArea );
+            && Pallet.PlaceInArea( StagingArea );
         if (staged)
             Employee.FinishTask();
         return staged;

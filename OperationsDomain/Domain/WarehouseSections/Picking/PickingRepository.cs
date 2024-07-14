@@ -9,13 +9,11 @@ namespace OperationsDomain.Domain.WarehouseSections.Picking;
 internal class PickingRepository( WarehouseDbContext dbContext, ILogger<PickingRepository> logger ) 
     : DatabaseService<PickingRepository>( dbContext, logger ), IPickingRepository
 {
-    readonly WarehouseDbContext _warehouse = dbContext;
-    
     public async Task<PickingTask?> GetNextPickingTask()
     {
         try
         {
-            var picking = await _warehouse.Picking
+            var picking = await DbContext.Picking
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
             return picking?
@@ -46,7 +44,7 @@ internal class PickingRepository( WarehouseDbContext dbContext, ILogger<PickingR
 
         try
         {
-            var picking = await _warehouse.Picking
+            var picking = await DbContext.Picking
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
 
@@ -129,7 +127,7 @@ internal class PickingRepository( WarehouseDbContext dbContext, ILogger<PickingR
 
         try
         {
-            var picking = await _warehouse.Picking
+            var picking = await DbContext.Picking
                 .Include( static p => p.ActivePickingTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );

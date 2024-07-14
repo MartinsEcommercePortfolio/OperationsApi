@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsApi.Features._Shared;
+namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 
 internal readonly record struct RackingDto(
     Guid Id,

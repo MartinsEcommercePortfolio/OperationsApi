@@ -36,6 +36,8 @@ public sealed class Pallet
         IsReceived() &&
         !IsOwned() &&
         IsStaged();
+    public bool CanBePickedUp() =>
+        true;
 
     public bool ReceiveBy( Employee employee )
     {
@@ -49,7 +51,7 @@ public sealed class Pallet
 
         return true;
     }
-    public bool PutIn( Area area )
+    public bool PlaceInArea( Area area )
     {
         if (Area is not null || Racking is not null || Owner is null)
             return false;
@@ -58,10 +60,11 @@ public sealed class Pallet
         SetArea( area );
         return true;
     }
-    public void PutAway( Racking racking )
+    public bool PutInRacking( Racking racking )
     {
         ClearOwners();
         SetRacking( racking );
+        return true;
     }
     public bool Load( Trailer trailer )
     {
@@ -81,10 +84,11 @@ public sealed class Pallet
         return true;
     }
     
-    public void GiveTo( Employee employee )
+    public bool GiveTo( Employee employee )
     {
         ClearOwners();
         SetOwner( employee );
+        return true;
     }
     public void TakeFrom( Employee employee )
     {

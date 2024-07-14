@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
 
-namespace OperationsApi.Features.WarehouseTasks.Dtos;
+namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 
 internal readonly record struct ReceivingTaskSummary(
     string TrailerNumber,

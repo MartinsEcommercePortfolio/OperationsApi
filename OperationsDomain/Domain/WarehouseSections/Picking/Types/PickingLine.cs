@@ -7,8 +7,6 @@ namespace OperationsDomain.Domain.WarehouseSections.Picking.Types;
 public sealed class PickingLine
 {
     public Guid Id { get; set; }
-    public Guid ItemId { get; set; }
-    public Guid RackingId { get; set; }
     public Product Product { get; set; } = default!;
     public Racking Racking { get; set; } = default!;
     public List<Item> PickedItems { get; set; } = [];

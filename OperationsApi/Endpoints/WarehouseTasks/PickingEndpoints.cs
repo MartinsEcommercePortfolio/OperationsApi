@@ -33,7 +33,7 @@ internal static class PickingEndpoints
             static async ( [FromBody] Guid itemId, HttpContext http, IPickingRepository repo ) =>
             await PickNextItem( itemId, http, repo ) );
 
-        app.MapPost( "api/tasks/picking/pickNextItem",
+        app.MapPost( "api/tasks/picking/stagePickingOrder",
             static async ( [FromBody] Guid areaId, HttpContext http, IPickingRepository repo ) =>
             await StagePickingOrder( areaId, http, repo ) );
     }
@@ -56,14 +56,14 @@ internal static class PickingEndpoints
     {
         var pickingLine = await picking.StartPickingTask( http.Employee(), taskId );
         return pickingLine is not null
-            ? Results.Ok( pickingLine )
+            ? Results.Ok( PickingLineSummary.FromModel( pickingLine ) )
             : Results.Problem();
     }
     static async Task<IResult> GetNextPickLocation( HttpContext http, IPickingRepository picking )
     {
         var pickingLine = await picking.GetNextPick( http.Employee() );
         return pickingLine is not null
-            ? Results.Ok( pickingLine )
+            ? Results.Ok( PickingLineSummary.FromModel( pickingLine ) )
             : Results.Problem();
     }
     static async Task<IResult> StartPickingLocation( Guid rackingId, HttpContext http, IPickingRepository picking )

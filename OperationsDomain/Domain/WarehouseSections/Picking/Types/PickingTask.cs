@@ -5,6 +5,7 @@ namespace OperationsDomain.Domain.WarehouseSections.Picking.Types;
 
 public sealed class PickingTask : WarehouseTask
 {
+    public Dock StagingDock { get; set; } = default!;
     public Area StagingArea { get; set; } = default!;
     public Pallet Pallet { get; set; } = default!;
     public PickingLine? CurrentPickLine { get; set; }
@@ -52,6 +53,7 @@ public sealed class PickingTask : WarehouseTask
     public bool StagePick( Guid areaId )
     {
         bool staged = IsStaging
+            && StagingArea.Id == areaId
             && CurrentPickLine is null
             && StagingArea.StagePallet( Pallet )
             && Pallet.PutIn( StagingArea );

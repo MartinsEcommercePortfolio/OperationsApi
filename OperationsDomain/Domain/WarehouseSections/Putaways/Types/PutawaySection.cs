@@ -9,7 +9,7 @@ public sealed class PutawaySection
     public List<Pallet> Pallets { get; set; } = [];
     public List<PutawayTask> PutawayTasks { get; set; } = [];
     
-    public async Task<Racking?> BeginPutaway( Employee employee, Guid palletId )
+    public async Task<PutawayTask?> BeginPutaway( Employee employee, Guid palletId )
     {
         Pallet? pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
         if (pallet is null || !pallet.CanBePutAway())
@@ -23,13 +23,13 @@ public sealed class PutawaySection
                 return null;
 
             var task = PutawayTask
-                .StartNew( employee, pallet, racking );
+                .Initialize( employee, pallet, racking );
             
             if (task is null)
                 return null;
 
             PutawayTasks.Add( task );
-            return racking;
+            return task;
         } );
     }
     public bool CompletePutaway( Employee employee, Guid palletId, Guid rackingId )

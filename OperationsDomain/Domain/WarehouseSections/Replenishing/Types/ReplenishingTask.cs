@@ -11,16 +11,13 @@ public sealed class ReplenishingTask : WarehouseTask
     public Guid ToRackingId { get; set; }
     public bool PalletHasBeenPicked { get; set; }
 
-    public Racking? PickupReplenishingPallet( Guid palletId )
+    public bool PickupReplenishingPallet( Guid palletId )
     {
         PalletHasBeenPicked = Pallet.Id == palletId
             && Pallet.CanBePickedUp()
             && FromRacking.TakePallet( Pallet )
             && Pallet.GiveTo( Employee );
-        
-        return PalletHasBeenPicked
-            ? ToRacking
-            : null;
+        return PalletHasBeenPicked;
     }
     public bool ReplenishLocation( Guid palletId, Guid rackingId )
     {

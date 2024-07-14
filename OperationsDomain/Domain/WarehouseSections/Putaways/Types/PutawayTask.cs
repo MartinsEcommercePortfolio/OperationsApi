@@ -11,8 +11,8 @@ public sealed class PutawayTask : WarehouseTask
     public Guid PalletId { get; set; }
     public Guid PickupAreaId { get; set; }
     public Guid PutawayRackingId { get; set; }
-
-    public static PutawayTask? StartNew( Employee employee, Pallet pallet, Racking racking )
+    
+    public static PutawayTask? Initialize( Employee employee, Pallet pallet, Racking racking )
     {
         var task = new PutawayTask {
             Employee = employee,

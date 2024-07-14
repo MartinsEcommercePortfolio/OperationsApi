@@ -20,35 +20,24 @@ public sealed class PickingTask : WarehouseTask
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
     }
-    public PickingLine? GetNextPick()
-    {
-        if (CurrentPickLine is null || !CurrentPickLine.IsComplete())
-            return null;
-        
-        int nextIndex = PickLines.IndexOf( CurrentPickLine );
-        if (nextIndex >= PickLines.Count)
-        {
-            CurrentPickLine = null;
-            IsStaging = true;
-            return null;
-        }
-        CurrentPickLine = PickLines[nextIndex];
-        return CurrentPickLine;
-    }
-    public int? ConfirmPickLocation( Guid rackingId )
+    public bool StartPickingLocation( Guid palletId, Guid rackingId )
     {
         if (CurrentPickLine is null || CurrentPickLine.IsComplete())
-            return null;
-        return CurrentPickLine
-            .ConfirmPickLocation( rackingId );
+            return false;
+
+        CurrentPickLine = PickLines.FirstOrDefault( p =>
+            p.Racking.Id == rackingId &&
+            p.Racking.Pallet is not null &&
+            p.Racking.Pallet.Id == palletId );
+
+        return CurrentPickLine?
+            .ConfirmPickLocation( palletId, rackingId ) ?? false;
     }
-    public int? PickItem( Guid itemId )
+    public bool PickItem( Guid itemId )
     {
         bool picked = CurrentPickLine is not null
             && CurrentPickLine.PickItem( Employee, itemId );
-        return picked
-            ? CurrentPickLine!.ItemsRemainingInPick()
-            : null;
+        return picked;
     }
     public bool StagePick( Guid areaId )
     {

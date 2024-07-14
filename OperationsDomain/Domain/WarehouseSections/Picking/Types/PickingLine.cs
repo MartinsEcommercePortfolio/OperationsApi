@@ -12,10 +12,8 @@ public sealed class PickingLine
     public List<Item> PickedItems { get; set; } = [];
     public int Quantity { get; set; }
 
-    public int? ConfirmPickLocation( Guid rackingId ) =>
-        Racking.Id == rackingId
-            ? Quantity
-            : null;
+    public bool ConfirmPickLocation( Guid palletId, Guid rackingId ) =>
+        Racking.Id == rackingId && Racking.Pallet is not null && Racking.Pallet.Id == palletId;
     public int ItemsRemainingInPick() =>
         Quantity - PickedItems.Count;
     public bool PickItem( Employee employee, Guid itemId )

@@ -11,11 +11,15 @@ internal static class ReceivingEndpoints
 {
     internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
     {
+        app.MapPost( "api/tasks/receiving/refreshTask",
+            static ( HttpContext http ) =>
+            RefreshTask( http.Employee() ) );
+        
         app.MapGet( "api/tasks/receiving/nextTask",
             static async ( IReceivingRepository repository ) =>
             await GetNextReceivingTask( repository ) );
 
-        app.MapPost( "api/tasks/receiving/startReceiving",
+        app.MapPost( "api/tasks/receiving/startTask",
             static async ( [FromQuery] Guid taskId, HttpContext http, IReceivingRepository repository ) =>
             await StartReceivingTask( http.Employee(), taskId, repository ) );
 
@@ -31,7 +35,15 @@ internal static class ReceivingEndpoints
             static async ( HttpContext http, IReceivingRepository repository ) =>
             await CompleteReceivingTask( http.Employee(), repository ) );
     }
-    
+
+    static IResult RefreshTask( Employee employee )
+    {
+        var task = employee.GetTask<ReceivingTask>();
+
+        return task.IsStarted && !task.IsCompleted
+            ? Results.Ok( ReceivingTaskSummary.FromModel( task ) )
+            : Results.Problem();
+    }
     static async Task<IResult> GetNextReceivingTask( IReceivingRepository repository )
     {
         ReceivingSection? receiving = await repository.GetReceivingSectionWithTasks();
@@ -67,11 +79,11 @@ internal static class ReceivingEndpoints
     }
     static async Task<IResult> StageReceivedPallet( Employee employee, Guid palletId, Guid areaId, IReceivingRepository repository )
     {
-        var staged = employee
+        var palletStaged = employee
             .GetTask<ReceivingTask>()
             .StagePallet( palletId, areaId );
 
-        return staged && await repository.SaveAsync()
+        return palletStaged && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }
@@ -80,11 +92,10 @@ internal static class ReceivingEndpoints
         var receiving = await repository
             .GetReceivingSectionWithTasks();
 
-        var taskStarted = receiving is not null
-            && receiving.CompleteReceivingTask( employee )
-            && await repository.SaveAsync();
+        var taskCompleted = receiving is not null
+            && receiving.CompleteReceivingTask( employee );
 
-        return taskStarted
+        return taskCompleted && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }

@@ -1,4 +1,4 @@
-using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouse.Employees;
 
 namespace OperationsApi.Middleware;
 

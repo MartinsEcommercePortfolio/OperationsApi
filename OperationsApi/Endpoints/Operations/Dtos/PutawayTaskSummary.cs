@@ -1,0 +1,11 @@
+using OperationsDomain.Warehouse.Operations.Putaways.Models;
+
+namespace OperationsApi.Endpoints.Operations.Dtos;
+
+internal readonly record struct PutawayTaskSummary(
+    Guid PalletId,
+    RackingDto Racking )
+{
+    internal static PutawayTaskSummary FromModel( PutawayTask model ) =>
+        new( model.PalletId, RackingDto.FromModel( model.PutawayRacking ) );
+}

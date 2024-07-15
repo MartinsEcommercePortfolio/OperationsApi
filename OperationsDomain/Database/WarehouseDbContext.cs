@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using OperationsDomain.Domain;
-using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.Equipment;
-using OperationsDomain.Domain.WarehouseBuilding;
-using OperationsDomain.Domain.WarehouseSections.Loading;
-using OperationsDomain.Domain.WarehouseSections.Loading.Models;
-using OperationsDomain.Domain.WarehouseSections.Picking.Models;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
-using OperationsDomain.Domain.WarehouseSections.Receiving.Models;
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
+using OperationsDomain.Warehouses;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Infrastructure;
+using OperationsDomain.Warehouses.Operations.Loading.Models;
+using OperationsDomain.Warehouses.Operations.Picking.Models;
+using OperationsDomain.Warehouses.Operations.Putaways.Models;
+using OperationsDomain.Warehouses.Operations.Receiving.Models;
+using OperationsDomain.Warehouses.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Database;
 
@@ -35,11 +34,11 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     
     // WAREHOUSE
     public required DbSet<Warehouse> Warehouses { get; init; }
-    public required DbSet<ReceivingSection> Receiving { get; set; }
-    public required DbSet<PutawaySection> Putaways { get; set; }
-    public required DbSet<PickingSection> Picking { get; set; }
-    public required DbSet<ReplenishingSection> Replenishing { get; set; }
-    public required DbSet<LoadingSection> Loading { get; set; }
+    public required DbSet<ReceivingOperations> Receiving { get; set; }
+    public required DbSet<PutawayOperations> Putaways { get; set; }
+    public required DbSet<PickingOperations> Picking { get; set; }
+    public required DbSet<ReplenishingOperations> Replenishing { get; set; }
+    public required DbSet<LoadingOperations> Loading { get; set; }
     public required DbSet<Trailer> Trailers { get; init; }
     public required DbSet<Dock> Docks { get; init; }
     public required DbSet<Area> Areas { get; init; }

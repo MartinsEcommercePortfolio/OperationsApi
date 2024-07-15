@@ -1,4 +1,4 @@
-using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
+using OperationsDomain.Warehouses.Operations.Putaways.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 

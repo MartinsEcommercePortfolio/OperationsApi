@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Domain.Employees;
-using OperationsDomain.Domain.WarehouseSections.Picking;
-using OperationsDomain.Domain.WarehouseSections.Picking.Models;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Operations.Picking;
+using OperationsDomain.Warehouses.Operations.Picking.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -51,7 +51,7 @@ internal static class PickingEndpoints
     static async Task<IResult> GetNextTask( IPickingRepository repository )
     {
         var picking = await repository
-            .GetPickingSectionWithTasks();
+            .GetPickingOperationsWithTasks();
         
         var nextTask = picking?
             .GetNextPickingTask();
@@ -63,7 +63,7 @@ internal static class PickingEndpoints
     static async Task<IResult> StartPickingTask( Employee employee, Guid taskId, IPickingRepository repository )
     {
         var picking = await repository
-            .GetPickingSectionWithTasks();
+            .GetPickingOperationsWithTasks();
         
         var task = picking?
             .StartPickingTask( employee, taskId );
@@ -109,7 +109,7 @@ internal static class PickingEndpoints
     static async Task<IResult> StageAndFinishPickingOrder( Employee employee, Guid areaId, IPickingRepository repository )
     {
         var picking = await repository
-            .GetPickingSectionWithTasks();
+            .GetPickingOperationsWithTasks();
 
         var taskCompleted = picking is not null
             && picking.StageAndFinishPickingOrder( employee, areaId );

@@ -1,4 +1,4 @@
-using OperationsDomain.Domain.WarehouseSections.Loading.Models;
+using OperationsDomain.Warehouses.Operations.Loading.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 

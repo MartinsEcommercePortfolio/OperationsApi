@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Domain.Employees;
-using OperationsDomain.Domain.WarehouseSections.Receiving;
-using OperationsDomain.Domain.WarehouseSections.Receiving.Models;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Operations.Receiving;
+using OperationsDomain.Warehouses.Operations.Receiving.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -52,7 +52,7 @@ internal static class ReceivingEndpoints
     }
     static async Task<IResult> GetNextReceivingTask( IReceivingRepository repository )
     {
-        var receiving = await repository.GetReceivingSectionWithTasks();
+        var receiving = await repository.GetReceivingOperationsWithTasks();
         var nextTask = receiving?.GetNextReceivingTask();
         
         return nextTask is not null
@@ -62,7 +62,7 @@ internal static class ReceivingEndpoints
     static async Task<IResult> StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, IReceivingRepository repository )
     {
         var receiving = await repository
-            .GetReceivingSectionWithTasks();
+            .GetReceivingOperationsWithTasks();
 
         var task = receiving?
             .StartReceivingTask( employee, taskId, trailerId, dockId, areaId );
@@ -97,7 +97,7 @@ internal static class ReceivingEndpoints
     static async Task<IResult> CompleteReceivingTask( Employee employee, IReceivingRepository repository )
     {
         var receiving = await repository
-            .GetReceivingSectionWithTasks();
+            .GetReceivingOperationsWithTasks();
 
         var taskCompleted = receiving is not null
             && receiving.CompleteReceivingTask( employee );

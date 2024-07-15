@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Domain.Employees;
-using OperationsDomain.Domain.WarehouseSections.Loading;
-using OperationsDomain.Domain.WarehouseSections.Loading.Models;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Operations.Loading;
+using OperationsDomain.Warehouses.Operations.Loading.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -62,7 +62,7 @@ public static class LoadingEndpoints
     }
     static async Task<IResult> GetNextLoadingTask( ILoadingRepository repository )
     {
-        var loading = await repository.GetLoadingSectionWithTasks();
+        var loading = await repository.GetLoadingOperationsWithTasks();
         var nextTask = loading?.GetNextLoadingTask();
 
         return nextTask is not null
@@ -72,7 +72,7 @@ public static class LoadingEndpoints
     static async Task<IResult> StartLoadingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, ILoadingRepository repository )
     {
         var loading = await repository
-            .GetLoadingSectionWithTasks();
+            .GetLoadingOperationsWithTasks();
 
         var task = loading?
             .StartLoadingTask( employee, taskId, trailerId, dockId, areaId );
@@ -107,7 +107,7 @@ public static class LoadingEndpoints
     static async Task<IResult> FinishLoadingTask( Employee employee, ILoadingRepository repository )
     {
         var loading = await repository
-            .GetLoadingSectionWithTasks();
+            .GetLoadingOperationsWithTasks();
 
         var taskCompleted = loading is not null
             && loading.FinishLoadingTask( employee );

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Domain.Employees;
-using OperationsDomain.Domain.WarehouseSections.Putaways;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Operations.Putaways;
+using OperationsDomain.Warehouses.Operations.Putaways.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -35,7 +35,7 @@ internal static class PutawaysEndpoints
     static async Task<IResult> StartPutawayTask( Employee employee, Guid palletId, IPutawayRepository repository )
     {
         var putaways = await repository
-            .GetPutawaysSectionWithPalletsAndRackings();
+            .GetPutawaysOperationsWithPalletsAndRackings();
 
         if (putaways is null)
             return Results.NotFound();
@@ -50,7 +50,7 @@ internal static class PutawaysEndpoints
     }
     static async Task<IResult> FinishPutaway( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
     {
-        var putaways = await repository.GetPutawaysSectionWithTasks();
+        var putaways = await repository.GetPutawaysOperationsWithTasks();
 
         var success = putaways is not null
             && putaways.FinishPutaway( employee, palletId, rackingId )

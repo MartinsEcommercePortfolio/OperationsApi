@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Domain.Employees;
-using OperationsDomain.Domain.WarehouseSections.Replenishing;
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
+using OperationsDomain.Warehouses.Employees;
+using OperationsDomain.Warehouses.Operations.Replenishing;
+using OperationsDomain.Warehouses.Operations.Replenishing.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 
@@ -43,7 +43,7 @@ internal static class ReplenishingEndpoints
     static async Task<IResult> GetNextReplenishingTask( IReplenishingRepository repository )
     {
         var replenishing = await repository
-            .GetReplenishingSectionWithTasks();
+            .GetReplenishingOperationsWithTasks();
         var nextTask = replenishing?
             .GetNextReplenishingTask();
         
@@ -54,7 +54,7 @@ internal static class ReplenishingEndpoints
     static async Task<IResult> StartReplenishingTask( Employee employee, Guid taskId, IReplenishingRepository repository )
     {
         var replenishing = await repository
-            .GetReplenishingSectionWithTasks();
+            .GetReplenishingOperationsWithTasks();
         
         var replenishingTask = replenishing?
             .StartReplenishingTask( employee, taskId );
@@ -80,7 +80,7 @@ internal static class ReplenishingEndpoints
     static async Task<IResult> FinishReplenishingTask( Employee employee, Guid palletId, Guid rackingId, IReplenishingRepository repository )
     {
         var replenishing = await repository
-            .GetReplenishingSectionWithTasks();
+            .GetReplenishingOperationsWithTasks();
 
         var replenished = replenishing is not null
             && replenishing.ReplenishLocation( employee, palletId, rackingId )

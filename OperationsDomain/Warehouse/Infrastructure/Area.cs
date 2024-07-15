@@ -4,8 +4,8 @@ public sealed class Area
 {
     public Guid Id { get; private set; }
     public string Number { get; private set; } = string.Empty;
-    public bool IsAvailable { get; set; }
-    public List<Pallet> Pallets { get; set; } = [];
+    public bool IsAvailable { get; private set; }
+    public List<Pallet> Pallets { get; private set; } = [];
 
     public bool TakePallet( Pallet pallet )
     {

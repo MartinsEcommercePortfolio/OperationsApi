@@ -1,11 +1,13 @@
+using OperationsDomain.Warehouse.Employees;
+
 namespace OperationsDomain.Warehouse.Infrastructure;
 
 public sealed class Trailer
 {
-    public Guid Id { get; set; }
-    public string Number { get; set; } = string.Empty;
-    public Dock? Dock { get; set; }
-    public List<Pallet> Pallets { get; set; } = [];
+    public Guid Id { get; private set; }
+    public string Number { get; private set; } = string.Empty;
+    public Dock? Dock { get; private set; }
+    public List<Pallet> Pallets { get; private set; } = [];
     
     public Pallet? GetPallet( Guid palletId ) =>
         Pallets.FirstOrDefault( p => p.Id == palletId );

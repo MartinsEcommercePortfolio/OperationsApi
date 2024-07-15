@@ -4,13 +4,13 @@ namespace OperationsDomain.Warehouse.Operations;
 
 public abstract class WarehouseTask
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid EmployeeId { get; set; }
-    public Employee Employee { get; set; } = new();
-    public bool IsStarted { get; set; }
-    public bool IsCompleted { get; set; }
-    
-    public static T Null<T>()
+    public Guid Id { get; protected set; } = Guid.NewGuid();
+    public Guid EmployeeId { get; protected set; }
+    public Employee Employee { get; protected set; } = new();
+    public bool IsStarted { get; protected set; }
+    public bool IsFinished { get; protected set; }
+
+    internal static T Null<T>()
         where T : WarehouseTask, new() =>
         new() {
             Id = Guid.Empty,
@@ -18,14 +18,22 @@ public abstract class WarehouseTask
             Employee = new Employee(),
             IsStarted = false
         };
-    
-    public virtual bool Start( Employee employee )
+
+    internal virtual bool StartWith( Employee employee )
     {
-        if (IsStarted || IsCompleted)
+        if (IsStarted || IsFinished)
             return false;
         EmployeeId = employee.Id;
         Employee = employee;
         IsStarted = true;
         return employee.StartTask( this );
+    }
+    internal bool Finish( Employee employee )
+    {
+        if (employee != Employee)
+            return false;
+
+        IsFinished = true;
+        return true;
     }
 }

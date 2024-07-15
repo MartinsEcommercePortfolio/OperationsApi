@@ -5,39 +5,38 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingOperations
 {
-    public Guid Id { get; set; }
-    public List<Pallet> Pallets { get; set; } = [];
-    public List<PickingTask> PendingPickingTasks { get; set; } = [];
-    public List<PickingTask> ActivePickingTasks { get; set; } = [];
+    public Guid Id { get; private set; }
+    public List<Pallet> Pallets { get; private set; } = [];
+    public List<PickingTask> PendingPickingTasks { get; private set; } = [];
+    public List<PickingTask> ActivePickingTasks { get; private set; } = [];
 
     public PickingTask? GetNextPickingTask() => 
         PendingPickingTasks.FirstOrDefault();
     public PickingTask? StartPickingTask( Employee employee, Guid taskId )
     {
-        var task = PendingPickingTasks
+        var pickingTask = PendingPickingTasks
             .FirstOrDefault( t => t.Id == taskId );
         
-        if (task is null)
+        if (pickingTask is null)
             return null;
 
-        bool started = !ActivePickingTasks.Contains( task )
-            && task.Start( employee )
-            && !Pallets.Contains( task.Pallet )
-            && PendingPickingTasks.Remove( task );
+        bool started = !ActivePickingTasks.Contains( pickingTask )
+            && !Pallets.Contains( pickingTask.Pallet )
+            && employee.StartPicking( pickingTask )
+            && PendingPickingTasks.Remove( pickingTask );
 
         if (!started)
             return null;
         
-        ActivePickingTasks.Add( task );
-        Pallets.Add( task.Pallet );
-        return task;
+        ActivePickingTasks.Add( pickingTask );
+        Pallets.Add( pickingTask.Pallet );
+        return pickingTask;
     }
     public bool StageAndFinishPickingOrder( Employee employee, Guid areaId )
     {
-        var task = employee.GetTask<PickingTask>();
-        var staged = task.StagePick( areaId );
-        return staged
-            && task.IsCompleted
+        var task = employee.TaskAs<PickingTask>();
+
+        return employee.FinishPicking( areaId )
             && ActivePickingTasks.Remove( task );
     }
 }

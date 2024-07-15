@@ -20,31 +20,66 @@ internal static class PickingEndpoints
             await GetNextTask( repository ) );
 
         app.MapPost( "api/tasks/picking/startPickingTask",
-            static async ( [FromQuery] Guid taskId, HttpContext http, IPickingRepository repository ) =>
-            await StartPickingTask( http.Employee(), taskId, repository ) );
+            static async (
+                    [FromQuery] Guid taskId,
+                    HttpContext http,
+                    IPickingRepository repository ) =>
+                await StartPickingTask(
+                    http.Employee(),
+                    taskId,
+                    repository ) );
 
         app.MapPost( "api/tasks/picking/startPick",
-            static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPickingRepository repository ) =>
-            await StartPickingLocation( http.Employee(), palletId, rackingId, repository ) );
+            static async (
+                    [FromQuery] Guid rackingId,
+                    [FromQuery] Guid palletId,
+                    HttpContext http,
+                    IPickingRepository repository ) =>
+                await StartPickingLocation(
+                    http.Employee(),
+                    rackingId,
+                    palletId,
+                    repository ) );
 
         app.MapPost( "api/tasks/picking/pickItem",
-            static async ( [FromQuery] Guid itemId, HttpContext http, IPickingRepository repository ) =>
-            await PickItem( http.Employee(), itemId, repository ) );
+            static async (
+                    [FromQuery] Guid itemId,
+                    HttpContext http,
+                    IPickingRepository repository ) =>
+                await PickItem(
+                    http.Employee(),
+                    itemId,
+                    repository ) );
 
         app.MapPost( "api/tasks/picking/finishPick",
-            static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPickingRepository repository ) =>
-            await FinishPickingLocation( http.Employee(), palletId, rackingId, repository ) );
+            static async (
+                    [FromQuery] Guid rackingId,
+                    [FromQuery] Guid palletId,
+                    HttpContext http,
+                    IPickingRepository repository ) =>
+                await FinishPickingLocation(
+                    http.Employee(),
+                    rackingId,
+                    palletId,
+                    repository ) );
 
         app.MapPost( "api/tasks/picking/stagePickingTask",
-            static async ( [FromQuery] Guid areaId, HttpContext http, IPickingRepository repository ) =>
-            await StageAndFinishPickingOrder( http.Employee(), areaId, repository ) );
+            static async (
+                    [FromQuery] Guid areaId,
+                    HttpContext http,
+                    IPickingRepository repository ) =>
+                await StageAndFinishPickingOrder(
+                    http.Employee(),
+                    areaId,
+                    repository ) );
     }
 
     static IResult RefreshTask( Employee employee )
     {
-        var task = employee.GetTask<PickingTask>();
+        var task = employee
+            .TaskAs<PickingTask>();
         
-        return task.IsStarted && !task.IsCompleted
+        return task.IsStarted && !task.IsFinished
             ? Results.Ok( PickingTaskSummary.FromModel( task ) )
             : Results.Problem();
     }
@@ -75,10 +110,9 @@ internal static class PickingEndpoints
             ? Results.Ok( task )
             : Results.Problem();
     }
-    static async Task<IResult> StartPickingLocation( Employee employee, Guid palletId, Guid rackingId, IPickingRepository repository )
+    static async Task<IResult> StartPickingLocation( Employee employee, Guid rackingId, Guid palletId, IPickingRepository repository )
     {
         var task = employee
-            .GetTask<PickingTask>()
             .StartPickingLocation( palletId, rackingId );
 
         return task && await repository.SaveAsync()
@@ -88,7 +122,6 @@ internal static class PickingEndpoints
     static async Task<IResult> PickItem( Employee employee, Guid itemId, IPickingRepository repository )
     {
         var picked = employee
-            .GetTask<PickingTask>()
             .PickItem( itemId );
 
         return picked && await repository.SaveAsync()
@@ -96,10 +129,9 @@ internal static class PickingEndpoints
             : Results.Problem();
 
     }
-    static async Task<IResult> FinishPickingLocation( Employee employee, Guid palletId, Guid rackingId, IPickingRepository repository )
+    static async Task<IResult> FinishPickingLocation( Employee employee, Guid rackingId, Guid palletId, IPickingRepository repository )
     {
         var task = employee
-            .GetTask<PickingTask>()
             .FinishPickingLocation( palletId, rackingId );
 
         return task && await repository.SaveAsync()

@@ -5,42 +5,41 @@ namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
 
 public sealed class PutawayOperations
 {
-    public List<Racking> Rackings { get; set; } = [];
-    public List<Pallet> Pallets { get; set; } = [];
-    public List<PutawayTask> PutawayTasks { get; set; } = [];
+    public List<Racking> Rackings { get; private set; } = [];
+    public List<Pallet> Pallets { get; private set; } = [];
+    public List<PutawayTask> PutawayTasks { get; private set; } = [];
     
-    public async Task<PutawayTask?> BeginPutaway( Employee employee, Guid palletId )
+    public async Task<PutawayTask?> StartPutaway( Employee employee, Guid palletId )
     {
-        Pallet? pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
-        if (pallet is null || !pallet.CanBePutAway())
+        var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
+        if (pallet is null)
             return null;
         
         return await Task.Run( () => {
-            var racking = Rackings.FirstOrDefault(
-                r => r.TakePallet( pallet ) );
+            var racking = Rackings
+                .FirstOrDefault( static r => r.IsAvailable());
             
             if (racking is null)
                 return null;
 
-            var task = PutawayTask
-                .Initialize( employee, pallet, racking );
+            PutawayTask task = new();
             
-            if (task is null)
-                return null;
+            var taskStarted = employee
+                .StartPutawayTask( task, racking, pallet );
 
+            if (!taskStarted)
+                return null;
+            
             PutawayTasks.Add( task );
             return task;
         } );
     }
-    public bool FinishPutaway( Employee employee, Guid palletId, Guid rackingId )
+    public bool FinishPutaway( Employee employee, Guid rackingId, Guid palletId )
     {
-        var task = employee
-            .GetTask<PutawayTask>();
-        var completed = task 
-            .Complete( palletId, rackingId );
-
-        if (completed)
-            PutawayTasks.Remove( task );
+        var task = employee.TaskAs<PutawayTask>();
+        
+        var completed = employee.FinishPutaway( rackingId, palletId )
+            && PutawayTasks.Remove( task );
 
         return completed;
     }

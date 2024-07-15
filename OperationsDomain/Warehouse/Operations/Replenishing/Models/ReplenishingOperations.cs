@@ -5,8 +5,8 @@ namespace OperationsDomain.Warehouse.Operations.Replenishing.Models;
 public sealed class ReplenishingOperations
 {
     public Guid Id { get; set; }
-    public List<ReplenishingTask> PendingReplenishingTasks { get; set; } = [];
-    public List<ReplenishingTask> ActiveReplenishingTasks { get; set; } = [];
+    public List<ReplenishingTask> PendingReplenishingTasks { get; private set; } = [];
+    public List<ReplenishingTask> ActiveReplenishingTasks { get; private set; } = [];
 
     public ReplenishingTask? GetNextReplenishingTask()
     {
@@ -17,30 +17,21 @@ public sealed class ReplenishingOperations
     {
         var task = PendingReplenishingTasks.FirstOrDefault( t => t.Id == taskId );
 
-        bool started = task is not null
+        var started = task is not null
             && !PendingReplenishingTasks.Contains( task )
-            && task.Start( employee )
+            && employee.StartReplenishing( task )
             && PendingReplenishingTasks.Remove( task );
 
-        if (!started)
-            return null;
+        if (started)
+            ActiveReplenishingTasks.Add( task! );
         
-        ActiveReplenishingTasks.Add( task! );
         return task;
     }
-    public bool ReplenishLocation( Employee employee, Guid palletId, Guid rackingId )
+    public bool FinishReplenishingTask( Employee employee, Guid rackingId, Guid palletId )
     {
-        var task = employee
-            .GetTask<ReplenishingTask>();
+        var task = employee.TaskAs<ReplenishingTask>();
         
-        var replenished = task
-            .ReplenishLocation( palletId, rackingId );
-
-        if (!replenished)
-            return false;
-
-        return replenished
-            && ActiveReplenishingTasks.Remove( task )
-            && employee.FinishTask();
+        return employee.ReplenishLocation( palletId, rackingId )
+            && ActiveReplenishingTasks.Remove( task );
     }
 }

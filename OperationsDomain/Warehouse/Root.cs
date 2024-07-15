@@ -7,14 +7,14 @@ namespace OperationsDomain.Warehouse;
 
 public sealed class Root
 {
-    public Guid Id { get; set; }
-    public List<Employee> Employees { get; set; } = [];
-    public List<Trailer> Trailers { get; set; } = [];
-    public List<Dock> Docks { get; set; } = [];
-    public List<Area> Areas { get; set; } = [];
-    public List<Racking> Rackings { get; set; } = [];
-    public List<Pallet> Pallets { get; set; } = [];
-    public List<Item> Items { get; set; } = [];
+    public Guid Id { get; private set; }
+    public List<Employee> Employees { get; private set; } = [];
+    public List<Trailer> Trailers { get; private set; } = [];
+    public List<Dock> Docks { get; private set; } = [];
+    public List<Area> Areas { get; private set; } = [];
+    public List<Racking> Rackings { get; private set; } = [];
+    public List<Pallet> Pallets { get; private set; } = [];
+    public List<Item> Items { get; private set; } = [];
 
     public ReceivingOperations ReceivingOperations { get; set; } = default!;
     public PutawayOperations PutawayOperations { get; set; } = default!;

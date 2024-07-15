@@ -4,15 +4,15 @@ namespace OperationsDomain.Warehouse.Operations.Loading.Models;
 
 public sealed class LoadingTask : WarehouseTask
 {
-    public Trailer Trailer { get; set; } = null!;
-    public Dock Dock { get; set; } = null!;
-    public List<Area> Areas { get; set; } = null!;
-    public List<Pallet> Pallets { get; set; } = null!;
-    public Guid TrailerId { get; set; }
-    public Guid DockId { get; set; }
-    public Guid AreaId { get; set; }
+    public Trailer Trailer { get; private set; } = null!;
+    public Dock Dock { get; private set; } = null!;
+    public List<Area> Areas { get; private set; } = null!;
+    public List<Pallet> Pallets { get; private set; } = null!;
+    public Guid TrailerId { get; private set; }
+    public Guid DockId { get; private set; }
+    public Guid AreaId { get; private set; }
 
-    public bool InitializeLoadingTask( Guid trailerId, Guid dockId, Guid areaId )
+    internal bool InitializeLoadingTask( Guid trailerId, Guid dockId, Guid areaId )
     {
         var isValid = Trailer.Id == trailerId
             && Dock.Id == dockId
@@ -20,8 +20,8 @@ public sealed class LoadingTask : WarehouseTask
         
         return isValid;
     }
-    
-    public bool StartLoadingPallet( Guid areaId, Guid palletId )
+
+    internal bool StartLoadingPallet( Guid areaId, Guid palletId )
     {
         var area = Areas.FirstOrDefault( a => a.Id == areaId );
         var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
@@ -31,7 +31,7 @@ public sealed class LoadingTask : WarehouseTask
             && area.RemovePallet( pallet )
             && pallet.GiveTo( Employee );
     }
-    public bool FinishLoadingPallet( Guid trailerId, Guid palletId )
+    internal bool FinishLoadingPallet( Guid trailerId, Guid palletId )
     {
         var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
 
@@ -39,13 +39,13 @@ public sealed class LoadingTask : WarehouseTask
             && Trailer.Id == trailerId
             && Pallets.Remove( pallet )
             && Trailer.LoadPallet( pallet )
-            && pallet.LoadInTrailer( Trailer );
+            && pallet.Load( Trailer );
 
         if (!loaded)
             return false;
 
         if (Pallets.Count <= 0)
-            IsCompleted = true;
+            IsFinished = true;
 
         return true;
     }

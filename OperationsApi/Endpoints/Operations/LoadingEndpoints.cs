@@ -54,9 +54,9 @@ public static class LoadingEndpoints
 
     static IResult RefreshTask( Employee employee )
     {
-        var task = employee.GetTask<LoadingTask>();
+        var task = employee.TaskAs<LoadingTask>();
 
-        return task.IsStarted && !task.IsCompleted
+        return task.IsStarted && !task.IsFinished
             ? Results.Ok( LoadingTaskSummary.FromModel( task ) )
             : Results.Problem();
     }
@@ -87,7 +87,6 @@ public static class LoadingEndpoints
     static async Task<IResult> StartLoadingPallet( Employee employee, Guid areaId, Guid palletId, ILoadingRepository repository )
     {
         var loadingStarted = employee
-            .GetTask<LoadingTask>()
             .StartLoadingPallet( palletId, areaId );
 
         return loadingStarted && await repository.SaveAsync()
@@ -97,7 +96,6 @@ public static class LoadingEndpoints
     static async Task<IResult> FinishLoadingPallet( Employee employee, Guid trailerId, Guid palletId, ILoadingRepository repository )
     {
         var receivingCompleted = employee
-            .GetTask<LoadingTask>()
             .FinishLoadingPallet( trailerId, palletId );
 
         return receivingCompleted && await repository.SaveAsync()

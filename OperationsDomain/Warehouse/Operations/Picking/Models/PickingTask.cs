@@ -5,22 +5,22 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingTask : WarehouseTask
 {
-    public Dock StagingDock { get; set; } = default!;
-    public Area StagingArea { get; set; } = default!;
-    public Pallet Pallet { get; set; } = default!;
-    public PickingLine? CurrentPickLine { get; set; }
-    public bool IsStaging { get; set; }
-    public List<PickingLine> PickLines { get; set; } = [];
-    
-    public override bool Start( Employee employee )
+    public Dock StagingDock { get; private set; } = default!;
+    public Area StagingArea { get; private set; } = default!;
+    public Pallet Pallet { get; private set; } = default!;
+    public PickingLine? CurrentPickLine { get; private set; }
+    public bool IsStaging { get; private set; }
+    public List<PickingLine> PickLines { get; private set; } = [];
+
+    internal override bool StartWith( Employee employee )
     {
-        if (!base.Start( employee ))
+        if (!base.StartWith( employee ))
             return false;
         Pallet = Pallet.NewEmpty( employee );
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
     }
-    public bool StartPickingLocation( Guid palletId, Guid rackingId )
+    internal bool StartPickingLocation( Guid rackingId, Guid palletId )
     {
         if (CurrentPickLine is null || CurrentPickLine.IsComplete())
             return false;
@@ -33,13 +33,13 @@ public sealed class PickingTask : WarehouseTask
         return CurrentPickLine?
             .ConfirmPickLocation( palletId, rackingId ) ?? false;
     }
-    public bool PickItem( Guid itemId )
+    internal bool PickItem( Guid itemId )
     {
         bool picked = CurrentPickLine is not null
             && CurrentPickLine.PickItem( Employee, itemId );
         return picked;
     }
-    public bool FinishPickingLocation( Guid palletId, Guid rackingId )
+    internal bool FinishPickingLocation( Guid rackingId, Guid palletId )
     {
         if (CurrentPickLine is null || CurrentPickLine.IsComplete())
             return false;
@@ -52,15 +52,16 @@ public sealed class PickingTask : WarehouseTask
         return CurrentPickLine?
             .ConfirmPickLocation( palletId, rackingId ) ?? false;
     }
-    public bool StagePick( Guid areaId )
+    internal bool StagePick( Guid areaId )
     {
         bool staged = IsStaging
             && StagingArea.Id == areaId
             && CurrentPickLine is null
-            && StagingArea.TakePallet( Pallet )
-            && Pallet.PlaceInArea( StagingArea );
+            && Employee.StagePallet( areaId, Guid.Empty );
+
         if (staged)
-            Employee.FinishTask();
+            IsFinished = true;
+        
         return staged;
     }
 }

@@ -5,12 +5,12 @@ namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 public sealed class ReceivingOperations
 {
-    public Guid Id { get; set; }
-    public List<Trailer> Trailers { get; set; } = [];
-    public List<Area> Areas { get; set; } = [];
-    public List<Pallet> Pallets { get; set; } = [];
-    public List<ReceivingTask> PendingReceivingTasks { get; set; } = [];
-    public List<ReceivingTask> ActiveReceivingTasks { get; set; } = [];
+    public Guid Id { get; private set; }
+    public List<Trailer> Trailers { get; private set; } = [];
+    public List<Area> Areas { get; private set; } = [];
+    public List<Pallet> Pallets { get; private set; } = [];
+    public List<ReceivingTask> PendingReceivingTasks { get; private set; } = [];
+    public List<ReceivingTask> ActiveReceivingTasks { get; private set; } = [];
     
     // Shipping
     public bool ReceiveTrailerWithPallets( string trailerNumber, string dockNumber, List<Pallet> pallets )
@@ -26,13 +26,12 @@ public sealed class ReceivingOperations
         var task = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
 
-        var stagingArea = GetReceivingArea( areaId );
+        var stagingArea = Areas
+            .FirstOrDefault( a => a.Id == areaId );
 
-        var taskStarted = task is not null
-            && stagingArea is not null
-            && task.Start( employee )
-            && task.InitializeStagingArea( trailerId, dockId, stagingArea )
-            && task.IsStarted
+        var taskStarted = stagingArea is not null
+            && task is not null
+            && employee.StartReceivingTask( task, trailerId, dockId, stagingArea )
             && PendingReceivingTasks.Remove( task );
 
         if (taskStarted)
@@ -43,20 +42,10 @@ public sealed class ReceivingOperations
     public bool CompleteReceivingTask( Employee employee )
     {
         var receivingTask = employee
-            .GetTask<ReceivingTask>();
-
-        if (!receivingTask.IsFinished() || !ActiveReceivingTasks.Remove( receivingTask ))
-            return false;
+            .TaskAs<ReceivingTask>();
         
-        employee.FinishTask();
-        return true;
-    }
-
-    Area? GetReceivingArea( Guid areaId )
-    {
-        var area = Areas.FirstOrDefault( a => a.Id == areaId );
-        return area is not null && area.CanUse()
-            ? area
-            : null;
+        return receivingTask.IsFinished
+            && employee.EndTask()
+            && ActiveReceivingTasks.Remove( receivingTask );
     }
 }

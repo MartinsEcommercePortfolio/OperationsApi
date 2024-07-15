@@ -26,9 +26,10 @@ internal static class PutawaysEndpoints
 
     static IResult RefreshTask( Employee employee )
     {
-        var task = employee.GetTask<PutawayTask>();
+        var task = employee
+            .TaskAs<PutawayTask>();
 
-        return task.IsStarted && !task.IsCompleted
+        return task.IsStarted && !task.IsFinished
             ? Results.Ok( PutawayTaskSummary.FromModel( task ) )
             : Results.Problem();
     }
@@ -41,7 +42,7 @@ internal static class PutawaysEndpoints
             return Results.NotFound();
 
         var putawayTask = await putaways
-            .BeginPutaway( employee, palletId )
+            .StartPutaway( employee, palletId )
             .ConfigureAwait( false );
         
         return putawayTask is not null && putawayTask.IsStarted && await repository.SaveAsync()

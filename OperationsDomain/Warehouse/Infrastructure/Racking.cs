@@ -4,17 +4,17 @@ namespace OperationsDomain.Warehouse.Infrastructure;
 
 public sealed class Racking
 {
-    public Guid Id { get; set; }
-    public string Aisle { get; set; } = string.Empty;
-    public string Bay { get; set; } = string.Empty;
-    public string Level { get; set; } = string.Empty;
-    public double Length { get; set; }
-    public double Width { get; set; }
-    public double Height { get; set; }
-    public double Capacity { get; set; }
-    public Guid OwnerId { get; set; }
-    public Employee? Owner { get; set; }
-    public Pallet? Pallet { get; set; }
+    public Guid Id { get; private set; }
+    public string Aisle { get; private set; } = string.Empty;
+    public string Bay { get; private set; } = string.Empty;
+    public string Level { get; private set; } = string.Empty;
+    public double Length { get; private set; }
+    public double Width { get; private set; }
+    public double Height { get; private set; }
+    public double Capacity { get; private set; }
+    public Guid OwnerId { get; private set; }
+    public Employee? Owner { get; private set; }
+    public Pallet? Pallet { get; private set; }
 
     public bool IsOwnedBy( Employee employee ) =>
         Owner == employee;
@@ -38,13 +38,18 @@ public sealed class Racking
             Pallet = pallet;
         return palletTaken;
     }
-    public void AssignTo( Employee employee )
+    public bool AssignTo( Employee employee )
     {
         OwnerId = employee.Id;
         Owner = employee;
+        return true;
     }
-    public void Free( Employee employee )
+    public bool Free( Employee employee )
     {
-        
+        if (Owner != employee)
+            return false;
+
+        Owner = null;
+        return true;
     }
 }

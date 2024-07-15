@@ -18,13 +18,6 @@ internal readonly record struct PalletDto(
 {
     internal Pallet ToModel( Trailer trailer )
     {
-        return new Pallet() {
-            Id = Guid.NewGuid(),
-            Trailer = trailer,
-            Length = Length,
-            Width = Width,
-            Height = Height,
-            Weight = Weight
-        };
+        throw new Exception( "PalletDto.ToModel is not implemented!" );
     }
 }

@@ -4,19 +4,19 @@ namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 public sealed class ReceivingTask : WarehouseTask
 {
-    public Trailer Trailer { get; set; } = default!;
-    public Dock Dock { get; set; } = default!;
-    public Area? Area { get; set; }
-    public Pallet? CurrentPallet { get; set; }
-    public List<Pallet> UnloadedPallets { get; set; } = [];
+    public Trailer Trailer { get; private set; } = default!;
+    public Dock Dock { get; private set; } = default!;
+    public Area? Area { get; private set; }
+    public Pallet? CurrentPallet { get; private set; }
+    public List<Pallet> StagedPallets { get; private set; } = [];
     
     public Guid TrailerId { get; set; }
     public Guid DockId { get; set; }
     public Guid AreaId { get; set; }
 
-    public bool InitializeStagingArea( Guid trailerId, Guid dockId, Area area )
+    internal bool InitializeStagingArea( Guid trailerId, Guid dockId, Area area )
     {
-        bool validArea = trailerId == Trailer.Id
+        var validArea = trailerId == Trailer.Id
             && dockId == Dock.Id
             && area.CanUse();
 
@@ -25,38 +25,36 @@ public sealed class ReceivingTask : WarehouseTask
 
         return validArea;
     }
-    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
+    internal bool StartReceivingPallet( Guid trailerId, Guid palletId )
     {
-        Pallet? pallet = Trailer.GetPallet( palletId );
+        var pallet = Trailer.GetPallet( palletId );
 
-        bool unloaded = Trailer.Id == trailerId
+        var unloaded = Trailer.Id == trailerId
             && pallet is not null
             && CurrentPallet is null
-            && !UnloadedPallets.Contains( pallet )
+            && !StagedPallets.Contains( pallet )
             && Trailer.UnloadPallet( pallet )
             && pallet.GiveTo( Employee );
 
-        if (!unloaded)
-            return false;
+        if (unloaded)
+            CurrentPallet = pallet;
         
-        UnloadedPallets.Add( pallet! );
-        CurrentPallet = pallet;
         return unloaded;
     }
-    public bool FinishReceivingPallet( Guid palletId, Guid areaId )
+    internal bool FinishReceivingPallet( Guid areaId, Guid palletId )
     {
-        bool staged = CurrentPallet is not null
+        var staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id
             && Area is not null
             && areaId == Area.Id
             && Area.TakePallet( CurrentPallet )
-            && CurrentPallet.PlaceInArea( Area );
-
-        if (staged)
-            CurrentPallet = null;
+            && CurrentPallet.Stage( Employee, Area );
         
+        if (!staged)
+            return false;
+
+        StagedPallets.Add( CurrentPallet! );
+        CurrentPallet = null;
         return staged;
     }
-    public bool IsFinished() =>
-        CurrentPallet is null && Trailer.IsEmpty();
 }

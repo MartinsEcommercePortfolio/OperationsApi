@@ -6,16 +6,16 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingLine
 {
-    public Guid Id { get; set; }
-    public Product Product { get; set; } = default!;
-    public Racking Racking { get; set; } = default!;
-    public List<Item> PickedItems { get; set; } = [];
-    public int Quantity { get; set; }
-    public bool Completed { get; set; }
+    public Guid Id { get; private set; }
+    public Product Product { get; private set; } = default!;
+    public Racking Racking { get; private set; } = default!;
+    public List<Item> PickedItems { get; private set; } = [];
+    public int Quantity { get; private set; }
+    public bool Completed { get; private set; }
 
-    public bool ConfirmPickLocation( Guid palletId, Guid rackingId ) =>
+    internal bool ConfirmPickLocation( Guid palletId, Guid rackingId ) =>
         Racking.Id == rackingId && Racking.Pallet is not null && Racking.Pallet.Id == palletId;
-    public bool StartPicking( Employee employee )
+    internal bool StartPicking( Employee employee )
     {
         if (!Racking.CanBePickedFrom())
             return false;
@@ -23,28 +23,20 @@ public sealed class PickingLine
         Racking.AssignTo( employee );
         return true;
     }
-    public bool PickItem( Employee employee, Guid itemId )
+    internal bool PickItem( Employee employee, Guid itemId )
     {
         Item? item = null;
         var pallet = Racking.Pallet;
 
         bool picked = pallet is not null
             && PickedItems.All( i => i.Id != itemId )
-            && pallet.PickItem( employee, itemId, out item );
+            && pallet.PickFrom( employee, itemId, out item );
         
         if (picked)
             PickedItems.Add( item! );
         
         return picked;
     }
-    public bool Complete( Employee employee )
-    {
-        if (PickedItems.Count != Quantity)
-            return false;
-        Completed = true;
-        Racking.Free( employee );
-        return true;
-    }
-    public bool IsComplete() =>
+    internal bool IsComplete() =>
         Completed && PickedItems.Count >= Quantity;
 }

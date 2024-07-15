@@ -3,7 +3,7 @@ using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseSections.Replenishing;
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Types;
+using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 

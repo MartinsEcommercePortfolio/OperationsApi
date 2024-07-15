@@ -3,7 +3,7 @@ using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseSections.Picking;
-using OperationsDomain.Domain.WarehouseSections.Picking.Types;
+using OperationsDomain.Domain.WarehouseSections.Picking.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 

@@ -1,5 +1,5 @@
 using OperationsDomain.Database;
-using OperationsDomain.Domain.WarehouseSections.Picking.Types;
+using OperationsDomain.Domain.WarehouseSections.Picking.Models;
 
 namespace OperationsDomain.Domain.WarehouseSections.Picking;
 

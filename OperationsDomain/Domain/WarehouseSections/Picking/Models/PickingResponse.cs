@@ -1,7 +1,7 @@
 using OperationsDomain.Domain.Catalog;
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Picking.Types;
+namespace OperationsDomain.Domain.WarehouseSections.Picking.Models;
 
 public readonly record struct PickingResponse(
     int? PicksRemaining,

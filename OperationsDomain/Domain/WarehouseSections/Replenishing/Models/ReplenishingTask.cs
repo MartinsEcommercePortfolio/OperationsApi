@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Replenishing.Types;
+namespace OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
 
 public sealed class ReplenishingTask : WarehouseTask
 {

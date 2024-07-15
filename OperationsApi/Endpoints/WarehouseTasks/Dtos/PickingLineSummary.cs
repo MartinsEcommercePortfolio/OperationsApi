@@ -1,4 +1,4 @@
-using OperationsDomain.Domain.WarehouseSections.Picking.Types;
+using OperationsDomain.Domain.WarehouseSections.Picking.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 

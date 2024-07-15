@@ -1,4 +1,4 @@
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Types;
+using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks.Dtos;
 

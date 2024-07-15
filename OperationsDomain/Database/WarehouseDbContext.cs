@@ -4,10 +4,11 @@ using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.Equipment;
 using OperationsDomain.Domain.WarehouseBuilding;
 using OperationsDomain.Domain.WarehouseSections.Loading;
-using OperationsDomain.Domain.WarehouseSections.Picking.Types;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
-using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Types;
+using OperationsDomain.Domain.WarehouseSections.Loading.Models;
+using OperationsDomain.Domain.WarehouseSections.Picking.Models;
+using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
+using OperationsDomain.Domain.WarehouseSections.Receiving.Models;
+using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
 
 namespace OperationsDomain.Database;
 

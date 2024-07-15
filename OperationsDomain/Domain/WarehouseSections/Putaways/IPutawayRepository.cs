@@ -1,5 +1,5 @@
 using OperationsDomain.Database;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
+using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
 
 namespace OperationsDomain.Domain.WarehouseSections.Putaways;
 

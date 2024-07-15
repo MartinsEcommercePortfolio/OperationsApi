@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OperationsDomain.Database;
-using OperationsDomain.Domain.WarehouseSections.Replenishing.Types;
+using OperationsDomain.Domain.WarehouseSections.Replenishing.Models;
 
 namespace OperationsDomain.Domain.WarehouseSections.Replenishing;
 

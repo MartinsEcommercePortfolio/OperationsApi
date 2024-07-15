@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Loading;
+namespace OperationsDomain.Domain.WarehouseSections.Loading.Models;
 
 public sealed class LoadingTask : WarehouseTask
 {

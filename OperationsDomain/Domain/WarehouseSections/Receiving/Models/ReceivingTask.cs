@@ -1,6 +1,6 @@
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Receiving.Types;
+namespace OperationsDomain.Domain.WarehouseSections.Receiving.Models;
 
 public sealed class ReceivingTask : WarehouseTask
 {

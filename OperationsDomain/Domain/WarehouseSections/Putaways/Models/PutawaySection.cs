@@ -1,7 +1,7 @@
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Putaways.Types;
+namespace OperationsDomain.Domain.WarehouseSections.Putaways.Models;
 
 public sealed class PutawaySection
 {

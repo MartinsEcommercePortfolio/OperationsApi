@@ -1,5 +1,5 @@
 using OperationsDomain.Database;
-using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
+using OperationsDomain.Domain.WarehouseSections.Receiving.Models;
 
 namespace OperationsDomain.Domain.WarehouseSections.Receiving;
 

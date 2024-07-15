@@ -2,7 +2,7 @@ using OperationsDomain.Domain.Catalog;
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseBuilding;
 
-namespace OperationsDomain.Domain.WarehouseSections.Picking.Types;
+namespace OperationsDomain.Domain.WarehouseSections.Picking.Models;
 
 public sealed class PickingLine
 {

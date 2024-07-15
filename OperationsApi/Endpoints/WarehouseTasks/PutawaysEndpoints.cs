@@ -3,7 +3,7 @@ using OperationsApi.Endpoints.WarehouseTasks.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseSections.Putaways;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
+using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
 
 namespace OperationsApi.Endpoints.WarehouseTasks;
 

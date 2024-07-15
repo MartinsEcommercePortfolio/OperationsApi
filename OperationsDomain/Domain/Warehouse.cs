@@ -1,7 +1,7 @@
 using OperationsDomain.Domain.Employees;
 using OperationsDomain.Domain.WarehouseBuilding;
-using OperationsDomain.Domain.WarehouseSections.Putaways.Types;
-using OperationsDomain.Domain.WarehouseSections.Receiving.Types;
+using OperationsDomain.Domain.WarehouseSections.Putaways.Models;
+using OperationsDomain.Domain.WarehouseSections.Receiving.Models;
 
 namespace OperationsDomain.Domain;
 

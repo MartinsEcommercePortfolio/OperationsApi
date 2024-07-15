@@ -16,8 +16,4 @@
       <ProjectReference Include="..\OperationsDomain\OperationsDomain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Endpoints\Employees\" />
-    </ItemGroup>
-
 </Project>

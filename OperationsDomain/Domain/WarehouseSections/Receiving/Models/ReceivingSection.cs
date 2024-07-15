@@ -32,31 +32,15 @@ public sealed class ReceivingSection
 
         return task;
     }
-    public bool ReceiveUnloadedPallet( Employee employee, Guid trailerId, Guid palletId )
-    {
-        var pallet = employee
-            .GetTask<ReceivingTask>()
-            .ReceivePallet( trailerId, palletId );
-
-        bool received = pallet is not null &&
-            !Pallets.Contains( pallet );
-
-        if (received)
-            Pallets.Add( pallet! );
-        
-        return received;
-    }
     public bool CompleteReceivingTask( Employee employee )
     {
         var receivingTask = employee
             .GetTask<ReceivingTask>();
-        
-        if (!receivingTask.IsFinished()) 
+
+        if (!receivingTask.IsFinished() || !ActiveReceivingTasks.Remove( receivingTask ))
             return false;
         
-        ActiveReceivingTasks.Remove( receivingTask );
         employee.FinishTask();
-
         return true;
     }
 

@@ -10,6 +10,13 @@ public sealed class Trailer
         Pallets.FirstOrDefault( p => p.Id == palletId );
     public bool UnloadPallet( Pallet pallet ) => 
         Pallets.Remove( pallet );
+    public bool LoadPallet( Pallet pallet )
+    {
+        if (Pallets.Contains( pallet ))
+            return false;
+        Pallets.Add( pallet );
+        return true;
+    }
     public bool IsEmpty() =>
         Pallets.Count <= 0;
 }

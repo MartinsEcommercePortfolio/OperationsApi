@@ -11,15 +11,15 @@ internal static class PickingEndpoints
 {
     internal static void MapPickingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/picking/refreshTask",
+        app.MapGet( "api/tasks/picking/refreshPickingTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
-        app.MapGet( "api/tasks/picking/nextTask",
+        app.MapGet( "api/tasks/picking/getNextPickingTask",
             static async ( IPickingRepository repository ) =>
             await GetNextTask( repository ) );
 
-        app.MapPost( "api/tasks/picking/startTask",
+        app.MapPost( "api/tasks/picking/startPickingTask",
             static async ( [FromQuery] Guid taskId, HttpContext http, IPickingRepository repository ) =>
             await StartPickingTask( http.Employee(), taskId, repository ) );
 
@@ -35,7 +35,7 @@ internal static class PickingEndpoints
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPickingRepository repository ) =>
             await FinishPickingLocation( http.Employee(), palletId, rackingId, repository ) );
 
-        app.MapPost( "api/tasks/picking/stagePick",
+        app.MapPost( "api/tasks/picking/stagePickingTask",
             static async ( [FromQuery] Guid areaId, HttpContext http, IPickingRepository repository ) =>
             await StageAndFinishPickingOrder( http.Employee(), areaId, repository ) );
     }

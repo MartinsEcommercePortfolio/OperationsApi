@@ -39,6 +39,7 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<PutawaySection> Putaways { get; set; }
     public required DbSet<PickingSection> Picking { get; set; }
     public required DbSet<ReplenishingSection> Replenishing { get; set; }
+    public required DbSet<LoadingSection> Loading { get; set; }
     public required DbSet<Trailer> Trailers { get; init; }
     public required DbSet<Dock> Docks { get; init; }
     public required DbSet<Area> Areas { get; init; }

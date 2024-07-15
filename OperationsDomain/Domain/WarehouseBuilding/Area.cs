@@ -17,6 +17,11 @@ public sealed class Area
 
         return staged;
     }
+    public bool RemovePallet( Pallet pallet )
+    {
+        bool removed = Pallets.Remove( pallet );
+        return removed;
+    }
 
     public bool CanUse()
     {

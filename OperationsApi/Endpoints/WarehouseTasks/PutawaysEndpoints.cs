@@ -11,17 +11,17 @@ internal static class PutawaysEndpoints
 {
     internal static void MapPutawaysEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/putaways/refreshTask",
+        app.MapGet( "api/tasks/putaways/refreshPutawayTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
-        app.MapPost( "api/tasks/putaways/startTask",
+        app.MapPost( "api/tasks/putaways/startPutawayTask",
             static async ( [FromQuery] Guid palletId, HttpContext http, IPutawayRepository repository ) =>
             await StartPutawayTask( http.Employee(), palletId, repository ) );
 
-        app.MapPost( "api/tasks/putaways/completeTask",
+        app.MapPost( "api/tasks/putaways/finishPutawayTask",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPutawayRepository repository ) =>
-            await CompletePutaway( http.Employee(), palletId, rackingId, repository ) );
+            await FinishPutaway( http.Employee(), palletId, rackingId, repository ) );
     }
 
     static IResult RefreshTask( Employee employee )
@@ -48,12 +48,12 @@ internal static class PutawaysEndpoints
             ? Results.Ok( PutawayTaskSummary.FromModel( putawayTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> CompletePutaway( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
+    static async Task<IResult> FinishPutaway( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
     {
         var putaways = await repository.GetPutawaysSectionWithTasks();
 
         var success = putaways is not null
-            && putaways.CompletePutaway( employee, palletId, rackingId )
+            && putaways.FinishPutaway( employee, palletId, rackingId )
             && await repository.SaveAsync();
         
         return success

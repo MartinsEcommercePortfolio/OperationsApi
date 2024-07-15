@@ -9,6 +9,7 @@ public sealed class Pallet
     public Guid ReceivedById { get; set; }
     public Guid AreaId { get; set; }
     public Guid RackingId { get; set; }
+    public Trailer? Trailer { get; set; }
     public Employee? Owner { get; set; }
     public Employee? ReceivedBy { get; set; }
     public Area? Area { get; set; }
@@ -68,12 +69,13 @@ public sealed class Pallet
         SetRacking( racking );
         return true;
     }
-    public bool Load( Trailer trailer )
+    public bool LoadInTrailer( Trailer trailer )
     {
-        if (!IsReceived())
+        if (!IsReceived() || Trailer is not null)
             return false;
-        
+
         ClearOwners();
+        Trailer = trailer;
         return true;
     }
     public bool PickItem( Employee employee, Guid itemId, out Item? item )

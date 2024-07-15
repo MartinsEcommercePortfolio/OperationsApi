@@ -32,7 +32,7 @@ public sealed class PutawaySection
             return task;
         } );
     }
-    public bool CompletePutaway( Employee employee, Guid palletId, Guid rackingId )
+    public bool FinishPutaway( Employee employee, Guid palletId, Guid rackingId )
     {
         var task = employee
             .GetTask<PutawayTask>();

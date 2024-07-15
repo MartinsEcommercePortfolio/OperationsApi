@@ -11,25 +11,25 @@ internal static class ReplenishingEndpoints
 {
     internal static void MapReplenishingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/replenishing/refreshTask",
+        app.MapGet( "api/tasks/replenishing/refreshReplenishingTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
-        app.MapGet( "api/tasks/replenishing/nextTask",
+        app.MapGet( "api/tasks/replenishing/getNextReplenishingTask",
             static async ( IReplenishingRepository repository ) =>
             await GetNextReplenishingTask( repository ) );
 
-        app.MapPost( "api/tasks/replenishing/startTask",
+        app.MapPost( "api/tasks/replenishing/startReplenishingTask",
             static async ( [FromQuery] Guid taskId, HttpContext http, IReplenishingRepository repository ) =>
             await StartReplenishingTask( http.Employee(), taskId, repository ) );
 
-        app.MapPost( "api/tasks/replenishing/pickupReplenishment",
+        app.MapPost( "api/tasks/replenishing/startReplenishingLocation",
             static async ( [FromQuery] Guid palletId, HttpContext http, IReplenishingRepository repository ) =>
             await PickupReplenishingPallet( http.Employee(), palletId, repository ) );
 
-        app.MapPost( "api/tasks/replenishing/completeTask",
+        app.MapPost( "api/tasks/replenishing/finishReplenishingTask",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IReplenishingRepository repository ) =>
-            await ReplenishLocation( http.Employee(), palletId, rackingId, repository ) );
+            await FinishReplenishingTask( http.Employee(), palletId, rackingId, repository ) );
     }
 
     static IResult RefreshTask( Employee employee )
@@ -77,7 +77,7 @@ internal static class ReplenishingEndpoints
             ? Results.Ok( palletPickedUp )
             : Results.Problem();
     }
-    static async Task<IResult> ReplenishLocation( Employee employee, Guid palletId, Guid rackingId, IReplenishingRepository repository )
+    static async Task<IResult> FinishReplenishingTask( Employee employee, Guid palletId, Guid rackingId, IReplenishingRepository repository )
     {
         var replenishing = await repository
             .GetReplenishingSectionWithTasks();

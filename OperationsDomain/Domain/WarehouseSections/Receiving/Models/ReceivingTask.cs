@@ -8,6 +8,7 @@ public sealed class ReceivingTask : WarehouseTask
     public Dock Dock { get; set; } = default!;
     public Area? Area { get; set; }
     public Pallet? CurrentPallet { get; set; }
+    public List<Pallet> UnloadedPallets { get; set; } = [];
     
     public Guid TrailerId { get; set; }
     public Guid DockId { get; set; }
@@ -24,22 +25,25 @@ public sealed class ReceivingTask : WarehouseTask
 
         return validArea;
     }
-    public Pallet? ReceivePallet( Guid trailerId, Guid palletId )
+    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
     {
         Pallet? pallet = Trailer.GetPallet( palletId );
 
         bool unloaded = Trailer.Id == trailerId
             && pallet is not null
             && CurrentPallet is null
+            && !UnloadedPallets.Contains( pallet )
             && Trailer.UnloadPallet( pallet )
-            && pallet.ReceiveBy( Employee );
+            && pallet.GiveTo( Employee );
 
+        if (!unloaded)
+            return false;
+        
+        UnloadedPallets.Add( pallet! );
         CurrentPallet = pallet;
-        return unloaded
-            ? CurrentPallet
-            : null;
+        return unloaded;
     }
-    public bool StagePallet( Guid palletId, Guid areaId )
+    public bool FinishReceivingPallet( Guid palletId, Guid areaId )
     {
         bool staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id

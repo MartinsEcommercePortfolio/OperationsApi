@@ -1,4 +1,5 @@
 using OperationsDomain.Warehouse.Employees;
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Operations.Putaways.Models;
 using OperationsDomain.Warehouse.Operations.Receiving.Models;

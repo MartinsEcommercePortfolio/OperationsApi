@@ -1,5 +1,6 @@
 using OperationsDomain.Domain.Catalog;
 using OperationsDomain.Warehouse.Employees;
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;

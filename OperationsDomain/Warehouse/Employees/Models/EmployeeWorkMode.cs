@@ -1,4 +1,4 @@
-namespace OperationsDomain.Warehouse.Employees;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public enum EmployeeWorkMode
 {

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OperationsDomain._Database;
+using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Employees;
 

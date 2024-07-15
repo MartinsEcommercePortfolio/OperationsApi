@@ -1,4 +1,5 @@
 using OperationsDomain.Warehouse.Employees;
+using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Operations;
 

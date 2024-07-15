@@ -6,7 +6,7 @@ using OperationsDomain.Warehouse.Operations.Putaways.Models;
 using OperationsDomain.Warehouse.Operations.Receiving.Models;
 using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
-namespace OperationsDomain.Warehouse.Employees;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class Employee
 {

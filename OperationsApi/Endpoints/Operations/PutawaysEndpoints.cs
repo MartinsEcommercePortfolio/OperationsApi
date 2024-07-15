@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Warehouse.Employees;
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Operations.Putaways;
 using OperationsDomain.Warehouse.Operations.Putaways.Models;
 

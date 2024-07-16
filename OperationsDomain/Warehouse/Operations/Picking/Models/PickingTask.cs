@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
@@ -58,7 +57,7 @@ public sealed class PickingTask : WarehouseTask
         bool staged = IsStaging
             && StagingArea.Id == areaId
             && CurrentPickLine is null
-            && Employee.StagePallet( areaId, Guid.Empty );
+            && Employee.StagePallet( StagingArea, Pallet );
 
         if (staged)
             IsFinished = true;

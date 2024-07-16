@@ -16,7 +16,7 @@ public sealed class ReplenishingTask : WarehouseTask
         PalletHasBeenPicked = Pallet.Id == palletId
             && Pallet.CanBePicked()
             && FromRacking.TakePallet( Pallet )
-            && Pallet.GiveTo( Employee );
+            && Pallet.AssignTo( Employee );
         
         return PalletHasBeenPicked;
     }

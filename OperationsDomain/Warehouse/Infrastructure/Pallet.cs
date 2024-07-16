@@ -97,22 +97,21 @@ public sealed class Pallet
         return true;
     }
     
-    public bool GiveTo( Employee employee )
+    public bool AssignTo( Employee employee )
     {
+        if (IsOwned())
+            return false;
+        
         ClearOwners();
         SetOwner( employee );
         return true;
-    }
-    public void TakeFrom( Employee employee )
-    {
-        ClearOwners();
     }
 
     public static Pallet NewEmpty( Employee employee )
     {
         Pallet pallet = new(Guid.NewGuid());
         pallet.Id = Guid.NewGuid();
-        pallet.GiveTo( employee );
+        pallet.AssignTo( employee );
         return pallet;
     }
     

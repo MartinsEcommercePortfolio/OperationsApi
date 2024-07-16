@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Operations.Loading.Models;
@@ -31,7 +30,7 @@ public sealed class LoadingOperations
         var loadingTask = employee
             .TaskAs<LoadingTask>();
 
-        return employee.FinishLoadingTask()
+        return employee.EndTask()
             && ActiveLoadingTasks.Remove( loadingTask );
     }
 }

@@ -6,55 +6,47 @@ public sealed class ReceivingTask : WarehouseTask
 {
     public Trailer Trailer { get; private set; } = default!;
     public Dock Dock { get; private set; } = default!;
-    public Area? Area { get; private set; }
+    public Area Area { get; private set; } = default!;
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> StagedPallets { get; private set; } = [];
-    
-    public Guid TrailerId { get; set; }
-    public Guid DockId { get; set; }
-    public Guid AreaId { get; set; }
 
-    internal bool InitializeStagingArea( Guid trailerId, Guid dockId, Area area )
+    public bool InitializeReceiving( Guid trailerId, Guid dockId, Guid areaId )
     {
         var validArea = trailerId == Trailer.Id
             && dockId == Dock.Id
-            && area.CanUse();
-
-        if (validArea)
-            Area = area;
+            && areaId == Area.Id
+            && Trailer.AssignTo( Employee )
+            && Dock.AssignTo( Employee )
+            && Area.AssignTo( Employee );
 
         return validArea;
     }
-    internal bool StartReceivingPallet( Guid trailerId, Guid palletId )
+    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
     {
         var pallet = Trailer.GetPallet( palletId );
-
-        var unloaded = Trailer.Id == trailerId
+        
+        CurrentPallet = pallet;
+        
+        return Trailer.Id == trailerId
             && pallet is not null
             && CurrentPallet is null
             && !StagedPallets.Contains( pallet )
-            && Trailer.UnloadPallet( pallet )
-            && pallet.GiveTo( Employee );
-
-        if (unloaded)
-            CurrentPallet = pallet;
-        
-        return unloaded;
+            && Employee.UnloadPallet( Trailer, pallet );
     }
-    internal bool FinishReceivingPallet( Guid areaId, Guid palletId )
+    public bool FinishReceivingPallet( Guid areaId, Guid palletId )
     {
         var staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id
-            && Area is not null
             && areaId == Area.Id
-            && Area.TakePallet( CurrentPallet )
-            && CurrentPallet.Stage( Employee, Area );
+            && !StagedPallets.Contains( CurrentPallet )
+            && Employee.StagePallet( Area, CurrentPallet );
         
         if (!staged)
             return false;
 
         StagedPallets.Add( CurrentPallet! );
         CurrentPallet = null;
+        
         return staged;
     }
 }

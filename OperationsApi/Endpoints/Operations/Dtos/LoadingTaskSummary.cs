@@ -9,8 +9,8 @@ internal readonly record struct LoadingTaskSummary(
     List<Guid> Pallets )
 {
     internal static LoadingTaskSummary FromModel( LoadingTask model ) => new(
-        model.Trailer.Number,
-        model.Dock.Number,
-        model.Areas.Select( static a => a.Number ).ToList(),
-        model.Pallets.Select( static p => p.Id ).ToList() );
+        model.TrailerToLoad.Number,
+        model.DockToUse.Number,
+        model.AreasToPickFrom.Select( static a => a.Number ).ToList(),
+        model.PalletsToLoad.Select( static p => p.Id ).ToList() );
 }

@@ -11,9 +11,6 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 public sealed class Employee
 {
     public Guid Id { get; private set; }
-    public Guid DeviceId { get; private set; }
-    public Guid ForkliftId { get; private set; }
-    public Guid TaskId { get; private set; }
     public Guid? PalletId { get; private set; }
     public Pallet? Pallet { get; private set; }
     public WarehouseTask? Task { get; private set; }
@@ -26,9 +23,6 @@ public sealed class Employee
     public static Employee Null() =>
         new() {
             Id = Guid.Empty,
-            DeviceId = Guid.Empty,
-            ForkliftId = Guid.Empty,
-            TaskId = Guid.Empty,
             Task = null,
             Name = string.Empty,
             WorkMode = EmployeeWorkMode.None
@@ -45,30 +39,26 @@ public sealed class Employee
         if (Task is not null)
             return false;
         
-        TaskId = task.Id;
         Task = task;
         task.StartWith( this );
         return true;
     }
     public bool EndTask()
     {
-        if (Task is null)
+        if (Task is null || !Task.IsFinished)
             return false;
         
-        TaskId = Guid.Empty;
         Task = null;
         return true;
     }
-
-    public bool StartReceivingTask( ReceivingTask receivingTask, Guid trailerId, Guid dockId, Area stagingArea ) =>
-        StartTask( receivingTask ) &&
-        receivingTask.StartWith( this ) &&
-        receivingTask.InitializeStagingArea( trailerId, dockId, stagingArea );
-    public bool UnloadPallet( Guid trailerId, Guid palletId ) =>
-        PalletId is null && Pallet is null &&
-        TaskAs<ReceivingTask>().StartReceivingPallet( trailerId, palletId );
-    public bool StagePallet( Guid areaId, Guid palletId ) =>
-        TaskAs<ReceivingTask>().FinishReceivingPallet( areaId, palletId );
+    
+    public bool UnloadPallet( Trailer trailer, Pallet pallet ) =>
+        trailer.RemovePallet( pallet ) &&
+        TakePallet( pallet );
+    public bool StagePallet( Area area, Pallet pallet ) =>
+        Pallet == pallet &&
+        area.AddPallet( Pallet ) &&
+        ReleasePallet();
 
     public bool StartPutawayTask( PutawayTask putawayTask, Racking racking, Pallet pallet ) =>
         putawayTask.InitializeFrom( this, racking, pallet ) && 
@@ -110,8 +100,23 @@ public sealed class Employee
         TaskAs<LoadingTask>().StartLoadingPallet( areaId, palletId );
     public bool FinishLoadingPallet( Guid trailerId, Guid palletId ) =>
         TaskAs<LoadingTask>().FinishLoadingPallet( trailerId, palletId );
-    public bool FinishLoadingTask() =>
-        Task is not null &&
-        Task.Finish( this ) &&
-        EndTask();
+
+    public bool TakePallet( Pallet pallet )
+    {
+        bool assigned = Pallet is not null
+            && pallet.AssignTo( this );
+        
+        if (assigned)
+            Pallet = pallet;
+        
+        return assigned;
+    }
+    public bool ReleasePallet()
+    {
+        if (Pallet is null)
+            return false;
+        
+        Pallet = null;
+        return true;
+    }
 }

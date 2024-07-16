@@ -17,7 +17,7 @@ public sealed class PutawayTask : WarehouseTask
     {
         bool canGenerate = pallet.CanBePutaway() &&
             racking.IsAvailable() &&
-            pallet.GiveTo( employee ) &&
+            pallet.AssignTo( employee ) &&
             racking.AssignTo( employee );
 
         if (!canGenerate)

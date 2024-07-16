@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Receiving;
@@ -79,7 +78,8 @@ internal static class ReceivingEndpoints
     static async Task<IResult> StartReceivingPallet( Employee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )
     {
         var receivingStarted = employee
-            .UnloadPallet( palletId, trailerId );
+            .TaskAs<ReceivingTask>()
+            .StartReceivingPallet( palletId, trailerId );
         
         return receivingStarted && await repository.SaveAsync()
             ? Results.Ok( true )
@@ -88,7 +88,8 @@ internal static class ReceivingEndpoints
     static async Task<IResult> FinishReceivingPallet( Employee employee, Guid areaId, Guid palletId, IReceivingRepository repository )
     {
         var receivingCompleted = employee
-            .StagePallet( areaId, palletId );
+            .TaskAs<ReceivingTask>()
+            .FinishReceivingPallet( areaId, palletId );
 
         return receivingCompleted && await repository.SaveAsync()
             ? Results.Ok( true )

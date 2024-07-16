@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
@@ -27,17 +26,14 @@ public sealed class ReceivingOperations
         var task = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
 
-        var stagingArea = Areas
-            .FirstOrDefault( a => a.Id == areaId );
-
-        var taskStarted = stagingArea is not null
-            && task is not null
-            && employee.StartReceivingTask( task, trailerId, dockId, stagingArea )
+        var taskStarted = task is not null
+            && task.InitializeReceiving( trailerId, dockId, areaId )
+            && employee.StartTask( task )
             && PendingReceivingTasks.Remove( task );
 
         if (taskStarted)
             ActiveReceivingTasks.Add( task! );
-
+    
         return task;
     }
     public bool CompleteReceivingTask( Employee employee )

@@ -1,4 +1,3 @@
-using OperationsDomain.Domain.Catalog;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
@@ -11,12 +10,18 @@ public sealed class PickingLine
     public List<Item> PickedItems { get; private set; } = [];
     public int Quantity { get; private set; }
     public bool Completed { get; private set; }
+    public bool Started { get; set; }
     
-    internal bool StartPicking( Guid palletId, Guid rackingId, Employee employee )
+    internal bool StartPicking( Employee employee, Guid palletId, Guid rackingId )
     {
-        bool started = Racking.Id == rackingId 
-            && Racking.Pallet is not null 
-            && Racking.Pallet.Id == palletId 
+        if (Started)
+            return false;
+
+        bool started = !Completed
+            && !Started
+            && Racking.Id == rackingId
+            && Racking.Pallet is not null
+            && Racking.Pallet.Id == palletId
             && Racking.AssignTo( employee );
         
         return started;
@@ -26,12 +31,16 @@ public sealed class PickingLine
         Item? item = null;
         var pallet = Racking.Pallet;
 
-        bool picked = pallet is not null
+        bool picked = employee == Racking.Owner
+            && pallet is not null
             && PickedItems.All( i => i.Id != itemId )
-            && pallet.PickFrom( employee, itemId, out item );
+            && pallet.PickFrom( Racking, employee, itemId, out item );
         
         if (picked)
             PickedItems.Add( item! );
+
+        if (PickedItems.Count == Quantity)
+            Completed = true;
         
         return picked;
     }

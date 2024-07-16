@@ -21,32 +21,29 @@ public sealed class PutawayOperations
 
         PutawayTask putawayTask = new();
 
-        var taskStarted = putawayTask.InitializePutaway( racking, pallet )
-            && employee.StartTask( putawayTask )
-            && employee.UnStagePallet( pallet.Area ?? new Area(), pallet );
+        var taskStarted = employee
+            .StartPutaway( putawayTask, racking, pallet );
 
-        if (!taskStarted)
-            return null;
-
-        PutawayTasks.Add( putawayTask );
+        if (taskStarted)
+            PutawayTasks.Add( putawayTask );
+        
         return putawayTask;
     }
     public bool FinishPutawayTask( Employee employee, Guid rackingId, Guid palletId )
     {
         var task = employee.TaskAs<PutawayTask>();
-        
-        var completed = task.CompletePutaway( rackingId, palletId )
+
+        return employee.FinishPutaway( rackingId, palletId )
             && employee.EndTask()
             && PutawayTasks.Remove( task );
-
-        return completed;
     }
 
     async Task<Racking?> FindRackingForPutaway( Pallet pallet )
     {
         return await Task.Run( () => {
             return Rackings
-                .FirstOrDefault( static r => r.IsAvailable() );
+                .FirstOrDefault( r => r.IsAvailable() 
+                    && r.PalletFits( pallet ) );
         } );
     }
 }

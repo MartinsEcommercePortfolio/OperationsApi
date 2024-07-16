@@ -114,7 +114,6 @@ internal static class PickingEndpoints
     static async Task<IResult> StartPickingLocation( Employee employee, Guid lineId, Guid rackingId, Guid palletId, IPickingRepository repository )
     {
         var task = employee
-            .TaskAs<PickingTask>()
             .StartPickingLine( lineId, palletId, rackingId );
 
         return task && await repository.SaveAsync()
@@ -124,7 +123,6 @@ internal static class PickingEndpoints
     static async Task<IResult> PickItem( Employee employee, Guid itemId, IPickingRepository repository )
     {
         var picked = employee
-            .TaskAs<PickingTask>()
             .PickItem( itemId );
 
         return picked && await repository.SaveAsync()
@@ -135,8 +133,7 @@ internal static class PickingEndpoints
     static async Task<IResult> FinishPickingLocation( Employee employee, Guid lineId, IPickingRepository repository )
     {
         var task = employee
-            .TaskAs<PickingTask>()
-            .FinishPickingLocation( lineId );
+            .FinishPickingLine( lineId );
 
         return task && await repository.SaveAsync()
             ? Results.Ok( true )

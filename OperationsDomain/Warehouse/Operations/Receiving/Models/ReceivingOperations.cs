@@ -27,8 +27,7 @@ public sealed class ReceivingOperations
             .FirstOrDefault( t => t.Id == taskId );
 
         var taskStarted = receivingTask is not null
-            && receivingTask.InitializeReceiving( trailerId, dockId, areaId )
-            && employee.StartTask( receivingTask )
+            && employee.StartReceiving( receivingTask, trailerId, dockId, areaId )
             && PendingReceivingTasks.Remove( receivingTask );
 
         if (taskStarted)
@@ -40,9 +39,8 @@ public sealed class ReceivingOperations
     {
         var receivingTask = employee
             .TaskAs<ReceivingTask>();
-        
-        return receivingTask.IsFinished
-            && employee.EndTask()
+
+        return employee.EndTask()
             && ActiveReceivingTasks.Remove( receivingTask );
     }
 }

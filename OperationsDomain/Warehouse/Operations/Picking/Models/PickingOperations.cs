@@ -17,13 +17,12 @@ public sealed class PickingOperations
 
         bool started = pickingTask is not null 
             && !ActivePickingTasks.Contains( pickingTask )
-            && employee.StartTask( pickingTask )
+            && employee.StartPicking( pickingTask )
             && PendingPickingTasks.Remove( pickingTask );
 
-        if (!started)
-            return null;
+        if (started)
+            ActivePickingTasks.Add( pickingTask! );
         
-        ActivePickingTasks.Add( pickingTask! );
         return pickingTask;
     }
     public bool FinishPickingTask( Employee employee, Guid areaId )
@@ -31,7 +30,7 @@ public sealed class PickingOperations
         var task = employee
             .TaskAs<PickingTask>();
 
-        return task.StagePick( areaId )
+        return employee.StagePick( areaId )
             && employee.EndTask()
             && ActivePickingTasks.Remove( task );
     }

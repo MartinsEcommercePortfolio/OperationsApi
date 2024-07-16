@@ -20,30 +20,17 @@ public sealed class PickingTask : WarehouseTask
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
     }
-    public bool StartPickingLine( Guid lineId, Guid rackingId, Guid palletId )
+    internal PickingLine? SetPickingLine( Guid lineId )
     {
-        bool canPick = !IsStaging && CurrentPickLine is null;
-        if (!canPick)
-            return false;
+        if (IsStaging || CurrentPickLine is not null)
+            return null;
 
         CurrentPickLine = PickLines.FirstOrDefault( p =>
-            p.Id == lineId &&
-            p.Racking.Id == rackingId &&
-            p.Racking.Pallet is not null &&
-            p.Racking.Pallet.Id == palletId );
+            p.Id == lineId );
 
-        return CurrentPickLine is not null
-            ? CurrentPickLine.StartPicking( palletId, rackingId, Employee )
-            : false;
+        return CurrentPickLine;
     }
-    public bool PickItem( Guid itemId )
-    {
-        bool picked = CurrentPickLine is not null
-            && CurrentPickLine.PickItem( Employee, itemId );
-        
-        return picked;
-    }
-    public bool FinishPickingLocation( Guid lineId )
+    internal bool FinishPickingLocation( Guid lineId )
     {
         bool finished = CurrentPickLine is not null
             && CurrentPickLine.Id == lineId
@@ -54,12 +41,11 @@ public sealed class PickingTask : WarehouseTask
 
         return finished;
     }
-    public bool StagePick( Guid areaId )
+    internal bool StagePick( Guid areaId )
     {
         bool staged = IsStaging
             && StagingArea.Id == areaId
-            && CurrentPickLine is null
-            && Employee.StagePallet( StagingArea, Pallet );
+            && CurrentPickLine is null;
 
         if (staged)
             IsFinished = true;

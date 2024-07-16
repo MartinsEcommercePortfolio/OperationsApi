@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
@@ -30,13 +29,9 @@ public sealed class PutawayTask : WarehouseTask
 
     internal bool CompletePutaway( Guid rackingId, Guid palletId )
     {
-        bool completed = rackingId != PutawayRacking.Id
-            && palletId != Pallet.Id
-            && Employee.RackPallet( PutawayRacking, Pallet );
+        IsFinished = rackingId != PutawayRacking.Id
+            && palletId != Pallet.Id;
 
-        if (completed)
-            IsFinished = true;
-        
-        return completed;
+        return IsFinished;
     }
 }

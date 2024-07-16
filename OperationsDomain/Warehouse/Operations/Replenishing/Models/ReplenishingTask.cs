@@ -11,15 +11,14 @@ public sealed class ReplenishingTask : WarehouseTask
     public Guid ToRackingId { get; private set; }
     public bool PalletHasBeenPicked { get; private set; }
 
-    public bool PickReplenishingPallet( Guid rackingId, Guid palletId )
+    internal bool ConfirmPickup( Guid rackingId, Guid palletId )
     {
         PalletHasBeenPicked = FromRacking.Id == rackingId
-            && ReplenPallet.Id == palletId
-            && Employee.UnRackPallet( FromRacking, ReplenPallet );
+            && ReplenPallet.Id == palletId;
         
         return PalletHasBeenPicked;
     }
-    public bool ReplenishLocation( Guid rackingId, Guid palletId )
+    internal bool ConfirmDeposit( Guid rackingId, Guid palletId )
     {
         IsFinished = PalletHasBeenPicked
             && ToRacking.Id == rackingId

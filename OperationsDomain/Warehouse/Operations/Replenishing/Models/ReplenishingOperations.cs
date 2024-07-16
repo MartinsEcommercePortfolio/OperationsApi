@@ -4,7 +4,7 @@ namespace OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 public sealed class ReplenishingOperations
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; private set; }
     public List<ReplenishingTask> PendingReplenishingTasks { get; private set; } = [];
     public List<ReplenishingTask> ActiveReplenishingTasks { get; private set; } = [];
 
@@ -19,7 +19,7 @@ public sealed class ReplenishingOperations
             .FirstOrDefault( t => t.Id == taskId );
 
         var started = replenishingTask is not null
-            && employee.StartTask( replenishingTask )
+            && employee.StartReplenishing( replenishingTask )
             && PendingReplenishingTasks.Remove( replenishingTask );
 
         if (started)
@@ -29,10 +29,10 @@ public sealed class ReplenishingOperations
     }
     public bool FinishReplenishingTask( Employee employee )
     {
-        var task = employee.TaskAs<ReplenishingTask>();
+        var task = employee
+            .TaskAs<ReplenishingTask>();
         
-        return task.IsFinished
-            && employee.EndTask()
+        return employee.EndTask()
             && ActiveReplenishingTasks.Remove( task );
     }
 }

@@ -10,7 +10,7 @@ public sealed class ReceivingTask : WarehouseTask
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> StagedPallets { get; private set; } = [];
 
-    public bool InitializeReceiving( Guid trailerId, Guid dockId, Guid areaId )
+    internal bool InitializeReceiving( Guid trailerId, Guid dockId, Guid areaId )
     {
         var validArea = trailerId == Trailer.Id
             && dockId == Dock.Id
@@ -21,25 +21,25 @@ public sealed class ReceivingTask : WarehouseTask
 
         return validArea;
     }
-    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
+    internal Pallet? StartReceivingPallet( Guid trailerId, Guid palletId )
     {
-        var pallet = Trailer.GetPallet( palletId );
-        
-        CurrentPallet = pallet;
-        
-        return Trailer.Id == trailerId
-            && pallet is not null
+        CurrentPallet = Trailer.GetPallet( palletId );
+
+        bool received = Trailer.Id == trailerId
+            && CurrentPallet is not null
             && CurrentPallet is null
-            && !StagedPallets.Contains( pallet )
-            && Employee.UnloadPallet( Trailer, pallet );
+            && !StagedPallets.Contains( CurrentPallet! );
+
+        return received
+            ? CurrentPallet
+            : null;
     }
-    public bool FinishReceivingPallet( Guid areaId, Guid palletId )
+    internal bool FinishReceivingPallet( Guid areaId, Guid palletId )
     {
         var staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id
             && areaId == Area.Id
-            && !StagedPallets.Contains( CurrentPallet )
-            && Employee.StagePallet( Area, CurrentPallet );
+            && !StagedPallets.Contains( CurrentPallet );
         
         if (!staged)
             return false;

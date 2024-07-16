@@ -100,7 +100,6 @@ internal static class ReplenishingEndpoints
     static async Task<IResult> PickupReplenishingPallet( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenPicked = employee
-            .TaskAs<ReplenishingTask>()
             .PickReplenishingPallet( rackingId, palletId );
 
         return replenPicked && await repository.SaveAsync()
@@ -110,7 +109,6 @@ internal static class ReplenishingEndpoints
     static async Task<IResult> ReplenishLocation( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenished = employee
-            .TaskAs<ReplenishingTask>()
             .ReplenishLocation( rackingId, palletId );
 
         return replenished && await repository.SaveAsync()

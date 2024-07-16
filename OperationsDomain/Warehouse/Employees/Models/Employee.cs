@@ -2,6 +2,9 @@ using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
+using OperationsDomain.Warehouse.Operations.Putaways.Models;
+using OperationsDomain.Warehouse.Operations.Receiving.Models;
+using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
@@ -48,7 +51,113 @@ public sealed class Employee
         Task = null;
         return true;
     }
+    
+    // RECEIVING
+    public bool StartReceiving( ReceivingTask task, Guid trailerId, Guid dockId, Guid areaId ) =>
+        StartTask( task ) &&
+        task.InitializeReceiving( trailerId, dockId, areaId );
+    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
+    {
+        var task = TaskAs<ReceivingTask>();
+        var pallet = task.StartReceivingPallet( trailerId, palletId );
 
+        return pallet is not null
+            && UnloadPallet( task.Trailer, pallet );
+    }
+    public bool FinishReceivingPallet( Guid areaId, Guid palletId )
+    {
+        var task = TaskAs<ReceivingTask>();
+
+        return task.CurrentPallet is not null
+            && StagePallet( task.Area, task.CurrentPallet )
+            && task.FinishReceivingPallet( areaId, palletId );
+    }
+    
+    // PUTAWAYS
+    public bool StartPutaway( PutawayTask task, Racking racking, Pallet pallet ) =>
+        pallet.Area is not null &&
+        StartTask( task ) &&
+        task.InitializePutaway( racking, pallet ) &&
+        UnStagePallet( pallet.Area, pallet );
+    public bool FinishPutaway( Guid rackingId, Guid palletId )
+    {
+        var task = TaskAs<PutawayTask>();
+
+        return task.CompletePutaway( rackingId, palletId )
+            && RackPallet( task.PutawayRacking, task.Pallet );
+    }
+    
+    // REPLENS
+    public bool StartReplenishing( ReplenishingTask task ) =>
+        StartTask( task );
+    public bool PickReplenishingPallet( Guid rackingId, Guid palletId )
+    {
+        var task = TaskAs<ReplenishingTask>();
+
+        return task.ConfirmPickup( rackingId, palletId )
+            && UnRackPallet( task.FromRacking, task.ReplenPallet );
+    }
+    public bool ReplenishLocation( Guid rackingId, Guid palletId )
+    {
+        var task = TaskAs<ReplenishingTask>();
+
+        return task.ConfirmDeposit( rackingId, palletId )
+            && RackPallet( task.ToRacking, task.ReplenPallet );
+    }
+    
+    // PICKING
+    public bool StartPicking( PickingTask task ) =>
+        StartTask( task );
+    public bool StartPickingLine( Guid lineId, Guid rackingId, Guid palletId )
+    {
+        var task = TaskAs<PickingTask>();
+        var pickLine = task.SetPickingLine( lineId );
+
+        return pickLine is not null
+            && pickLine.StartPicking( this, rackingId, palletId );
+    }
+    public bool PickItem( Guid itemId )
+    {
+        var task = TaskAs<PickingTask>();
+
+        return task.CurrentPickLine is not null
+            && task.CurrentPickLine.PickItem( this, itemId );
+    }
+    public bool FinishPickingLine( Guid lineId )
+    {
+        var task = TaskAs<PickingTask>();
+        
+        return task.FinishPickingLocation( lineId );
+    }
+    public bool StagePick( Guid areaId )
+    {
+        var task = TaskAs<PickingTask>();
+        
+        return StagePallet( task.StagingArea, task.Pallet )
+            && task.StagePick( areaId );
+    }
+    
+    // LOADING
+    public bool StartLoadingTask( LoadingTask loadingTask, Guid trailerId, Guid dockId, Guid areaId ) =>
+        loadingTask.InitializeLoadingTask( trailerId, dockId, areaId ) &&
+        StartTask( loadingTask );
+    public bool StartLoadingPallet( Guid areaId, Guid palletId )
+    {
+        var task = TaskAs<LoadingTask>();
+        var pallet = task.GetLoadingPallet( areaId, palletId );
+
+        return pallet?.Area != null
+            && UnStagePallet( pallet.Area, pallet );
+    }
+    public bool FinishLoadingPallet( Guid trailerId, Guid palletId )
+    {
+        var task = TaskAs<LoadingTask>();
+        return Pallet is not null
+            && task.FinishLoadingPallet( trailerId, palletId )
+            && LoadPallet( task.TrailerToLoad, Pallet );
+    }
+    
+    // ACTIONS
     public bool TakePallet( Pallet pallet )
     {
         bool assigned = Pallet is not null
@@ -67,7 +176,6 @@ public sealed class Employee
         Pallet = null;
         return true;
     }
-    
     public bool LoadPallet( Trailer trailer, Pallet pallet ) =>
         ReleasePallet( pallet ) &&
         trailer.AddPallet( pallet );
@@ -86,13 +194,4 @@ public sealed class Employee
     public bool UnRackPallet( Racking racking, Pallet pallet ) =>
         racking.RemovePallet() &&
         TakePallet( pallet );
-
-    public bool StartLoadingTask( LoadingTask loadingTask, Guid trailerId, Guid dockId, Guid areaId ) =>
-        loadingTask.StartWith( this ) &&
-        loadingTask.InitializeLoadingTask( trailerId, dockId, areaId ) &&
-        StartTask( loadingTask );
-    public bool StartLoadingPallet( Guid areaId, Guid palletId ) =>
-        TaskAs<LoadingTask>().StartLoadingPallet( areaId, palletId );
-    public bool FinishLoadingPallet( Guid trailerId, Guid palletId ) =>
-        TaskAs<LoadingTask>().FinishLoadingPallet( trailerId, palletId );
 }

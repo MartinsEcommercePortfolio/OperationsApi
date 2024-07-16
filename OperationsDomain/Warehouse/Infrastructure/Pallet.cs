@@ -88,14 +88,13 @@ public sealed class Pallet
         Trailer = trailer;
         return true;
     }
-    public bool PickFrom( Employee employee, Guid itemId, out Item? item )
+    public bool PickFrom( Racking racking, Employee employee, Guid itemId, out Item? item )
     {
         item = Items.FirstOrDefault( i => i.Id == itemId );
-        if (item is null)
-            return false;
-        Items.Remove( item );
-        item.GiveTo( employee );
-        return true;
+        return racking == Racking
+            && racking.IsOwnedBy( employee )
+            && item is not null
+            && Items.Remove( item );
     }
     
     public bool AssignTo( Employee employee )

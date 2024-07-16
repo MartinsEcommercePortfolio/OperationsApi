@@ -78,7 +78,6 @@ internal static class ReceivingEndpoints
     static async Task<IResult> StartReceivingPallet( Employee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )
     {
         var receivingStarted = employee
-            .TaskAs<ReceivingTask>()
             .StartReceivingPallet( palletId, trailerId );
         
         return receivingStarted && await repository.SaveAsync()
@@ -88,7 +87,6 @@ internal static class ReceivingEndpoints
     static async Task<IResult> FinishReceivingPallet( Employee employee, Guid areaId, Guid palletId, IReceivingRepository repository )
     {
         var receivingCompleted = employee
-            .TaskAs<ReceivingTask>()
             .FinishReceivingPallet( areaId, palletId );
 
         return receivingCompleted && await repository.SaveAsync()

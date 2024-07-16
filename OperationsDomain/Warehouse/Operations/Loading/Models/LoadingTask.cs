@@ -17,16 +17,17 @@ public sealed class LoadingTask : WarehouseTask
         
         return isValid;
     }
-    internal bool StartLoadingPallet( Guid areaId, Guid palletId )
+    internal Pallet? GetLoadingPallet( Guid areaId, Guid palletId )
     {
         var area = AreasToPickFrom.FirstOrDefault( a => a.Id == areaId );
         var pallet = PalletsToLoad.FirstOrDefault( p => p.Id == palletId );
 
-        return area is not null
-            && pallet is not null
-            && area.RemovePallet( pallet )
-            && Employee.TakePallet( pallet )
-            && pallet.AssignTo( Employee );
+        bool startLoading = area is not null
+            && pallet is not null;
+
+        return startLoading
+            ? pallet
+            : null;
     }
     internal bool FinishLoadingPallet( Guid trailerId, Guid palletId )
     {
@@ -34,9 +35,7 @@ public sealed class LoadingTask : WarehouseTask
 
         var loaded = pallet is not null
             && TrailerToLoad.Id == trailerId
-            && PalletsToLoad.Remove( pallet )
-            && TrailerToLoad.AddPallet( pallet )
-            && pallet.Load( TrailerToLoad );
+            && PalletsToLoad.Remove( pallet );
 
         if (!loaded)
             return false;

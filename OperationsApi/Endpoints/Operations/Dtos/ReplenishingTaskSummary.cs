@@ -9,7 +9,7 @@ internal readonly record struct ReplenishingTaskSummary(
     RackingDto ToRacking )
 {
     internal static ReplenishingTaskSummary FromModel( ReplenishingTask model ) => new(
-        model.Pallet.Id,
+        model.ReplenPallet.Id,
         model.PalletHasBeenPicked,
         RackingDto.FromModel( model.FromRacking ),
         RackingDto.FromModel( model.ToRacking ) );

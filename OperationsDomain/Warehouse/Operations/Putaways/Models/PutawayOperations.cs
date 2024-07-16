@@ -9,7 +9,7 @@ public sealed class PutawayOperations
     public List<Pallet> Pallets { get; private set; } = [];
     public List<PutawayTask> PutawayTasks { get; private set; } = [];
     
-    public async Task<PutawayTask?> StartPutaway( Employee employee, Guid palletId )
+    public async Task<PutawayTask?> StartPutawayTask( Employee employee, Guid palletId )
     {
         var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
         if (pallet is null)
@@ -31,7 +31,7 @@ public sealed class PutawayOperations
         PutawayTasks.Add( putawayTask );
         return putawayTask;
     }
-    public bool FinishPutaway( Employee employee, Guid rackingId, Guid palletId )
+    public bool FinishPutawayTask( Employee employee, Guid rackingId, Guid palletId )
     {
         var task = employee.TaskAs<PutawayTask>();
         

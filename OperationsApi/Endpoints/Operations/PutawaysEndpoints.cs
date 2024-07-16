@@ -43,7 +43,7 @@ internal static class PutawaysEndpoints
             return Results.NotFound();
 
         var putawayTask = await putaways
-            .StartPutaway( employee, palletId )
+            .StartPutawayTask( employee, palletId )
             .ConfigureAwait( false );
         
         return putawayTask is not null && putawayTask.IsStarted && await repository.SaveAsync()
@@ -55,7 +55,7 @@ internal static class PutawaysEndpoints
         var putaways = await repository.GetPutawaysOperationsWithTasks();
 
         var success = putaways is not null
-            && putaways.FinishPutaway( employee, palletId, rackingId )
+            && putaways.FinishPutawayTask( employee, palletId, rackingId )
             && await repository.SaveAsync();
         
         return success

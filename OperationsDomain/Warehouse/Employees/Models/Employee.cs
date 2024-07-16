@@ -2,7 +2,6 @@ using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
-using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
@@ -49,19 +48,40 @@ public sealed class Employee
         Task = null;
         return true;
     }
-    
+
+    public bool TakePallet( Pallet pallet )
+    {
+        bool assigned = Pallet is not null
+            && pallet.AssignTo( this );
+
+        if (assigned)
+            Pallet = pallet;
+
+        return assigned;
+    }
+    public bool ReleasePallet( Pallet pallet )
+    {
+        if (Pallet != pallet)
+            return false;
+
+        Pallet = null;
+        return true;
+    }
+
+    public bool LoadPallet( Trailer trailer, Pallet pallet ) =>
+        ReleasePallet( pallet ) &&
+        trailer.AddPallet( pallet );
     public bool UnloadPallet( Trailer trailer, Pallet pallet ) =>
         trailer.RemovePallet( pallet ) &&
         TakePallet( pallet );
     public bool StagePallet( Area area, Pallet pallet ) =>
-        Pallet == pallet &&
-        area.AddPallet( Pallet ) &&
-        ReleasePallet();
+        ReleasePallet( pallet ) &&
+        area.AddPallet( pallet );
     public bool UnStagePallet( Area area, Pallet pallet ) =>
         area.RemovePallet( pallet ) &&
         TakePallet( pallet );
     public bool RackPallet( Racking racking, Pallet pallet ) =>
-        ReleasePallet() &&
+        ReleasePallet( pallet ) &&
         racking.AddPallet( pallet );
     public bool UnRackPallet( Racking racking, Pallet pallet ) =>
         racking.RemovePallet() &&
@@ -81,16 +101,6 @@ public sealed class Employee
         Task!.Finish( this ) &&
         EndTask();
 
-    public bool StartReplenishing( ReplenishingTask replenishingTask ) =>
-        replenishingTask.StartWith( this ) &&
-        StartTask( replenishingTask );
-    public bool PickupReplenishment( Guid palletId ) =>
-        TaskAs<ReplenishingTask>().PickupReplenishingPallet( palletId );
-    public bool ReplenishLocation( Guid rackingId, Guid palletId ) =>
-        TaskAs<ReplenishingTask>().ReplenishLocation( rackingId, palletId ) &&
-        Task!.Finish( this ) &&
-        EndTask();
-
     public bool StartLoadingTask( LoadingTask loadingTask, Guid trailerId, Guid dockId, Guid areaId ) =>
         loadingTask.StartWith( this ) &&
         loadingTask.InitializeLoadingTask( trailerId, dockId, areaId ) &&
@@ -99,23 +109,4 @@ public sealed class Employee
         TaskAs<LoadingTask>().StartLoadingPallet( areaId, palletId );
     public bool FinishLoadingPallet( Guid trailerId, Guid palletId ) =>
         TaskAs<LoadingTask>().FinishLoadingPallet( trailerId, palletId );
-
-    public bool TakePallet( Pallet pallet )
-    {
-        bool assigned = Pallet is not null
-            && pallet.AssignTo( this );
-        
-        if (assigned)
-            Pallet = pallet;
-        
-        return assigned;
-    }
-    public bool ReleasePallet()
-    {
-        if (Pallet is null)
-            return false;
-        
-        Pallet = null;
-        return true;
-    }
 }

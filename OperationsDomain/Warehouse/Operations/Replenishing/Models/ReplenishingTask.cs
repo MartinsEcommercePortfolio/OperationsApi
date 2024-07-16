@@ -4,29 +4,27 @@ namespace OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 public sealed class ReplenishingTask : WarehouseTask
 {
-    public Pallet Pallet { get; private set; } = default!;
+    public Pallet ReplenPallet { get; private set; } = default!;
     public Racking FromRacking { get; private set; } = default!;
     public Racking ToRacking { get; private set; } = default!;
     public Guid FromRackingId { get; private set; }
     public Guid ToRackingId { get; private set; }
     public bool PalletHasBeenPicked { get; private set; }
 
-    internal bool PickupReplenishingPallet( Guid palletId )
+    public bool PickReplenishingPallet( Guid rackingId, Guid palletId )
     {
-        PalletHasBeenPicked = Pallet.Id == palletId
-            && Pallet.CanBePicked()
-            && FromRacking.AddPallet( Pallet )
-            && Pallet.AssignTo( Employee );
+        PalletHasBeenPicked = FromRacking.Id == rackingId
+            && ReplenPallet.Id == palletId
+            && Employee.UnRackPallet( FromRacking, ReplenPallet );
         
         return PalletHasBeenPicked;
     }
-    internal bool ReplenishLocation( Guid rackingId, Guid palletId )
+    public bool ReplenishLocation( Guid rackingId, Guid palletId )
     {
         IsFinished = PalletHasBeenPicked
             && ToRacking.Id == rackingId
-            && Pallet.Id == palletId
-            && ToRacking.AddPallet( Pallet )
-            && Pallet.Rack( Employee, ToRacking );
+            && ReplenPallet.Id == palletId
+            && Employee.RackPallet( ToRacking, ReplenPallet );
 
         return IsFinished;
     }

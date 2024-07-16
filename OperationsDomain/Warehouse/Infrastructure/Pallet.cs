@@ -1,4 +1,4 @@
-using OperationsDomain.Warehouse.Employees;
+using OperationsDomain.Domain.Catalog;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
@@ -21,6 +21,7 @@ public sealed class Pallet
     public Trailer? Trailer { get; private set; }
     public Employee? Employee { get; private set; }
 
+    public Product Product { get; private set; }
     public int ItemCount { get; private set; }
     public List<Item> Items { get; private set; } = [];
     

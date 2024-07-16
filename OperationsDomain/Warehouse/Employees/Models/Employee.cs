@@ -67,7 +67,7 @@ public sealed class Employee
         Pallet = null;
         return true;
     }
-
+    
     public bool LoadPallet( Trailer trailer, Pallet pallet ) =>
         ReleasePallet( pallet ) &&
         trailer.AddPallet( pallet );
@@ -86,20 +86,6 @@ public sealed class Employee
     public bool UnRackPallet( Racking racking, Pallet pallet ) =>
         racking.RemovePallet() &&
         TakePallet( pallet );
-
-    public bool StartPicking( PickingTask pickingTask ) =>
-        StartTask( pickingTask ) &&
-        pickingTask.StartWith( this );
-    public bool StartPickingLocation( Guid rackingId, Guid palletId ) =>
-        TaskAs<PickingTask>().StartPickingLocation( rackingId, palletId );
-    public bool PickItem( Guid itemId ) =>
-        TaskAs<PickingTask>().PickItem( itemId );
-    public bool FinishPickingLocation( Guid rackingId, Guid palletId ) =>
-        TaskAs<PickingTask>().FinishPickingLocation( rackingId, palletId );
-    public bool FinishPicking( Guid areaId ) =>
-        TaskAs<PickingTask>().StagePick( areaId ) &&
-        Task!.Finish( this ) &&
-        EndTask();
 
     public bool StartLoadingTask( LoadingTask loadingTask, Guid trailerId, Guid dockId, Guid areaId ) =>
         loadingTask.StartWith( this ) &&

@@ -1,13 +1,10 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingOperations
 {
     public Guid Id { get; private set; }
-    public List<Pallet> Pallets { get; private set; } = [];
     public List<PickingTask> PendingPickingTasks { get; private set; } = [];
     public List<PickingTask> ActivePickingTasks { get; private set; } = [];
 
@@ -17,27 +14,25 @@ public sealed class PickingOperations
     {
         var pickingTask = PendingPickingTasks
             .FirstOrDefault( t => t.Id == taskId );
-        
-        if (pickingTask is null)
-            return null;
 
-        bool started = !ActivePickingTasks.Contains( pickingTask )
-            && !Pallets.Contains( pickingTask.Pallet )
-            && employee.StartPicking( pickingTask )
+        bool started = pickingTask is not null 
+            && !ActivePickingTasks.Contains( pickingTask )
+            && employee.StartTask( pickingTask )
             && PendingPickingTasks.Remove( pickingTask );
 
         if (!started)
             return null;
         
-        ActivePickingTasks.Add( pickingTask );
-        Pallets.Add( pickingTask.Pallet );
+        ActivePickingTasks.Add( pickingTask! );
         return pickingTask;
     }
-    public bool StageAndFinishPickingOrder( Employee employee, Guid areaId )
+    public bool FinishPickingTask( Employee employee, Guid areaId )
     {
-        var task = employee.TaskAs<PickingTask>();
+        var task = employee
+            .TaskAs<PickingTask>();
 
-        return employee.FinishPicking( areaId )
+        return task.StagePick( areaId )
+            && employee.EndTask()
             && ActivePickingTasks.Remove( task );
     }
 }

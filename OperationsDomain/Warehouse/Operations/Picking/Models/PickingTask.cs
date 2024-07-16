@@ -20,39 +20,41 @@ public sealed class PickingTask : WarehouseTask
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
     }
-    internal bool StartPickingLocation( Guid rackingId, Guid palletId )
+    public bool StartPickingLine( Guid lineId, Guid rackingId, Guid palletId )
     {
-        if (CurrentPickLine is null || CurrentPickLine.IsComplete())
+        bool canPick = !IsStaging && CurrentPickLine is null;
+        if (!canPick)
             return false;
 
         CurrentPickLine = PickLines.FirstOrDefault( p =>
+            p.Id == lineId &&
             p.Racking.Id == rackingId &&
             p.Racking.Pallet is not null &&
             p.Racking.Pallet.Id == palletId );
 
-        return CurrentPickLine?
-            .ConfirmPickLocation( palletId, rackingId ) ?? false;
+        return CurrentPickLine is not null
+            ? CurrentPickLine.StartPicking( palletId, rackingId, Employee )
+            : false;
     }
-    internal bool PickItem( Guid itemId )
+    public bool PickItem( Guid itemId )
     {
         bool picked = CurrentPickLine is not null
             && CurrentPickLine.PickItem( Employee, itemId );
+        
         return picked;
     }
-    internal bool FinishPickingLocation( Guid rackingId, Guid palletId )
+    public bool FinishPickingLocation( Guid lineId )
     {
-        if (CurrentPickLine is null || CurrentPickLine.IsComplete())
-            return false;
+        bool finished = CurrentPickLine is not null
+            && CurrentPickLine.Id == lineId
+            && CurrentPickLine.IsComplete();
 
-        CurrentPickLine = PickLines.FirstOrDefault( p =>
-            p.Racking.Id == rackingId &&
-            p.Racking.Pallet is not null &&
-            p.Racking.Pallet.Id == palletId );
+        if (finished)
+            CurrentPickLine = null;
 
-        return CurrentPickLine?
-            .ConfirmPickLocation( palletId, rackingId ) ?? false;
+        return finished;
     }
-    internal bool StagePick( Guid areaId )
+    public bool StagePick( Guid areaId )
     {
         bool staged = IsStaging
             && StagingArea.Id == areaId

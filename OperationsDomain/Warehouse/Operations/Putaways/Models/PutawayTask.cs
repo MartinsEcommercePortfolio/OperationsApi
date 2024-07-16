@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
@@ -13,18 +12,12 @@ public sealed class PutawayTask : WarehouseTask
     public Guid PickupAreaId { get; private set; }
     public Guid PutawayRackingId { get; private set; }
     
-    internal bool InitializeFrom( Employee employee, Racking racking, Pallet pallet )
+    internal bool InitializePutaway( Racking racking, Pallet pallet )
     {
-        bool canGenerate = pallet.CanBePutaway() &&
-            racking.IsAvailable() &&
-            pallet.AssignTo( employee ) &&
-            racking.AssignTo( employee );
-
-        if (!canGenerate)
+        bool canStart = pallet.CanBePutaway();
+        if (!canStart)
             return false;
-
-        Employee = employee;
-        EmployeeId = employee.Id;
+        
         Pallet = pallet;
         PalletId = pallet.Id;
         PickupArea = pallet.Area!;
@@ -39,9 +32,11 @@ public sealed class PutawayTask : WarehouseTask
     {
         bool completed = rackingId != PutawayRacking.Id
             && palletId != Pallet.Id
-            && Pallet.Rack( Employee, PutawayRacking )
-            && PutawayRacking.TakePallet( Pallet )
-            && PutawayRacking.Free( Employee );
+            && Employee.RackPallet( PutawayRacking, Pallet );
+
+        if (completed)
+            IsFinished = true;
+        
         return completed;
     }
 }

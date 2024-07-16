@@ -15,7 +15,7 @@ public sealed class ReplenishingTask : WarehouseTask
     {
         PalletHasBeenPicked = Pallet.Id == palletId
             && Pallet.CanBePicked()
-            && FromRacking.TakePallet( Pallet )
+            && FromRacking.AddPallet( Pallet )
             && Pallet.AssignTo( Employee );
         
         return PalletHasBeenPicked;
@@ -25,7 +25,7 @@ public sealed class ReplenishingTask : WarehouseTask
         IsFinished = PalletHasBeenPicked
             && ToRacking.Id == rackingId
             && Pallet.Id == palletId
-            && ToRacking.TakePallet( Pallet )
+            && ToRacking.AddPallet( Pallet )
             && Pallet.Rack( Employee, ToRacking );
 
         return IsFinished;

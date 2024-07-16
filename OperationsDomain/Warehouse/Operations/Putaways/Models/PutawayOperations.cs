@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
@@ -15,33 +14,39 @@ public sealed class PutawayOperations
         var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
         if (pallet is null)
             return null;
-        
-        return await Task.Run( () => {
-            var racking = Rackings
-                .FirstOrDefault( static r => r.IsAvailable());
-            
-            if (racking is null)
-                return null;
 
-            PutawayTask task = new();
-            
-            var taskStarted = employee
-                .StartPutawayTask( task, racking, pallet );
+        var racking = await FindRackingForPutaway( pallet );
+        if (racking is null)
+            return null;
 
-            if (!taskStarted)
-                return null;
-            
-            PutawayTasks.Add( task );
-            return task;
-        } );
+        PutawayTask putawayTask = new();
+
+        var taskStarted = putawayTask.InitializePutaway( racking, pallet )
+            && employee.StartTask( putawayTask )
+            && employee.UnStagePallet( pallet.Area ?? new Area(), pallet );
+
+        if (!taskStarted)
+            return null;
+
+        PutawayTasks.Add( putawayTask );
+        return putawayTask;
     }
     public bool FinishPutaway( Employee employee, Guid rackingId, Guid palletId )
     {
         var task = employee.TaskAs<PutawayTask>();
         
-        var completed = employee.FinishPutaway( rackingId, palletId )
+        var completed = task.CompletePutaway( rackingId, palletId )
+            && employee.EndTask()
             && PutawayTasks.Remove( task );
 
         return completed;
+    }
+
+    async Task<Racking?> FindRackingForPutaway( Pallet pallet )
+    {
+        return await Task.Run( () => {
+            return Rackings
+                .FirstOrDefault( static r => r.IsAvailable() );
+        } );
     }
 }

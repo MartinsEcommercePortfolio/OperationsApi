@@ -2,8 +2,6 @@ using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
-using OperationsDomain.Warehouse.Operations.Putaways.Models;
-using OperationsDomain.Warehouse.Operations.Receiving.Models;
 using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
@@ -59,14 +57,15 @@ public sealed class Employee
         Pallet == pallet &&
         area.AddPallet( Pallet ) &&
         ReleasePallet();
-
-    public bool StartPutawayTask( PutawayTask putawayTask, Racking racking, Pallet pallet ) =>
-        putawayTask.InitializeFrom( this, racking, pallet ) && 
-        putawayTask.StartWith( this ) && 
-        StartTask( putawayTask );
-    public bool FinishPutaway( Guid rackingId, Guid palletId ) =>
-        TaskAs<PutawayTask>().CompletePutaway( rackingId, palletId ) &&
-        EndTask();
+    public bool UnStagePallet( Area area, Pallet pallet ) =>
+        area.RemovePallet( pallet ) &&
+        TakePallet( pallet );
+    public bool RackPallet( Racking racking, Pallet pallet ) =>
+        ReleasePallet() &&
+        racking.AddPallet( pallet );
+    public bool UnRackPallet( Racking racking, Pallet pallet ) =>
+        racking.RemovePallet() &&
+        TakePallet( pallet );
 
     public bool StartPicking( PickingTask pickingTask ) =>
         StartTask( pickingTask ) &&

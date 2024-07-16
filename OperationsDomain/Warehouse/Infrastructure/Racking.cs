@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
@@ -17,7 +16,7 @@ public sealed class Racking
     public Employee? Owner { get; private set; }
     public Pallet? Pallet { get; private set; }
 
-    public bool IsOwnedBy( Employee employee ) =>
+    public bool IsOwnedBy( Employee? employee ) =>
         Owner == employee;
     public bool IsAvailable() =>
         Owner is null &&
@@ -30,14 +29,21 @@ public sealed class Racking
         Length > pallet.Length &&
         Width > pallet.Width &&
         Height > pallet.Height;
-    public bool TakePallet( Pallet pallet )
+    public bool AddPallet( Pallet pallet )
     {
-        bool palletTaken = IsAvailable() &&
-            PalletFits( pallet ) &&
-            Capacity > pallet.Weight;
-        if (palletTaken)
+        bool palletAdded = IsAvailable() 
+            && PalletFits( pallet ) 
+            && Capacity > pallet.Weight;
+        
+        if (palletAdded)
             Pallet = pallet;
-        return palletTaken;
+        
+        return palletAdded;
+    }
+    public bool RemovePallet()
+    {
+        Pallet = null;
+        return true;
     }
     public bool AssignTo( Employee employee )
     {

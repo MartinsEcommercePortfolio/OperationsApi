@@ -23,18 +23,18 @@ public sealed class ReceivingOperations
         PendingReceivingTasks.FirstOrDefault();
     public ReceivingTask? StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
-        var task = PendingReceivingTasks
+        var receivingTask = PendingReceivingTasks
             .FirstOrDefault( t => t.Id == taskId );
 
-        var taskStarted = task is not null
-            && task.InitializeReceiving( trailerId, dockId, areaId )
-            && employee.StartTask( task )
-            && PendingReceivingTasks.Remove( task );
+        var taskStarted = receivingTask is not null
+            && receivingTask.InitializeReceiving( trailerId, dockId, areaId )
+            && employee.StartTask( receivingTask )
+            && PendingReceivingTasks.Remove( receivingTask );
 
         if (taskStarted)
-            ActiveReceivingTasks.Add( task! );
+            ActiveReceivingTasks.Add( receivingTask! );
     
-        return task;
+        return receivingTask;
     }
     public bool CompleteReceivingTask( Employee employee )
     {

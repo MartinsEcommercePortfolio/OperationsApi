@@ -5,13 +5,23 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingTask : WarehouseTask
 {
-    public Dock StagingDock { get; private set; } = default!;
-    public Area StagingArea { get; private set; } = default!;
-    public Pallet Pallet { get; private set; } = default!;
+    public PickingTask( Guid orderId, Dock dock, Area area, List<PickingLine> lines )
+    {
+        OrderId = orderId;
+        StagingDock = dock;
+        StagingArea = area;
+        Pallet = new Pallet( Guid.NewGuid() );
+        PickLines = lines;
+    }
+    
+    public Guid OrderId { get; private set; }
+    public Dock StagingDock { get; private set; }
+    public Area StagingArea { get; private set; }
+    public Pallet Pallet { get; private set; }
     public PickingLine? CurrentPickLine { get; private set; }
     public bool IsStaging { get; private set; }
     public List<PickingLine> PickLines { get; private set; } = [];
-
+    
     internal override bool StartWith( Employee employee )
     {
         if (!base.StartWith( employee ))
@@ -19,6 +29,10 @@ public sealed class PickingTask : WarehouseTask
         Pallet = Pallet.NewEmpty( employee );
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
+    }
+    internal void SetOrder( Guid orderId )
+    {
+        OrderId = orderId;
     }
     internal PickingLine? SetPickingLine( Guid lineId )
     {

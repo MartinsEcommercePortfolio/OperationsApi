@@ -6,8 +6,15 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingLine
 {
+    public PickingLine( Racking racking, int quantity )
+    {
+        Id = Guid.NewGuid();
+        Racking = racking;
+        Quantity = quantity;
+    }
+    
     public Guid Id { get; private set; }
-    public Racking Racking { get; private set; } = default!;
+    public Racking Racking { get; private set; }
     public List<Item> PickedItems { get; private set; } = [];
     public int Quantity { get; private set; }
     public bool Completed { get; private set; }

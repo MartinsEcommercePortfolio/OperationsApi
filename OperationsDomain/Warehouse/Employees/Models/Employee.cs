@@ -174,7 +174,7 @@ public sealed class Employee
 
         return task.InitializeStaging( areaId )
             && StagePallet( task.StagingArea, task.Pallet )
-            && picking.RemoveCompletedTask( task )
+            && picking.HandleCompletedTask( task )
             && EndTask();
     }
     

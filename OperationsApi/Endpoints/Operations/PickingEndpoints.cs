@@ -142,7 +142,7 @@ internal static class PickingEndpoints
 
         var taskCompleted = picking is not null
             && employee.FinishPicking( picking, areaId );
-
+        
         return taskCompleted && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();

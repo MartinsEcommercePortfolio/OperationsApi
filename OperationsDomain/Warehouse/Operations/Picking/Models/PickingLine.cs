@@ -39,7 +39,7 @@ public sealed class PickingLine
         PickedItems.Add( item! );
 
         if (pallet!.IsEmpty())
-            replenishing.SubmitReplenishEvent( new ReplenishEvent( Racking ) );
+            replenishing.SubmitReplenishEvent( Racking );
 
         if (PickedItems.Count == Quantity)
             Completed = true;

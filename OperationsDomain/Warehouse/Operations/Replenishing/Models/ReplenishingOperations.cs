@@ -16,12 +16,12 @@ public sealed class ReplenishingOperations
         return task;
     }
 
-    internal bool SubmitReplenishEvent( ReplenishEvent e )
+    internal bool SubmitReplenishEvent( Racking racking )
     {
         var existingPending = PendingReplenishingTasks
-            .FirstOrDefault( p => p.ToRacking == e.Racking );
+            .FirstOrDefault( p => p.ToRacking == racking );
         var existingActive = ActiveReplenishingTasks
-            .FirstOrDefault( a => a.ToRacking == e.Racking );
+            .FirstOrDefault( a => a.ToRacking == racking );
         
         if (existingPending is not null || existingActive is not null)
             return false;
@@ -29,18 +29,15 @@ public sealed class ReplenishingOperations
         var fromRacking = Rackings.FirstOrDefault( r =>
             r.IsPickSlot &&
             r.Pallet is not null &&
-            r.Product == e.Racking.Product );
+            r.Product == racking.Product );
 
-        if (fromRacking is null)
-            return false;
-
-        ReplenishEvents.Add( e );
-        return true;
+        return fromRacking is not null
+            && GenerateReplenishingTask( racking );
     }
-    internal bool GenerateReplenishingTask( ReplenishEvent replenishEvent )
+    internal bool GenerateReplenishingTask( Racking racking )
     {
         var existingTask = PendingReplenishingTasks.FirstOrDefault( r =>
-            r.ToRacking == replenishEvent.Racking );
+            r.ToRacking == racking );
 
         if (existingTask is not null)
             return false;
@@ -48,12 +45,12 @@ public sealed class ReplenishingOperations
         var fromRacking = Rackings.FirstOrDefault( r =>
             r.IsPickSlot &&
             r.Pallet is not null &&
-            r.Product == replenishEvent.Racking.Product );
+            r.Product == racking.Product );
 
         if (fromRacking is null)
             return false;
 
-        var task = new ReplenishingTask( fromRacking.Pallet!, fromRacking, replenishEvent.Racking );
+        var task = new ReplenishingTask( fromRacking.Pallet!, fromRacking, racking );
         PendingReplenishingTasks.Add( task );
         return true;
     }

@@ -48,4 +48,6 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<Employee> Employees { get; init; }
     public required DbSet<Forklift> Forklifts { get; init; }
     public required DbSet<Scanner> Scanners { get; init; }
+
+    public required DbSet<ReplenishEvent> ReplenishEvents { get; init; }
 }

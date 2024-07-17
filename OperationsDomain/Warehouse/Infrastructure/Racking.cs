@@ -21,10 +21,6 @@ public sealed class Racking
     public bool IsAvailable() =>
         Owner is null &&
         Pallet is null;
-    public bool CanBePickedFrom() =>
-        Owner is null &&
-        Pallet is not null &&
-        Pallet.CanBePickedFrom();
     public bool PalletFits( Pallet pallet ) =>
         Length > pallet.Length &&
         Width > pallet.Width &&
@@ -38,6 +34,17 @@ public sealed class Racking
         if (palletAdded)
             Pallet = pallet;
         
+        return palletAdded;
+    }
+    public bool ReplenPallet( Pallet pallet )
+    {
+        bool palletAdded = Pallet is null
+            && PalletFits( pallet )
+            && Capacity > pallet.Weight;
+
+        if (palletAdded)
+            Pallet = pallet;
+
         return palletAdded;
     }
     public bool RemovePallet()

@@ -4,12 +4,20 @@ namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 public sealed class ReceivingTask : WarehouseTask
 {
-    public Trailer Trailer { get; private set; } = default!;
-    public Dock Dock { get; private set; } = default!;
-    public Area Area { get; private set; } = default!;
+    public ReceivingTask() {}
+    public ReceivingTask( Trailer trailer, Dock dock, Area area )
+    {
+        Trailer = trailer;
+        Dock = dock;
+        Area = area;
+    }
+    
+    public Trailer Trailer { get; private set; } = null!;
+    public Dock Dock { get; private set; } = null!;
+    public Area Area { get; private set; } = null!;
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> StagedPallets { get; private set; } = [];
-
+    
     internal bool InitializeReceiving( Guid trailerId, Guid dockId, Guid areaId )
     {
         var validArea = trailerId == Trailer.Id

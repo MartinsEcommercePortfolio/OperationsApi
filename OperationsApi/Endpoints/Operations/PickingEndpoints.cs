@@ -33,14 +33,12 @@ internal static class PickingEndpoints
             static async (
                     [FromQuery] Guid lineId,
                     [FromQuery] Guid rackingId,
-                    [FromQuery] Guid palletId,
                     HttpContext http,
                     IPickingRepository repository ) =>
                 await StartPickingLocation(
                     http.Employee(),
                     lineId,
                     rackingId,
-                    palletId,
                     repository ) );
 
         app.MapPost( "api/tasks/picking/pickItem",
@@ -107,10 +105,10 @@ internal static class PickingEndpoints
             ? Results.Ok( PickingTaskSummary.FromModel( employee.TaskAs<PickingTask>() ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartPickingLocation( Employee employee, Guid lineId, Guid rackingId, Guid palletId, IPickingRepository repository )
+    static async Task<IResult> StartPickingLocation( Employee employee, Guid lineId, Guid rackingId, IPickingRepository repository )
     {
         var task = employee
-            .StartPickingLine( lineId, palletId, rackingId );
+            .StartPickingLine( lineId, rackingId );
 
         return task && await repository.SaveAsync()
             ? Results.Ok( true )
@@ -118,13 +116,14 @@ internal static class PickingEndpoints
     }
     static async Task<IResult> PickItem( Employee employee, Guid itemId, IPickingRepository repository )
     {
-        var picked = employee
-            .PickItem( itemId );
+        var picking = await repository.GetPickingOperationsWithEvents();
+        
+        var picked = picking is not null
+            && employee.PickItem( picking, itemId );
 
         return picked && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
-
     }
     static async Task<IResult> FinishPickingLocation( Employee employee, Guid lineId, IPickingRepository repository )
     {

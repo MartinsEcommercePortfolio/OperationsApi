@@ -4,11 +4,22 @@ namespace OperationsDomain.Warehouse.Infrastructure;
 
 public sealed class Trailer
 {
+    internal Trailer( string number, Dock dock, List<Pallet> pallets )
+    {
+        Id = Guid.NewGuid();
+        Number = number;
+        Dock = dock;
+        Pallets = pallets;
+    }
+    
     public Guid Id { get; private set; }
-    public string Number { get; private set; } = string.Empty;
-    public Dock? Dock { get; private set; }
+    public string Number { get; private set; }
+    public Dock Dock { get; private set; }
     public Employee? Owner { get; private set; }
-    public List<Pallet> Pallets { get; private set; } = [];
+    public List<Pallet> Pallets { get; private set; }
+
+    public static Trailer CreateFrom( string number, Dock dock, List<Pallet> pallets ) =>
+        new Trailer( number, dock, pallets );
     
     public Pallet? GetPallet( Guid palletId ) =>
         Pallets.FirstOrDefault( p => p.Id == palletId );
@@ -21,9 +32,6 @@ public sealed class Trailer
         Pallets.Add( pallet );
         return true;
     }
-    public bool IsEmpty() =>
-        Pallets.Count <= 0;
-
     public bool AssignTo( Employee employee )
     {
         if (Owner is not null)

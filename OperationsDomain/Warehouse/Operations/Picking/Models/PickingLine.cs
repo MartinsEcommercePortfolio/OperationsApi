@@ -1,5 +1,6 @@
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
@@ -10,34 +11,35 @@ public sealed class PickingLine
     public List<Item> PickedItems { get; private set; } = [];
     public int Quantity { get; private set; }
     public bool Completed { get; private set; }
-    public bool Started { get; set; }
+    public bool Started { get; private set; }
     
-    internal bool StartPicking( Employee employee, Guid palletId, Guid rackingId )
+    internal bool StartPicking( Employee employee, Guid rackingId )
     {
-        if (Started)
+        if (Started || Completed)
             return false;
 
-        bool started = !Completed
-            && !Started
-            && Racking.Id == rackingId
-            && Racking.Pallet is not null
-            && Racking.Pallet.Id == palletId
+        bool started = Racking.Id == rackingId
             && Racking.AssignTo( employee );
         
         return started;
     }
-    internal bool PickItem( Employee employee, Guid itemId )
+    internal bool PickItem( Employee employee, PickingOperations picking, Guid itemId )
     {
         Item? item = null;
         var pallet = Racking.Pallet;
 
-        bool picked = employee == Racking.Owner
-            && pallet is not null
+        var picked = pallet is not null 
+            && employee == Racking.Owner
             && PickedItems.All( i => i.Id != itemId )
             && pallet.PickFrom( Racking, employee, itemId, out item );
+
+        if (!picked)
+            return false;
         
-        if (picked)
-            PickedItems.Add( item! );
+        PickedItems.Add( item! );
+
+        if (pallet!.IsEmpty())
+            picking.SubmitReplenishEvent( new ReplenishEvent( Racking ) );
 
         if (PickedItems.Count == Quantity)
             Completed = true;

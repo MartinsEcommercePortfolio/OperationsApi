@@ -23,4 +23,18 @@ internal class PickingRepository( WarehouseDbContext dbContext, ILogger<PickingR
             return ProcessDbException<PickingOperations?>( e, null );
         }
     }
+    public async Task<PickingOperations?> GetPickingOperationsWithEvents()
+    {
+        try
+        {
+            return await DbContext.Picking
+                .Include( static p => p.ReplenishEvents )
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
+        }
+        catch ( Exception e )
+        {
+            return ProcessDbException<PickingOperations?>( e, null );
+        }
+    }
 }

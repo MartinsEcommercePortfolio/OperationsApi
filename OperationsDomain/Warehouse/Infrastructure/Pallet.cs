@@ -1,5 +1,7 @@
 using OperationsDomain.Catalog;
 using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Warehouse.Operations.Picking.Models;
+using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
 
@@ -8,6 +10,15 @@ public sealed class Pallet
     public Pallet( Guid id )
     {
         Id = id;
+    }
+
+    public static Pallet NewEmpty( Employee employee )
+    {
+        Pallet pallet = new( Guid.NewGuid() ) {
+            Id = Guid.NewGuid()
+        };
+        pallet.AssignTo( employee );
+        return pallet;
     }
     
     public Guid Id { get; private set; }
@@ -29,74 +40,23 @@ public sealed class Pallet
     public double Width { get; private set; }
     public double Height { get; private set; }
     public double Weight { get; private set; }
-    
+
+    public bool IsEmpty() =>
+        Items.Count <= 0;
     public bool IsOwned() => 
-        Employee is not null;
-    public bool IsOwnedBy( Employee employee ) =>
-        Employee == employee;
-    public bool IsRacked() =>
-        RackingId is not null || Racking is not null;
+        EmployeeId is not null;
     public bool IsStaged() =>
-        AreaId is not null || Area is not null;
-    public bool IsCorrectArea( Guid areaId ) =>
-        AreaId == areaId;
+        AreaId is not null;
 
-    public bool CanBeStaged( Employee employee ) =>
-        IsOwnedBy( employee ) &&
-        Area is not null &&
-        Racking is not null;
-    public bool CanBeRacked( Employee employee ) =>
-        IsOwnedBy( employee );
-    public bool CanBePutaway() =>
-        !IsOwned() &&
-        IsStaged();
-    public bool CanBePicked() =>
-        !IsOwned() &&
-        IsRacked();
-    public bool CanBePickedFrom() =>
-        !IsOwned() &&
-        IsRacked();
-    
-    public bool Stage( Employee employee, Area area )
-    {
-        if (!CanBeStaged( employee ))
-            return false;
-        
-        ClearOwners();
-        SetArea( area );
-        return true;
-    }
-    public bool Pick( Employee employee )
-    {
-        return false;
-    }
-    public bool Rack( Employee employee, Racking racking )
-    {
-        if (!CanBeRacked( employee ))
-            return false;
-        
-        ClearOwners();
-        SetRacking( racking );
-        return true;
-    }
-    public bool Load( Trailer trailer )
-    {
-        if (Trailer is not null)
-            return false;
-
-        ClearOwners();
-        Trailer = trailer;
-        return true;
-    }
     public bool PickFrom( Racking racking, Employee employee, Guid itemId, out Item? item )
     {
         item = Items.FirstOrDefault( i => i.Id == itemId );
-        return racking == Racking
+        
+        return item is not null
+            && racking == Racking
             && racking.IsOwnedBy( employee )
-            && item is not null
             && Items.Remove( item );
     }
-    
     public bool AssignTo( Employee employee )
     {
         if (IsOwned())
@@ -105,14 +65,6 @@ public sealed class Pallet
         ClearOwners();
         SetOwner( employee );
         return true;
-    }
-
-    public static Pallet NewEmpty( Employee employee )
-    {
-        Pallet pallet = new(Guid.NewGuid());
-        pallet.Id = Guid.NewGuid();
-        pallet.AssignTo( employee );
-        return pallet;
     }
     
     void ClearOwners()

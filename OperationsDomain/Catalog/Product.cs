@@ -1,4 +1,4 @@
-namespace OperationsDomain.Domain.Catalog;
+namespace OperationsDomain.Catalog;
 
 public sealed class Product
 {

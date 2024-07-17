@@ -41,7 +41,7 @@ public sealed class PickingTask : WarehouseTask
 
         return finished;
     }
-    internal bool StagePick( Guid areaId )
+    internal bool InitializeStaging( Guid areaId )
     {
         bool staged = IsStaging
             && StagingArea.Id == areaId

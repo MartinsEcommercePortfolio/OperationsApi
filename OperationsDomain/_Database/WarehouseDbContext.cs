@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsDomain.Warehouse;
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Equipment;
 using OperationsDomain.Warehouse.Infrastructure;

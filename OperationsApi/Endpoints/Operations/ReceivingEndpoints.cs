@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Receiving;
 using OperationsDomain.Warehouse.Operations.Receiving.Models;
 
@@ -30,15 +29,15 @@ internal static class ReceivingEndpoints
                     IReceivingRepository repository ) =>
             await StartReceivingTask( http.Employee(), taskId, trailerId, dockId, areaId, repository ) );
 
-        app.MapPost( "api/tasks/receiving/unloadPallet",
+        app.MapPost( "api/tasks/receiving/startReceive",
             static async ( [FromQuery] Guid trailerId, [FromQuery] Guid palletId, HttpContext http, IReceivingRepository repository ) =>
             await StartReceivingPallet( http.Employee(), trailerId, palletId, repository ) );
 
-        app.MapPost( "api/tasks/receiving/stagePallet",
+        app.MapPost( "api/tasks/receiving/finishReceive",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid areaId, HttpContext http, IReceivingRepository repository ) =>
             await FinishReceivingPallet( http.Employee(), palletId, areaId, repository ) );
 
-        app.MapGet( "api/tasks/receiving/completeTask",
+        app.MapGet( "api/tasks/receiving/finishTask",
             static async ( HttpContext http, IReceivingRepository repository ) =>
             await CompleteReceivingTask( http.Employee(), repository ) );
     }
@@ -47,7 +46,7 @@ internal static class ReceivingEndpoints
     {
         var task = employee.TaskAs<ReceivingTask>();
 
-        return task.IsStarted && !((WarehouseTask) task).IsFinished
+        return task.IsStarted && !task.IsFinished
             ? Results.Ok( ReceivingTaskSummary.FromModel( task ) )
             : Results.Problem();
     }
@@ -65,14 +64,11 @@ internal static class ReceivingEndpoints
         var receiving = await repository
             .GetReceivingOperationsWithTasks();
 
-        var task = receiving?
-            .StartReceivingTask( employee, taskId, trailerId, dockId, areaId );
-
-        var taskStarted = task is not null
-            && task.IsStarted;
+        var taskStarted = receiving is not null
+            && employee.StartReceiving( receiving, taskId, trailerId, dockId, areaId );
         
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( ReceivingTaskSummary.FromModel( task! ) )
+            ? Results.Ok( ReceivingTaskSummary.FromModel( employee.TaskAs<ReceivingTask>() ) )
             : Results.Problem();
     }
     static async Task<IResult> StartReceivingPallet( Employee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )
@@ -99,7 +95,7 @@ internal static class ReceivingEndpoints
             .GetReceivingOperationsWithTasks();
 
         var taskCompleted = receiving is not null
-            && receiving.CompleteReceivingTask( employee );
+            && employee.FinishReceiving( receiving );
 
         return taskCompleted && await repository.SaveAsync()
             ? Results.Ok( true )

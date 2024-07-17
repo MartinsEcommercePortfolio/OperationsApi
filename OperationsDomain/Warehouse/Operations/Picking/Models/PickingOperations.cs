@@ -1,5 +1,3 @@
-using OperationsDomain.Warehouse.Employees.Models;
-
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingOperations
@@ -10,28 +8,23 @@ public sealed class PickingOperations
 
     public PickingTask? GetNextPickingTask() => 
         PendingPickingTasks.FirstOrDefault();
-    public PickingTask? StartPickingTask( Employee employee, Guid taskId )
+    internal PickingTask? GetTask( Guid taskId ) =>
+        PendingPickingTasks.FirstOrDefault( t => t.Id == taskId );
+    internal bool AcceptTask( PickingTask task )
     {
-        var pickingTask = PendingPickingTasks
-            .FirstOrDefault( t => t.Id == taskId );
-
-        bool started = pickingTask is not null 
-            && !ActivePickingTasks.Contains( pickingTask )
-            && employee.StartPicking( pickingTask )
-            && PendingPickingTasks.Remove( pickingTask );
-
-        if (started)
-            ActivePickingTasks.Add( pickingTask! );
+        var accepted = task.IsStarted
+            && !task.IsFinished
+            && !ActivePickingTasks.Contains( task )
+            && PendingPickingTasks.Remove( task );
         
-        return pickingTask;
-    }
-    public bool FinishPickingTask( Employee employee, Guid areaId )
-    {
-        var task = employee
-            .TaskAs<PickingTask>();
+        if (accepted)
+            ActivePickingTasks.Add( task );
 
-        return employee.StagePick( areaId )
-            && employee.EndTask()
+        return accepted;
+    }
+    internal bool FinishTask( PickingTask task )
+    {
+        return task.IsFinished
             && ActivePickingTasks.Remove( task );
     }
 }

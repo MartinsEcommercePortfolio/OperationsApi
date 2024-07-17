@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
@@ -11,36 +10,31 @@ public sealed class ReceivingOperations
     public List<Pallet> Pallets { get; private set; } = [];
     public List<ReceivingTask> PendingReceivingTasks { get; private set; } = [];
     public List<ReceivingTask> ActiveReceivingTasks { get; private set; } = [];
+
+    public ReceivingTask? GetNextReceivingTask() =>
+        PendingReceivingTasks.FirstOrDefault();
     
-    // Shipping
-    public bool ReceiveTrailerWithPallets( string trailerNumber, string dockNumber, List<Pallet> pallets )
+    internal bool ReceiveTrailerWithPallets( string trailerNumber, string dockNumber, List<Pallet> pallets )
     {
         return false;
     }
-    
-    // Tasks
-    public ReceivingTask? GetNextReceivingTask() =>
-        PendingReceivingTasks.FirstOrDefault();
-    public ReceivingTask? StartReceivingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    internal ReceivingTask? GetReceivingTask( Guid taskId ) =>
+        PendingReceivingTasks.FirstOrDefault( t => t.Id == taskId );
+    internal bool AcceptReceivingTask( ReceivingTask receivingTask )
     {
-        var receivingTask = PendingReceivingTasks
-            .FirstOrDefault( t => t.Id == taskId );
-
-        var taskStarted = receivingTask is not null
-            && employee.StartReceiving( receivingTask, trailerId, dockId, areaId )
+        var accepted = receivingTask.IsStarted 
+            && !receivingTask.IsFinished
+            && !ActiveReceivingTasks.Contains( receivingTask ) 
             && PendingReceivingTasks.Remove( receivingTask );
 
-        if (taskStarted)
-            ActiveReceivingTasks.Add( receivingTask! );
-    
-        return receivingTask;
-    }
-    public bool CompleteReceivingTask( Employee employee )
-    {
-        var receivingTask = employee
-            .TaskAs<ReceivingTask>();
+        if (accepted)
+            ActiveReceivingTasks.Add( receivingTask );
 
-        return employee.EndTask()
+        return accepted;
+    }
+    internal bool CompleteTask( ReceivingTask receivingTask )
+    {
+        return receivingTask.IsFinished
             && ActiveReceivingTasks.Remove( receivingTask );
     }
 }

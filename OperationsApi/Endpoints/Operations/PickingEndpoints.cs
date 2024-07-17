@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Operations.Picking;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
@@ -12,15 +11,15 @@ internal static class PickingEndpoints
 {
     internal static void MapPickingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/picking/refreshPickingTask",
+        app.MapGet( "api/tasks/picking/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
-        app.MapGet( "api/tasks/picking/getNextPickingTask",
+        app.MapGet( "api/tasks/picking/nextTask",
             static async ( IPickingRepository repository ) =>
             await GetNextTask( repository ) );
 
-        app.MapPost( "api/tasks/picking/startPickingTask",
+        app.MapPost( "api/tasks/picking/startTask",
             static async (
                     [FromQuery] Guid taskId,
                     HttpContext http,
@@ -64,7 +63,7 @@ internal static class PickingEndpoints
                     lineId,
                     repository ) );
 
-        app.MapPost( "api/tasks/picking/stagePickingTask",
+        app.MapPost( "api/tasks/picking/finishTask",
             static async (
                     [FromQuery] Guid areaId,
                     HttpContext http,
@@ -101,14 +100,11 @@ internal static class PickingEndpoints
         var picking = await repository
             .GetPickingOperationsWithTasks();
         
-        var task = picking?
-            .StartPickingTask( employee, taskId );
-
-        var pickStarted = task is not null
-            && task.IsStarted;
+        var pickStarted = picking is not null
+            && employee.StartPicking( picking, taskId );
         
         return pickStarted && await repository.SaveAsync()
-            ? Results.Ok( task )
+            ? Results.Ok( PickingTaskSummary.FromModel( employee.TaskAs<PickingTask>() ) )
             : Results.Problem();
     }
     static async Task<IResult> StartPickingLocation( Employee employee, Guid lineId, Guid rackingId, Guid palletId, IPickingRepository repository )
@@ -145,7 +141,7 @@ internal static class PickingEndpoints
             .GetPickingOperationsWithTasks();
 
         var taskCompleted = picking is not null
-            && picking.FinishPickingTask( employee, areaId );
+            && employee.FinishPicking( picking, areaId );
 
         return taskCompleted && await repository.SaveAsync()
             ? Results.Ok( true )

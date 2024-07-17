@@ -11,54 +11,38 @@ internal static class ReplenishingEndpoints
 {
     internal static void MapReplenishingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/replenishing/refreshReplenishingTask",
+        app.MapGet( "api/tasks/replenishing/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.Employee() ) );
         
-        app.MapGet( "api/tasks/replenishing/getNextReplenishingTask",
+        app.MapGet( "api/tasks/replenishing/nextTask",
             static async ( IReplenishingRepository repository ) =>
             await GetNextReplenishingTask( repository ) );
 
-        app.MapPost( "api/tasks/replenishing/startReplenishingTask",
+        app.MapPost( "api/tasks/replenishing/startTask",
             static async (
                     [FromQuery] Guid taskId,
+                    [FromQuery] Guid rackingId,
+                    [FromQuery] Guid palletId,
                     HttpContext http,
                     IReplenishingRepository repository ) =>
                 await StartReplenishingTask(
                     http.Employee(),
                     taskId,
-                    repository ) );
-
-        app.MapPost( "api/tasks/replenishing/pickupReplen",
-            static async (
-                    [FromQuery] Guid rackingId,
-                    [FromQuery] Guid palletId,
-                    HttpContext http,
-                    IReplenishingRepository repository ) =>
-                await PickupReplenishingPallet(
-                    http.Employee(),
                     rackingId,
                     palletId,
                     repository ) );
 
-        app.MapPost( "api/tasks/replenishing/replenLocation",
+        app.MapPost( "api/tasks/replenishing/finishTask",
             static async (
                     [FromQuery] Guid rackingId,
                     [FromQuery] Guid palletId,
-                    HttpContext http,
-                    IReplenishingRepository repository ) =>
-                await ReplenishLocation(
-                    http.Employee(),
-                    rackingId,
-                    palletId,
-                    repository ) );
-
-        app.MapPost( "api/tasks/replenishing/finishReplenishingTask",
-            static async (
                     HttpContext http,
                     IReplenishingRepository repository ) =>
                 await FinishReplenishingTask(
                     http.Employee(),
+                    rackingId,
+                    palletId,
                     repository ) );
     }
 
@@ -82,46 +66,25 @@ internal static class ReplenishingEndpoints
             ? Results.Ok( ReplenishingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartReplenishingTask( Employee employee, Guid taskId, IReplenishingRepository repository )
+    static async Task<IResult> StartReplenishingTask( Employee employee, Guid taskId, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenishing = await repository
             .GetReplenishingOperationsWithTasks();
         
-        var replenishingTask = replenishing?
-            .StartReplenishingTask( employee, taskId );
-
-        var taskStarted = replenishingTask is not null
-            && replenishingTask.IsStarted;
+        var taskStarted = replenishing is not null
+            && employee.StartReplenishing( replenishing, taskId, rackingId, palletId );
         
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( ReplenishingTaskSummary.FromModel( replenishingTask! ) )
+            ? Results.Ok( ReplenishingTaskSummary.FromModel( employee.TaskAs<ReplenishingTask>() ) )
             : Results.Problem();
     }
-    static async Task<IResult> PickupReplenishingPallet( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
-    {
-        var replenPicked = employee
-            .PickReplenishingPallet( rackingId, palletId );
-
-        return replenPicked && await repository.SaveAsync()
-            ? Results.Ok( replenPicked )
-            : Results.Problem();
-    }
-    static async Task<IResult> ReplenishLocation( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
-    {
-        var replenished = employee
-            .ReplenishLocation( rackingId, palletId );
-
-        return replenished && await repository.SaveAsync()
-            ? Results.Ok( replenished )
-            : Results.Problem();
-    }
-    static async Task<IResult> FinishReplenishingTask( Employee employee, IReplenishingRepository repository )
+    static async Task<IResult> FinishReplenishingTask( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenishing = await repository
             .GetReplenishingOperationsWithTasks();
 
         var replenished = replenishing is not null
-            && replenishing.FinishReplenishingTask( employee );
+            && employee.FinishReplenishing( replenishing, rackingId, palletId );
 
         return replenished && await repository.SaveAsync()
             ? Results.Ok( true )

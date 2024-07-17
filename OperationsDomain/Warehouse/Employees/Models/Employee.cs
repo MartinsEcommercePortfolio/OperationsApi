@@ -53,9 +53,18 @@ public sealed class Employee
     }
     
     // RECEIVING
-    public bool StartReceiving( ReceivingTask task, Guid trailerId, Guid dockId, Guid areaId ) =>
-        StartTask( task ) &&
-        task.InitializeReceiving( trailerId, dockId, areaId );
+    public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    {
+        if (Task is not null)
+            return false;
+
+        var receivingTask = receiving.GetReceivingTask( taskId );
+
+        return receivingTask is not null
+            && receivingTask.InitializeReceiving( trailerId, dockId, areaId )
+            && StartTask( receivingTask )
+            && receiving.AcceptReceivingTask( receivingTask );
+    }
     public bool StartReceivingPallet( Guid trailerId, Guid palletId )
     {
         var task = TaskAs<ReceivingTask>();
@@ -72,42 +81,80 @@ public sealed class Employee
             && StagePallet( task.Area, task.CurrentPallet )
             && task.FinishReceivingPallet( areaId, palletId );
     }
+    public bool FinishReceiving( ReceivingOperations receiving )
+    {
+        var task = TaskAs<ReceivingTask>();
+
+        return EndTask()
+            && receiving.CompleteTask( task );
+    }
     
     // PUTAWAYS
-    public bool StartPutaway( PutawayTask task, Racking racking, Pallet pallet ) =>
-        pallet.Area is not null &&
-        StartTask( task ) &&
-        task.InitializePutaway( racking, pallet ) &&
-        UnStagePallet( pallet.Area, pallet );
-    public bool FinishPutaway( Guid rackingId, Guid palletId )
+    public async Task<bool> StartPutaway( PutawayOperations putaways, Guid palletId )
+    {
+        if (Task is not null)
+            return false;
+
+        var putawayTask = new PutawayTask();
+
+        var pallet = putaways.FindPallet( palletId );
+        if (pallet is null)
+            return false;
+
+        var racking = await putaways.FindRackingForPutaway( pallet );
+
+        return racking is not null
+            && pallet.Area is not null
+            && putawayTask.InitializePutaway( racking, pallet )
+            && StartTask( putawayTask )
+            && putaways.AcceptPutawayTask( putawayTask )
+            && UnStagePallet( pallet.Area, pallet );
+    }
+    public bool FinishPutaway( PutawayOperations putaways, Guid rackingId, Guid palletId )
     {
         var task = TaskAs<PutawayTask>();
 
         return task.CompletePutaway( rackingId, palletId )
-            && RackPallet( task.PutawayRacking, task.Pallet );
+            && RackPallet( task.PutawayRacking, task.Pallet )
+            && putaways.FinishPutawayTask( task );
     }
     
     // REPLENS
-    public bool StartReplenishing( ReplenishingTask task ) =>
-        StartTask( task );
-    public bool PickReplenishingPallet( Guid rackingId, Guid palletId )
+    public bool StartReplenishing( ReplenishingOperations replenishing, Guid taskId, Guid rackingId, Guid palletId )
     {
-        var task = TaskAs<ReplenishingTask>();
+        if (Task is not null)
+            return false;
+        
+        var replenishingTask = replenishing.GetReplenishingTask( taskId );
 
-        return task.ConfirmPickup( rackingId, palletId )
-            && UnRackPallet( task.FromRacking, task.ReplenPallet );
+        return replenishingTask is not null
+            && StartTask( replenishingTask )
+            && replenishing.AcceptReplenishingTask( replenishingTask )
+            && replenishingTask.ConfirmPickup( rackingId, palletId )
+            && UnRackPallet( replenishingTask.FromRacking, replenishingTask.ReplenPallet );
     }
-    public bool ReplenishLocation( Guid rackingId, Guid palletId )
+    public bool FinishReplenishing( ReplenishingOperations replenishing, Guid rackingId, Guid palletId )
     {
         var task = TaskAs<ReplenishingTask>();
 
         return task.ConfirmDeposit( rackingId, palletId )
-            && RackPallet( task.ToRacking, task.ReplenPallet );
+            && RackPallet( task.ToRacking, task.ReplenPallet )
+            && EndTask()
+            && replenishing.FinishReplenishingTask( task );
     }
     
     // PICKING
-    public bool StartPicking( PickingTask task ) =>
-        StartTask( task );
+    public bool StartPicking( PickingOperations picking, Guid taskId )
+    {
+        if (Task is not null)
+            return false;
+
+        var pickingTask = picking.GetTask( taskId );
+
+        return pickingTask is not null
+            && StartTask( pickingTask )
+            && picking.AcceptTask( pickingTask );
+    }
     public bool StartPickingLine( Guid lineId, Guid rackingId, Guid palletId )
     {
         var task = TaskAs<PickingTask>();
@@ -129,18 +176,28 @@ public sealed class Employee
         
         return task.FinishPickingLocation( lineId );
     }
-    public bool StagePick( Guid areaId )
+    public bool FinishPicking( PickingOperations picking, Guid areaId )
     {
         var task = TaskAs<PickingTask>();
-        
-        return StagePallet( task.StagingArea, task.Pallet )
-            && task.StagePick( areaId );
+
+        return task.InitializeStaging( areaId )
+            && StagePallet( task.StagingArea, task.Pallet )
+            && EndTask()
+            && picking.FinishTask( task );
     }
-    
     // LOADING
-    public bool StartLoadingTask( LoadingTask loadingTask, Guid trailerId, Guid dockId, Guid areaId ) =>
-        loadingTask.InitializeLoadingTask( trailerId, dockId, areaId ) &&
-        StartTask( loadingTask );
+    public bool StartLoading( LoadingOperations loading, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    {
+        if (Task is not null)
+            return false;
+
+        var loadingTask = loading.GetTask( taskId );
+
+        return loadingTask is not null
+            && loadingTask.InitializeLoadingTask( trailerId, dockId, areaId )
+            && StartTask( loadingTask )
+            && loading.AcceptTask( loadingTask );
+    }
     public bool StartLoadingPallet( Guid areaId, Guid palletId )
     {
         var task = TaskAs<LoadingTask>();
@@ -152,9 +209,17 @@ public sealed class Employee
     public bool FinishLoadingPallet( Guid trailerId, Guid palletId )
     {
         var task = TaskAs<LoadingTask>();
+        
         return Pallet is not null
             && task.FinishLoadingPallet( trailerId, palletId )
             && LoadPallet( task.TrailerToLoad, Pallet );
+    }
+    public bool FinishLoading( LoadingOperations loading )
+    {
+        var task = TaskAs<LoadingTask>();
+
+        return EndTask()
+            && loading.CompleteTask( task );
     }
     
     // ACTIONS

@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
@@ -9,41 +8,34 @@ public sealed class PutawayOperations
     public List<Pallet> Pallets { get; private set; } = [];
     public List<PutawayTask> PutawayTasks { get; private set; } = [];
     
-    public async Task<PutawayTask?> StartPutawayTask( Employee employee, Guid palletId )
+    internal bool AcceptPutawayTask( PutawayTask task )
     {
-        var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
-        if (pallet is null)
-            return null;
-
-        var racking = await FindRackingForPutaway( pallet );
-        if (racking is null)
-            return null;
-
-        PutawayTask putawayTask = new();
-
-        var taskStarted = employee
-            .StartPutaway( putawayTask, racking, pallet );
-
-        if (taskStarted)
-            PutawayTasks.Add( putawayTask );
+        var accepted = task.IsStarted
+            && !PutawayTasks.Contains( task );
         
-        return putawayTask;
-    }
-    public bool FinishPutawayTask( Employee employee, Guid rackingId, Guid palletId )
-    {
-        var task = employee.TaskAs<PutawayTask>();
+        if (accepted)
+            PutawayTasks.Add( task );
 
-        return employee.FinishPutaway( rackingId, palletId )
-            && employee.EndTask()
+        return accepted;
+    }
+    public bool FinishPutawayTask( PutawayTask task )
+    {
+        return task.IsFinished
             && PutawayTasks.Remove( task );
     }
-
-    async Task<Racking?> FindRackingForPutaway( Pallet pallet )
+        
+    internal Pallet? FindPallet( Guid palletId )
+    {
+        return Pallets.FirstOrDefault( p => p.Id == palletId );
+    }
+    internal async Task<Racking?> FindRackingForPutaway( Pallet pallet )
     {
         return await Task.Run( () => {
             return Rackings
-                .FirstOrDefault( r => r.IsAvailable() 
-                    && r.PalletFits( pallet ) );
+                .FirstOrDefault( r => 
+                    r.IsAvailable() &&
+                    r.Level != "0" &&
+                    r.PalletFits( pallet ) );
         } );
     }
 }

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;

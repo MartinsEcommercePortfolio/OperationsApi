@@ -1,4 +1,4 @@
-using OperationsDomain.Domain.Catalog;
+using OperationsDomain.Catalog;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;

@@ -1,5 +1,3 @@
-using OperationsDomain.Warehouse.Employees.Models;
-
 namespace OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 public sealed class ReplenishingOperations
@@ -13,26 +11,23 @@ public sealed class ReplenishingOperations
         var task = PendingReplenishingTasks.FirstOrDefault();
         return task;
     }
-    public ReplenishingTask? StartReplenishingTask( Employee employee, Guid taskId )
+    internal ReplenishingTask? GetReplenishingTask( Guid taskId ) =>
+        PendingReplenishingTasks.FirstOrDefault( t => t.Id == taskId );
+    internal bool AcceptReplenishingTask( ReplenishingTask task )
     {
-        var replenishingTask = PendingReplenishingTasks
-            .FirstOrDefault( t => t.Id == taskId );
+        var accepted = task.IsStarted
+            && !task.IsFinished
+            && !ActiveReplenishingTasks.Contains( task )
+            && PendingReplenishingTasks.Remove( task );
 
-        var started = replenishingTask is not null
-            && employee.StartReplenishing( replenishingTask )
-            && PendingReplenishingTasks.Remove( replenishingTask );
+        if (accepted)
+            ActiveReplenishingTasks.Add( task );
 
-        if (started)
-            ActiveReplenishingTasks.Add( replenishingTask! );
-        
-        return replenishingTask;
+        return accepted;
     }
-    public bool FinishReplenishingTask( Employee employee )
+    internal bool FinishReplenishingTask( ReplenishingTask task )
     {
-        var task = employee
-            .TaskAs<ReplenishingTask>();
-        
-        return employee.EndTask()
+        return task.IsFinished
             && ActiveReplenishingTasks.Remove( task );
     }
 }

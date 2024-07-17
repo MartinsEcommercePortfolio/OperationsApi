@@ -13,8 +13,24 @@ internal sealed class ReplenishingRepository( WarehouseDbContext dbContext, ILog
         try
         {
             return await DbContext.Replenishing
-                .Include( static w => w.PendingReplenishingTasks )
-                .Include( static w => w.ActiveReplenishingTasks )
+                .Include( static r => r.PendingReplenishingTasks )
+                .Include( static r => r.ActiveReplenishingTasks )
+                .FirstOrDefaultAsync()
+                .ConfigureAwait( false );
+        }
+        catch ( Exception e )
+        {
+            return ProcessDbException<ReplenishingOperations?>( e, null );
+        }
+    }
+    public async Task<ReplenishingOperations?> GetReplenishingOperationsWithEventsAndTasks()
+    {
+        try
+        {
+            return await DbContext.Replenishing
+                .Include( static r => r.ReplenishEvents )
+                .Include( static r => r.PendingReplenishingTasks )
+                .Include( static r => r.ActiveReplenishingTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }

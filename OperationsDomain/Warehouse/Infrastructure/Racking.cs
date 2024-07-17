@@ -1,3 +1,4 @@
+using OperationsDomain.Catalog;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
@@ -5,6 +6,7 @@ namespace OperationsDomain.Warehouse.Infrastructure;
 public sealed class Racking
 {
     public Guid Id { get; private set; }
+    public bool IsPickSlot { get; private set; }
     public string Aisle { get; private set; } = string.Empty;
     public string Bay { get; private set; } = string.Empty;
     public string Level { get; private set; } = string.Empty;
@@ -15,6 +17,7 @@ public sealed class Racking
     public Guid OwnerId { get; private set; }
     public Employee? Owner { get; private set; }
     public Pallet? Pallet { get; private set; }
+    public Product Product { get; private set; } = new();
 
     public bool IsOwnedBy( Employee? employee ) =>
         Owner == employee;

@@ -23,7 +23,7 @@ public sealed class PickingLine
         
         return started;
     }
-    internal bool PickItem( Employee employee, PickingOperations picking, Guid itemId )
+    internal bool PickItem( Employee employee, ReplenishingOperations replenishing, Guid itemId )
     {
         Item? item = null;
         var pallet = Racking.Pallet;
@@ -39,7 +39,7 @@ public sealed class PickingLine
         PickedItems.Add( item! );
 
         if (pallet!.IsEmpty())
-            picking.SubmitReplenishEvent( new ReplenishEvent( Racking ) );
+            replenishing.SubmitReplenishEvent( new ReplenishEvent( Racking ) );
 
         if (PickedItems.Count == Quantity)
             Completed = true;

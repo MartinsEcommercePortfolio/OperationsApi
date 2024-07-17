@@ -6,4 +6,5 @@ namespace OperationsDomain.Warehouse.Operations.Replenishing;
 public interface IReplenishingRepository : IEfCoreRepository
 {
     public Task<ReplenishingOperations?> GetReplenishingOperationsWithTasks();
+    public Task<ReplenishingOperations?> GetReplenishingOperationsWithEventsAndTasks();
 }

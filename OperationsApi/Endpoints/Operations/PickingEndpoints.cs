@@ -4,6 +4,7 @@ using OperationsApi.Utilities;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Operations.Picking;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
+using OperationsDomain.Warehouse.Operations.Replenishing;
 
 namespace OperationsApi.Endpoints.Operations;
 
@@ -45,7 +46,7 @@ internal static class PickingEndpoints
             static async (
                     [FromQuery] Guid itemId,
                     HttpContext http,
-                    IPickingRepository repository ) =>
+                    IReplenishingRepository repository ) =>
                 await PickItem(
                     http.Employee(),
                     itemId,
@@ -114,12 +115,12 @@ internal static class PickingEndpoints
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> PickItem( Employee employee, Guid itemId, IPickingRepository repository )
+    static async Task<IResult> PickItem( Employee employee, Guid itemId, IReplenishingRepository repository )
     {
-        var picking = await repository.GetPickingOperationsWithEvents();
+        var replenishing = await repository.GetReplenishingOperationsWithEventsAndTasks();
         
-        var picked = picking is not null
-            && employee.PickItem( picking, itemId );
+        var picked = replenishing is not null
+            && employee.PickItem( replenishing, itemId );
 
         return picked && await repository.SaveAsync()
             ? Results.Ok( true )

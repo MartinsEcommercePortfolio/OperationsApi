@@ -155,12 +155,12 @@ public sealed class Employee
         return pickLine is not null
             && pickLine.StartPicking( this, rackingId );
     }
-    public bool PickItem( PickingOperations picking, Guid itemId )
+    public bool PickItem( ReplenishingOperations replenishing, Guid itemId )
     {
         var task = TaskAs<PickingTask>();
 
         return task.CurrentPickLine is not null
-            && task.CurrentPickLine.PickItem( this, picking, itemId );
+            && task.CurrentPickLine.PickItem( this, replenishing, itemId );
     }
     public bool FinishPickingLine( Guid lineId )
     {

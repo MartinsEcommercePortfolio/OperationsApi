@@ -23,12 +23,6 @@ internal static class HttpExtentions
             return new PutawayEmployee();
         return userObj as PutawayEmployee ?? new PutawayEmployee();
     }
-    public static ReplenishingEmployee GetReplenishingEmployee( this HttpContext http )
-    {
-        if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return new ReplenishingEmployee();
-        return userObj as ReplenishingEmployee ?? new ReplenishingEmployee();
-    }
     public static PickingEmployee GetPickingEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))

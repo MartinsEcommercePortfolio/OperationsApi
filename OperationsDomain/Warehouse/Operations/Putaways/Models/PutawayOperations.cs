@@ -1,4 +1,5 @@
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
 
@@ -20,7 +21,7 @@ public sealed class PutawayOperations
             ? new PutawayTask( pallet, pallet.Area, racking )
             : null;
     }
-    internal bool AcceptPutawayTask( PutawayTask task )
+    internal bool ActivateTask( PutawayTask task )
     {
         var accepted = task.IsStarted
             && !PutawayTasks.Contains( task );

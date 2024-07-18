@@ -1,49 +1,52 @@
 using OperationsDomain.Shipping.Models;
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Loading.Models;
 
 public sealed class LoadingTask : WarehouseTask
 {
-    public Trailer TrailerToLoad { get; private set; } = null!;
-    public Dock DockToUse { get; private set; } = null!;
-    public List<Area> AreasToPickFrom { get; private set; } = null!;
-    public List<Pallet> PalletsToLoad { get; private set; } = null!;
-
-    internal bool InitializeLoadingTask( Guid trailerId, Guid dockId, Guid areaId )
+    public LoadingTask( Trailer trailer, Dock dock, List<Pallet> pallets )
     {
-        var isValid = TrailerToLoad.Id == trailerId
-            && DockToUse.Id == dockId
-            && AreasToPickFrom.Any( a => a.Id == areaId );
-        
-        return isValid;
+        Trailer = trailer;
+        Dock = dock;
+        Pallets = pallets;
     }
-    internal Pallet? GetLoadingPallet( Guid areaId, Guid palletId )
+    
+    public Trailer Trailer { get; private set; }
+    public Dock Dock { get; private set; }
+    public List<Pallet> Pallets { get; private set; }
+
+    internal bool InitializeLoadingTask( Employee employee, Guid trailerId, Guid dockId )
     {
-        var area = AreasToPickFrom.FirstOrDefault( a => a.Id == areaId );
-        var pallet = PalletsToLoad.FirstOrDefault( p => p.Id == palletId );
-
-        bool startLoading = area is not null
-            && pallet is not null;
-
-        return startLoading
-            ? pallet
-            : null;
+        return Trailer.Id == trailerId
+            && Dock.Id == dockId
+            && Trailer.Pallets.All( p => p.AssignTo( employee ) );
+    }
+    internal Pallet? GetLoadingPallet( Guid palletId )
+    {
+        return Pallets.FirstOrDefault( p => p.Id == palletId );
     }
     internal bool FinishLoadingPallet( Guid trailerId, Guid palletId )
     {
-        var pallet = PalletsToLoad.FirstOrDefault( p => p.Id == palletId );
+        var pallet = Pallets.FirstOrDefault( p => p.Id == palletId );
 
         var loaded = pallet is not null
-            && TrailerToLoad.Id == trailerId
-            && PalletsToLoad.Remove( pallet );
+            && Trailer.Id == trailerId
+            && Pallets.Remove( pallet );
 
         if (!loaded)
             return false;
 
-        if (PalletsToLoad.Count <= 0)
+        if (Pallets.Count <= 0)
             IsFinished = true;
 
         return true;
     }
+    internal override bool Finish( Employee employee )
+    {
+        return Trailer.Pallets.All( p => p.UnAssignFrom( employee ) );
+    }
+
 }

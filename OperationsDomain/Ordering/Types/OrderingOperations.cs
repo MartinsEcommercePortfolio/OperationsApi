@@ -95,16 +95,12 @@ public sealed class OrderingOperations
                 .FirstOrDefault( p => p.Id == item.ProductId );
 
             var pickReserved = product is not null
-                && product.ReservePickAmount( item.Quantity );
+                && product.ReserveQuantity( item.Quantity );
 
             if (!pickReserved)
                 return false;
         }
 
         return true;
-    }
-    Trailer? FindTrailerForRoute( ShippingRoute shippingRoute, List<Trailer> trailers )
-    {
-        return null;
     }
 }

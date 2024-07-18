@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Ordering.Dtos;
 using OperationsDomain.Ordering;
 using OperationsDomain.Shipping;
+using OperationsDomain.Warehouse.Operations.Picking;
 
 namespace OperationsApi.Endpoints.Ordering;
 
@@ -12,23 +13,28 @@ internal static class OrderingEndpoints
         app.MapPost( "api/ordering/place",
             static async (
                     [FromBody] WarehouseOrderDto order,
-                    IShippingRepository shippingRepository,
-                    IOrderingRepository orderingRepository ) =>
+                    IOrderingRepository orderingRepository,
+                    IPickingRepository pickingRepository,
+                    IShippingRepository shippingRepository ) =>
                 await PlaceOrder(
                     order,
-                    shippingRepository,
-                    orderingRepository ) );
+                    orderingRepository,
+                    pickingRepository,
+                    shippingRepository) );
     }
 
-    static async Task<IResult> PlaceOrder( WarehouseOrderDto order, IShippingRepository shippingRepository, IOrderingRepository orderingRepository )
+    static async Task<IResult> PlaceOrder( WarehouseOrderDto order, IOrderingRepository orderingRepo, IPickingRepository pickingRepo, IShippingRepository shippingRepo )
     {
-        var shipping = await shippingRepository.GetShippingOperationsWithRoutes();
+        var ordering = await orderingRepo.GetOrderingOperationsForNewOrder();
+        var picking = await pickingRepo.GetPickingOperationsWithTasks();
+        var shipping = await shippingRepo.GetShippingOperationsWithRoutes();
 
-        var route = shipping?.GetRouteByPos( order.PosX, order.PosY );
+        if (ordering is null || shipping is null || picking is null)
+            return Results.Problem( "Failed to get repositories." );
+
+       /* var route = shipping.GetRouteByPos( order.PosX, order.PosY );
         if (route is null)
             return Results.NotFound( "No route found." );
-        
-        var ordering = await orderingRepository.GetOrderingOperationsForNewOrder();
 
         var orderPlaced = ordering is not null
             && ordering.AddOrder( order.ToModel( route ) )
@@ -36,6 +42,8 @@ internal static class OrderingEndpoints
 
         return orderPlaced
             ? Results.Ok( true )
-            : Results.Problem();
+            : Results.Problem();*/
+
+       return Results.Problem();
     }
 }

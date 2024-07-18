@@ -29,15 +29,15 @@ internal sealed class OrderingDispatcher(
         {
             _logger.LogInformation( "OrderingDispatcher is executing." );
 
-            await HandlePendingOrders();
-            await HandleCompletedOrders();
+            //await HandlePendingOrders();
+            //await HandleCompletedOrders();
             await Task.Delay( ExecutionInterval, stoppingToken );
         }
 
         _logger.LogInformation( "OrderingDispatcher has stopped." );
     }
     
-    async Task HandlePendingOrders()
+    /*async Task HandlePendingOrders()
     {
         await using AsyncServiceScope scope = _provider.CreateAsyncScope();
 
@@ -135,5 +135,5 @@ internal sealed class OrderingDispatcher(
     IShippingRepository GetShippingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IShippingRepository>() ?? throw new Exception( $"Failed to get {nameof( IShippingRepository )} from provider." );
     IPickingRepository GetPickingRepository( AsyncServiceScope scope ) =>
-        scope.ServiceProvider.GetService<IPickingRepository>() ?? throw new Exception( $"Failed to get {nameof( IPickingRepository )} from provider." );
+        scope.ServiceProvider.GetService<IPickingRepository>() ?? throw new Exception( $"Failed to get {nameof( IPickingRepository )} from provider." );*/
 }

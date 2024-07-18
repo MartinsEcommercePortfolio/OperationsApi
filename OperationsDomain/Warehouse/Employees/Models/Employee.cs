@@ -1,5 +1,4 @@
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 using OperationsDomain.Warehouse.Operations;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
@@ -7,8 +6,8 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 public class Employee
 {
     public Guid Id { get; private set; }
-    public Guid? PalletId { get; private set; }
-    public Pallet? Pallet { get; private set; }
+    public Guid? PalletEquippedId { get; private set; }
+    public Pallet? PalletEquipped { get; private set; }
     public WarehouseTask? Task { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public EmployeeWorkMode WorkMode { get; private set; }
@@ -49,40 +48,35 @@ public class Employee
     }
     
     // ACTIONS
-    public bool TakePallet( Pallet pallet )
+    public bool PickupPallet( Pallet pallet )
     {
-        bool assigned = Pallet is not null
-            && pallet.AssignTo( this );
-
-        if (assigned)
-            Pallet = pallet;
-
-        return assigned;
+        return PalletEquipped is null
+            && pallet.Pickup( this );
     }
-    public bool ReleasePallet( Pallet pallet )
+    public bool DropPallet( Pallet pallet )
     {
-        if (Pallet != pallet)
+        if (PalletEquipped != pallet)
             return false;
 
-        Pallet = null;
+        PalletEquipped = null;
         return true;
     }
     public bool LoadPallet( Trailer trailer, Pallet pallet ) =>
-        ReleasePallet( pallet ) &&
-        trailer.AddPallet( pallet );
+        DropPallet( pallet ) &&
+        trailer.AddPallet( this, pallet );
     public bool UnloadPallet( Trailer trailer, Pallet pallet ) =>
-        trailer.RemovePallet( pallet ) &&
-        TakePallet( pallet );
+        trailer.RemovePallet( this, pallet ) &&
+        PickupPallet( pallet );
     public bool StagePallet( Area area, Pallet pallet ) =>
-        ReleasePallet( pallet ) &&
-        area.AddPallet( pallet );
+        DropPallet( pallet ) &&
+        area.AddPallet( this, pallet );
     public bool UnStagePallet( Area area, Pallet pallet ) =>
-        area.RemovePallet( pallet ) &&
-        TakePallet( pallet );
+        area.RemovePallet( this, pallet ) &&
+        PickupPallet( pallet );
     public bool RackPallet( Racking racking, Pallet pallet ) =>
-        ReleasePallet( pallet ) &&
-        racking.AddPallet( pallet );
+        DropPallet( pallet ) &&
+        racking.AddPallet( this, pallet );
     public bool UnRackPallet( Racking racking, Pallet pallet ) =>
-        racking.RemovePallet() &&
-        TakePallet( pallet );
+        racking.RemovePallet( this, pallet ) &&
+        PickupPallet( pallet );
 }

@@ -1,4 +1,6 @@
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
 
@@ -21,6 +23,12 @@ public sealed class PutawayTask : WarehouseTask
     public Guid PalletId { get; private set; }
     public Guid PickupAreaId { get; private set; }
     public Guid PutawayRackingId { get; private set; }
+
+    public bool Initialize( Employee employee )
+    {
+        return PutawayRacking.AssignTo( employee )
+            && Pallet.AssignTo( employee );
+    }
 
     internal bool CompletePutaway( Guid rackingId, Guid palletId )
     {

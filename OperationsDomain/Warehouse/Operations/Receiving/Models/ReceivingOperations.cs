@@ -1,5 +1,6 @@
 using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
@@ -31,8 +32,8 @@ public sealed class ReceivingOperations
 
         if (!validTask)
             return false;
-        
-        trailer = Trailer.CreateFrom( trailerNumber, dock!, pallets );
+
+        trailer = new Trailer( trailerNumber, dock!, pallets );
         Trailers.Add( trailer );
 
         var task = new ReceivingTask( trailer, dock!, area! );

@@ -6,7 +6,7 @@ public sealed class LoadingEmployee : Employee
 {
     public LoadingTask? LoadingTask => TaskAs<LoadingTask>();
 
-    public bool StartLoading( LoadingOperations loading, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    public bool StartLoading( LoadingOperations loading, Guid taskId, Guid trailerId, Guid dockId )
     {
         if (LoadingTask is not null)
             return false;
@@ -14,22 +14,22 @@ public sealed class LoadingEmployee : Employee
         var task = loading.GetTask( taskId );
         
         return task is not null
-            && task.InitializeLoadingTask( trailerId, dockId, areaId )
+            && task.InitializeLoadingTask( this, trailerId, dockId )
             && StartTask( task )
             && loading.AcceptTask( task );
     }
-    public bool StartLoadingPallet( Guid areaId, Guid palletId )
+    public bool StartLoadingPallet( Guid palletId )
     {
-        var pallet = LoadingTask?.GetLoadingPallet( areaId, palletId );
+        var pallet = LoadingTask?.GetLoadingPallet( palletId );
         return pallet?.Area != null
             && UnStagePallet( pallet.Area, pallet );
     }
     public bool FinishLoadingPallet( Guid trailerId, Guid palletId )
     {
         return LoadingTask is not null
-            && Pallet is not null
+            && PalletEquipped is not null
             && LoadingTask.FinishLoadingPallet( trailerId, palletId )
-            && LoadPallet( LoadingTask.TrailerToLoad, Pallet );
+            && LoadPallet( LoadingTask.Trailer, PalletEquipped );
     }
     public bool FinishLoading( LoadingOperations loading )
     {

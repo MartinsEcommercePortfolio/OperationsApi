@@ -1,4 +1,5 @@
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
@@ -12,7 +13,7 @@ public sealed class PickingOperations
     public List<PickingTask> ActivePickingTasks { get; private set; } = [];
     public List<PickingTask> CompletedPickingTasks { get; private set; } = [];
 
-    public PickingTask? GeneratePickingTask( Guid orderId, List<(Guid, int)> productCounts )
+    public PickingTask? GeneratePickingTask( Guid orderId, Dictionary<Guid, int> palletCounts )
     {
         var dock = FindDockForTask();
         if (dock is null)
@@ -21,19 +22,11 @@ public sealed class PickingOperations
         var area = FindAreaForDock( dock );
         if (area is null)
             return null;
-        
-        List<PickingLine> lines = [];
-        foreach ( var pc in productCounts )
-        {
-            var racking = FindRackingForPickLine( pc.Item1 );
 
-            if (racking is null)
-                return null;
-
-            lines.Add( new PickingLine( racking, pc.Item2 ) );
-        }
-
-        return new PickingTask( orderId, dock, area, lines );
+        var pallets = FindPalletsToPick( palletCounts );
+        return pallets is not null
+            ? new PickingTask( orderId, dock, area, pallets )
+            : null;
     }
     public bool AddPendingTask( PickingTask task )
     {
@@ -80,8 +73,27 @@ public sealed class PickingOperations
         null;
     Area? FindAreaForDock( Dock dock ) =>
         null;
-    Racking? FindRackingForPickLine( Guid productId ) =>
-        Rackings.FirstOrDefault( r =>
-            r.IsPickSlot &&
-            r.Product.Id == productId );
+    List<Pallet>? FindPalletsToPick( Dictionary<Guid, int> palletCounts )
+    {
+        List<Pallet> pallets = [];
+
+        foreach ( var count in palletCounts )
+        {
+            for ( int i = 0; i < count.Value; i++ )
+            {
+                var racking = Rackings
+                    .FirstOrDefault( r =>
+                        r.Product.Id == count.Key &&
+                        r.Pallet is not null );
+
+                if (racking is null)
+                    return null;
+
+                pallets.Add( racking.Pallet! );
+            }
+
+        }
+        
+        return pallets;
+    }
 }

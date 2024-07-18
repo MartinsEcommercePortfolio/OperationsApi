@@ -14,8 +14,9 @@ public sealed class PutawayEmployee : Employee
         var putawayTask = await putaways.GenerateTask( palletId );
 
         return putawayTask is not null
+            && putawayTask.Initialize( this )
             && StartTask( putawayTask )
-            && putaways.AcceptPutawayTask( putawayTask )
+            && putaways.ActivateTask( putawayTask )
             && UnStagePallet( putawayTask.PickupArea, putawayTask.Pallet );
     }
     public bool FinishPutaway( PutawayOperations putaways, Guid rackingId, Guid palletId )

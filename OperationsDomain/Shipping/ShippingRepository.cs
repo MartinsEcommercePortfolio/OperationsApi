@@ -13,7 +13,6 @@ internal sealed class ShippingRepository( WarehouseDbContext dbContext, ILogger<
         try
         {
             return await DbContext.Shipping
-                .Include( static s => s.Routes )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }

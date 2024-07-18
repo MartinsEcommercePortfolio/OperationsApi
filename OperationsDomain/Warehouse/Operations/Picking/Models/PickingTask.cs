@@ -1,66 +1,47 @@
-using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingTask : WarehouseTask
 {
-    public PickingTask( Guid orderId, Dock dock, Area area, List<PickingLine> lines )
+    public PickingTask( Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets )
     {
-        OrderId = orderId;
+        Id = Guid.NewGuid();
+        WarehouseOrderId = warehouseOrderId;
         StagingDock = dock;
         StagingArea = area;
-        Pallet = Pallet.Empty();
-        PickLines = lines;
+        Pallets = pallets;
+        StagedPallets = [];
     }
     
-    public Guid OrderId { get; private set; }
+    public Guid WarehouseOrderId { get; private set; }
     public Dock StagingDock { get; private set; }
     public Area StagingArea { get; private set; }
-    public Pallet Pallet { get; private set; }
-    public PickingLine? CurrentPickLine { get; private set; }
-    public bool IsStaging { get; private set; }
-    public List<PickingLine> PickLines { get; private set; }
+    public Pallet? CurrentPallet { get; private set; }
+    public List<Pallet> Pallets { get; private set; }
+    public List<Pallet> StagedPallets { get; private set; }
     
-    internal override bool StartWith( Employee employee )
+    public Pallet? StartPickingPallet( Guid rackingId, Guid palletId )
     {
-        if (!base.StartWith( employee ))
-            return false;
-        Pallet = Pallet.Empty();
-        Pallet.AssignTo( employee );
-        CurrentPickLine = PickLines.FirstOrDefault();
-        return true;
-    }
-    internal PickingLine? SetPickingLine( Guid lineId )
-    {
-        if (IsStaging || CurrentPickLine is not null)
+        if (CurrentPallet is not null)
             return null;
 
-        CurrentPickLine = PickLines.FirstOrDefault( p =>
-            p.Id == lineId );
+        CurrentPallet = Pallets.FirstOrDefault( p => 
+            p.Id == palletId && p.Racking!.Id == rackingId );
 
-        return CurrentPickLine;
-    }
-    internal bool FinishPickingLocation( Guid lineId )
-    {
-        bool finished = CurrentPickLine is not null
-            && CurrentPickLine.Id == lineId
-            && CurrentPickLine.IsComplete();
-
-        if (finished)
-            CurrentPickLine = null;
-
-        return finished;
-    }
-    internal bool InitializeStaging( Guid areaId )
-    {
-        bool staged = IsStaging
-            && StagingArea.Id == areaId
-            && CurrentPickLine is null;
-
-        if (staged)
-            IsFinished = true;
+        if (CurrentPallet is null || StagedPallets.Contains( CurrentPallet ))
+            return null;
         
-        return staged;
+        return CurrentPallet;
+    }
+    public Pallet? FinishPickingPallet( Guid areaId )
+    {
+        if (CurrentPallet is null || areaId != StagingArea.Id)
+            return null;
+        
+        StagedPallets.Add( CurrentPallet );
+        var temp = CurrentPallet;
+        CurrentPallet = null;
+        return temp;
     }
 }

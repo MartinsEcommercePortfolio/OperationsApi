@@ -1,29 +1,33 @@
-using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Ordering.Types;
 
 public sealed class WarehouseOrder
 {
-    public WarehouseOrder( Guid orderId, Guid orderGroupId, Guid shippingRouteId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
+    public WarehouseOrder( Guid orderId, Guid orderGroupId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
     {
+        Id = new Guid();
         OrderId = orderId;
         OrderGroupId = orderGroupId;
-        ShippingRouteId = shippingRouteId;
         CustomerId = customerId;
         DateCreated = dateCreated;
         PosX = posX;
         PosY = posY;
         DateReceived = DateTime.Now;
         Items = items;
+        Pallets = [];
     }
+    
+    public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public Guid OrderGroupId { get; private set; }
     public Guid ShippingRouteId { get; private set; }
+    public Guid? ShipmentId { get; private set; }
     public string? CustomerId { get; private set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateReceived { get; private set; }
     public int PosX { get; private set; }
     public int PosY { get; private set; }
-    public Pallet Pallet { get; private set; } = Pallet.Empty();
+    public List<Pallet> Pallets { get; private set; }
     public List<WarehouseOrderItem> Items { get; private set; }
 }

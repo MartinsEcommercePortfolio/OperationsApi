@@ -1,4 +1,5 @@
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;
 

@@ -1,5 +1,4 @@
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;
 
@@ -17,7 +16,7 @@ internal readonly record struct PalletDto(
     double ItemWeight,
     List<Guid> ItemIds )
 {
-    internal Pallet ToModel( Trailer trailer )
+    internal static PalletDto FromModel( Pallet pallet )
     {
         throw new Exception( "PalletDto.ToModel is not implemented!" );
     }

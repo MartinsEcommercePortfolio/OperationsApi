@@ -28,12 +28,8 @@ public abstract class WarehouseTask
         IsStarted = true;
         return employee.StartTask( this );
     }
-    internal bool Finish( Employee employee )
+    internal virtual bool Finish( Employee employee )
     {
-        if (employee != Employee)
-            return false;
-
-        IsFinished = true;
         return true;
     }
 }

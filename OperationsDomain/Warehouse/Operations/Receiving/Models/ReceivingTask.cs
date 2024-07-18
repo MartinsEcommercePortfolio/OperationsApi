@@ -1,5 +1,7 @@
 using OperationsDomain.Shipping.Models;
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
@@ -19,16 +21,15 @@ public sealed class ReceivingTask : WarehouseTask
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> StagedPallets { get; private set; } = [];
     
-    internal bool InitializeReceiving( Guid trailerId, Guid dockId, Guid areaId )
+    internal bool InitializeReceiving( Employee employee, Guid trailerId, Guid dockId, Guid areaId )
     {
-        var validArea = trailerId == Trailer.Id
+        return trailerId == Trailer.Id
             && dockId == Dock.Id
             && areaId == Area.Id
             && Trailer.AssignTo( Employee )
             && Dock.AssignTo( Employee )
-            && Area.AssignTo( Employee );
-
-        return validArea;
+            && Area.AssignTo( Employee )
+            && Trailer.Pallets.All( p => p.AssignTo( employee ) );
     }
     internal Pallet? StartReceivingPallet( Guid trailerId, Guid palletId )
     {

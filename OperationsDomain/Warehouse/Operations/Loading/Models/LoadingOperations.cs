@@ -1,5 +1,3 @@
-using OperationsDomain.Warehouse.Operations.Picking.Models;
-
 namespace OperationsDomain.Warehouse.Operations.Loading.Models;
 
 public sealed class LoadingOperations
@@ -10,10 +8,6 @@ public sealed class LoadingOperations
 
     public LoadingTask? GetNextTask() =>
         PendingLoadingTasks.FirstOrDefault();
-    public bool AddNewTask( List<PickingLine> pick )
-    {
-        return false;
-    }
     
     internal LoadingTask? GetTask( Guid taskId ) =>
         PendingLoadingTasks.FirstOrDefault( t => t.Id == taskId );

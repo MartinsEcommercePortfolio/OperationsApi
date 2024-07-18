@@ -4,7 +4,6 @@ using OperationsApi.Utilities;
 using OperationsDomain.Ordering;
 using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Picking;
-using OperationsDomain.Warehouse.Operations.Replenishing;
 
 namespace OperationsApi.Endpoints.Operations;
 
@@ -44,11 +43,13 @@ internal static class PickingEndpoints
 
         app.MapPost( "api/tasks/picking/pickItem",
             static async (
+                    [FromQuery] Guid rackingId,
                     [FromQuery] Guid itemId,
                     HttpContext http,
-                    IReplenishingRepository repository ) =>
+                    IPickingRepository repository ) =>
                 await PickItem(
                     http.GetPickingEmployee(),
+                    rackingId,
                     itemId,
                     repository ) );
 
@@ -64,13 +65,11 @@ internal static class PickingEndpoints
 
         app.MapPost( "api/tasks/picking/finishTask",
             static async (
-                    [FromQuery] Guid areaId,
                     HttpContext http,
                     IPickingRepository pickingRepository,
                     IOrderingRepository orderingRepository ) =>
-                await StageAndFinishPickingOrder(
+                await StageFinishPickingOrder(
                     http.GetPickingEmployee(),
-                    areaId,
                     pickingRepository,
                     orderingRepository ) );
     }
@@ -112,39 +111,37 @@ internal static class PickingEndpoints
     static async Task<IResult> StartPickingLocation( PickingEmployee employee, Guid lineId, Guid rackingId, IPickingRepository repository )
     {
         var task = employee
-            .StartPickingLine( lineId, rackingId );
+            .StartPickingPallet( lineId, rackingId );
 
         return task && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> PickItem( PickingEmployee employee, Guid itemId, IReplenishingRepository repository )
+    static async Task<IResult> PickItem( PickingEmployee employee, Guid rackingId, Guid palletId , IPickingRepository repository )
     {
-        var replenishing = await repository.GetReplenishingOperationsWithEventsAndTasks();
-        
-        var picked = replenishing is not null
-            && employee.PickItem( replenishing, itemId );
+        var picked = employee
+            .StartPickingPallet( rackingId, palletId );
 
         return picked && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> FinishPickingLocation( PickingEmployee employee, Guid lineId, IPickingRepository repository )
+    static async Task<IResult> FinishPickingLocation( PickingEmployee employee, Guid palletId, IPickingRepository repository )
     {
         var task = employee
-            .FinishPickingLine( lineId );
+            .FinishPickingPallet( palletId );
 
         return task && await repository.SaveAsync()
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> StageAndFinishPickingOrder( PickingEmployee employee, Guid areaId, IPickingRepository pickingRepository, IOrderingRepository orderingRepository )
+    static async Task<IResult> StageFinishPickingOrder( PickingEmployee employee, IPickingRepository pickingRepository, IOrderingRepository orderingRepository )
     {
         var picking = await pickingRepository
             .GetPickingOperationsWithTasks();
 
         var taskCompleted = picking is not null
-            && employee.FinishPicking( picking, areaId );
+            && employee.FinishPicking( picking );
 
         if (!taskCompleted)
             return Results.Problem();
@@ -153,7 +150,7 @@ internal static class PickingEndpoints
             .GetOrderingOperationsForNewOrder();
 
         var orderUpdated = ordering is not null
-            && ordering.CompleteOrder( employee.PickingTask!.OrderId );
+            && ordering.CompleteOrder( employee.PickingTask!.WarehouseOrderId );
 
         return orderUpdated
             && await pickingRepository.SaveAsync()

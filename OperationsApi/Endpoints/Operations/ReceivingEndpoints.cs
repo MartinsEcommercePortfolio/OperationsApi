@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Receiving;
-using OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 namespace OperationsApi.Endpoints.Operations;
 
@@ -12,6 +11,11 @@ internal static class ReceivingEndpoints
 {
     internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
     {
+        app.MapPost( "api/tasks/receiving/receiveInventory",
+            static async ( [FromQuery] Guid trailerId, [FromQuery] Guid palletId, HttpContext http, IReceivingRepository repository ) =>
+            await StartReceivingPallet( http.GetReceivingEmployee(), trailerId, palletId, repository ) );
+        
+        
         app.MapGet( "api/tasks/receiving/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.GetReceivingEmployee() ) );
@@ -43,6 +47,10 @@ internal static class ReceivingEndpoints
             await CompleteReceivingTask( http.GetReceivingEmployee(), repository ) );
     }
 
+    static async Task<IResult> ReceiveInventoryOrder( Trailer trailer )
+    {
+        return Results.Ok();
+    }
     static IResult RefreshTask( ReceivingEmployee employee )
     {
         var refreshed = employee.ReceivingTask is not null

@@ -9,11 +9,13 @@ public sealed class ShippingOperations
     public List<Shipment> Shipments { get; private set; } = [];
     public List<ShippingRoute> Routes { get; private set; } = [];
 
-    public Shipment? CreateShipment( (ShippingRoute, List<WarehouseOrder>) shipment )
+    public Shipment? CreateShipment( ShippingRoute route, List<WarehouseOrder> orders )
     {
         return null;
     }
-    public ShippingRoute? GetRoute( int posX, int posY ) =>
+    public ShippingRoute? GetRouteById( Guid id ) =>
+        Routes.FirstOrDefault( r => r.Id == id );
+    public ShippingRoute? GetRouteByPos( int posX, int posY ) =>
         Routes.FirstOrDefault( r =>
             r.ContainsAddress( posX, posY ) );
     public bool ShipOrders( Trailer trailer )

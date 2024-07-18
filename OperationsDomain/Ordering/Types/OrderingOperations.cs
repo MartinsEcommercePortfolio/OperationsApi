@@ -22,28 +22,28 @@ public sealed class OrderingOperations
         PendingOrders.Add( warehouseOrder );
         return true;
     }
-    public List<(ShippingRoute, List<WarehouseOrder>)> GetReadyOrdersByRoute()
+    public Dictionary<Guid, List<WarehouseOrder>> GetReadyOrdersByRoute()
     {
-        Dictionary<ShippingRoute, List<WarehouseOrder>> ordersByRoute = [];
+        Dictionary<Guid, List<WarehouseOrder>> ordersByRouteId = [];
 
         foreach ( var order in PendingOrders )
         {
-            if (!ordersByRoute.TryGetValue( order.ShippingRoute, out List<WarehouseOrder>? orders ))
+            if (!ordersByRouteId.TryGetValue( order.ShippingRouteId, out List<WarehouseOrder>? orders ))
             {
                 orders = [];
-                ordersByRoute.Add( order.ShippingRoute, orders );
+                ordersByRouteId.Add( order.ShippingRouteId, orders );
             }
 
             orders.Add( order );
         }
 
-        List<(ShippingRoute, List<WarehouseOrder>)> toCreate = [];
+        Dictionary<Guid, List<WarehouseOrder>> toReturn = [];
 
-        foreach ( var kvp in ordersByRoute )
+        foreach ( var kvp in ordersByRouteId )
         {
             if (kvp.Value.Count == OrderGroupMaxSize)
             {
-                toCreate.Add( (kvp.Key, kvp.Value) );
+                toReturn.Add( kvp.Key, kvp.Value );
                 continue;
             }
 
@@ -57,12 +57,12 @@ public sealed class OrderingOperations
                     .Take( OrderGroupMaxSize )
                     .ToList();
 
-                toCreate.Add( (kvp.Key, values) );
+                toReturn.Add( kvp.Key, values );
                 break;
             }
         }
 
-        return toCreate;
+        return toReturn;
     }
     public bool ActivateOrder( WarehouseOrder order )
     {

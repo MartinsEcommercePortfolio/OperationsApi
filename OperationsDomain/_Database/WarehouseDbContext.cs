@@ -39,7 +39,9 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     
     // ORDERS
     public required DbSet<OrderingOperations> Ordering { get; init; }
-    public required DbSet<WarehouseOrder> PendingOrders { get; init; }
+    public required List<WarehouseOrder> PendingOrders { get; init; }
+    public required List<WarehouseOrder> ActiveOrders { get; init; }
+    public required List<WarehouseOrder> PickedOrders { get; init; }
     
     // WAREHOUSE
     public required DbSet<Root> Warehouses { get; init; }

@@ -1,15 +1,14 @@
-using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Ordering.Types;
 
 public sealed class WarehouseOrder
 {
-    public WarehouseOrder( Guid orderId, Guid orderGroupId, ShippingRoute shippingRoute, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
+    public WarehouseOrder( Guid orderId, Guid orderGroupId, Guid shippingRouteId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
     {
         OrderId = orderId;
         OrderGroupId = orderGroupId;
-        ShippingRoute = shippingRoute;
+        ShippingRouteId = shippingRouteId;
         CustomerId = customerId;
         DateCreated = dateCreated;
         PosX = posX;
@@ -19,7 +18,7 @@ public sealed class WarehouseOrder
     }
     public Guid OrderId { get; private set; }
     public Guid OrderGroupId { get; private set; }
-    public ShippingRoute ShippingRoute { get; private set; }
+    public Guid ShippingRouteId { get; private set; }
     public string? CustomerId { get; private set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateReceived { get; private set; }

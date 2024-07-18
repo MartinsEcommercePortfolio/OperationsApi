@@ -18,23 +18,13 @@ internal static class OrderingEndpoints
                     order,
                     shippingRepository,
                     orderingRepository ) );
-        
-        app.MapPost( "api/ordering/ship",
-            static async (
-                    [FromBody] Guid orderGroupId,
-                    IOrderingRepository orderingRepository,
-                    IShippingRepository shippingRepository ) =>
-                await ShipOrderGroup(
-                    orderGroupId,
-                    orderingRepository,
-                    shippingRepository ) );
     }
 
     static async Task<IResult> PlaceOrder( WarehouseOrderDto order, IShippingRepository shippingRepository, IOrderingRepository orderingRepository )
     {
         var shipping = await shippingRepository.GetShippingOperationsWithRoutes();
 
-        var route = shipping?.GetRoute( order.PosX, order.PosY );
+        var route = shipping?.GetRouteByPos( order.PosX, order.PosY );
         if (route is null)
             return Results.NotFound( "No route found." );
         
@@ -47,32 +37,5 @@ internal static class OrderingEndpoints
         return orderPlaced
             ? Results.Ok( true )
             : Results.Problem();
-    }
-    static async Task<IResult> ShipOrderGroup( Guid orderGroupId, IOrderingRepository orderingRepository, IShippingRepository shippingRepository )
-    {
-        /*var ordering = await orderingRepository
-            .GetOrderingOperationsForNewOrder();
-
-        var orderGroup = null; ordering?.CompleteShippingGroup( orderGroupId );
-        if (orderGroup is null)
-            return Results.Problem();
-
-        var shipping = await shippingRepository
-            .GetShippingOperationsWithRoutes();
-
-        var shipped = shipping is not null
-            && shipping.ShipOrders( orderGroup.ShippingTrailer )
-            && await orderingRepository.SaveAsync()
-            && await shippingRepository.SaveAsync();
-
-        if (shipped)
-        {
-            // TODO: send emails
-        }
-
-        return shipped
-            ? Results.Ok()
-            : Results.Problem();*/
-        return Results.Problem();
     }
 }

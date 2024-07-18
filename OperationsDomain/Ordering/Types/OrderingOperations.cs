@@ -12,6 +12,7 @@ public sealed class OrderingOperations
     public List<Product> Products { get; private set; } = [];
     public List<WarehouseOrder> PendingOrders { get; private set; } = [];
     public List<WarehouseOrder> ActiveOrders { get; private set; } = [];
+    public List<WarehouseOrder> PickedOrders { get; private set; } = [];
 
     public bool AddOrder( WarehouseOrder warehouseOrder )
     {
@@ -73,19 +74,17 @@ public sealed class OrderingOperations
         
         return false;
     }
-    public OrderShippingGroup? CompleteOrder( Guid groupId )
+    public bool CompleteOrder( Guid orderId )
     {
-        /*var group = ShippingGroups
-            .FirstOrDefault( g => g.Id == groupId );
+        var order = ActiveOrders.FirstOrDefault( a => a.OrderId == orderId );
 
-        var shipped = group is not null
-            && group.Ship()
-            && ShippingGroups.Remove( group );
+        var completed = order is not null
+            && ActiveOrders.Remove( order );
 
-        return shipped
-            ? group
-            : null;*/
-        return null;
+        if (completed)
+            PickedOrders.Add( order! );
+
+        return completed;
     }
 
     bool ValidateOrder( WarehouseOrder order )

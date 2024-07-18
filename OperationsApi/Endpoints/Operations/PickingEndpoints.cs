@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
+using OperationsDomain.Ordering;
 using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Picking;
 using OperationsDomain.Warehouse.Operations.Replenishing;
@@ -65,11 +66,13 @@ internal static class PickingEndpoints
             static async (
                     [FromQuery] Guid areaId,
                     HttpContext http,
-                    IPickingRepository repository ) =>
+                    IPickingRepository pickingRepository,
+                    IOrderingRepository orderingRepository ) =>
                 await StageAndFinishPickingOrder(
                     http.GetPickingEmployee(),
                     areaId,
-                    repository ) );
+                    pickingRepository,
+                    orderingRepository ) );
     }
 
     static IResult RefreshTask( PickingEmployee employee )
@@ -135,16 +138,27 @@ internal static class PickingEndpoints
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> StageAndFinishPickingOrder( PickingEmployee employee, Guid areaId, IPickingRepository repository )
+    static async Task<IResult> StageAndFinishPickingOrder( PickingEmployee employee, Guid areaId, IPickingRepository pickingRepository, IOrderingRepository orderingRepository )
     {
-        var picking = await repository
+        var picking = await pickingRepository
             .GetPickingOperationsWithTasks();
 
         var taskCompleted = picking is not null
             && employee.FinishPicking( picking, areaId );
-        
-        return taskCompleted && await repository.SaveAsync()
-            ? Results.Ok( true )
-            : Results.Problem();
+
+        if (!taskCompleted)
+            return Results.Problem();
+
+        var ordering = await orderingRepository
+            .GetOrderingOperationsForNewOrder();
+
+        var orderUpdated = ordering is not null
+            && ordering.CompleteOrder( employee.PickingTask!.OrderId );
+
+        return orderUpdated
+            && await pickingRepository.SaveAsync()
+            && await orderingRepository.SaveAsync()
+                ? Results.Ok( true )
+                : Results.Problem();
     }
 }

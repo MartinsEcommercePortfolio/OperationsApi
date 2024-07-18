@@ -7,7 +7,7 @@ using OperationsDomain.Warehouse.Operations.Picking.Models;
 
 namespace OperationsApi.Services;
 
-internal sealed class PickGenerator( IOrderingRepository orderingRepository, IShippingRepository shippingRepository, IPickingRepository pickingRepository )
+internal sealed class PickingTaskGenerator( IOrderingRepository orderingRepository, IShippingRepository shippingRepository, IPickingRepository pickingRepository )
 {
     readonly IOrderingRepository _orderingRepository = orderingRepository;
     readonly IShippingRepository _shippingRepository = shippingRepository;

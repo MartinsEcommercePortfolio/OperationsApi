@@ -1,3 +1,4 @@
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;

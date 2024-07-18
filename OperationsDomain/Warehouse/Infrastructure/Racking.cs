@@ -5,11 +5,33 @@ namespace OperationsDomain.Warehouse.Infrastructure;
 
 public sealed class Racking
 {
-    public Guid Id { get; private set; }
+    public Racking(
+        bool isPickSlot,
+        string aisle,
+        string bay,
+        string level,
+        double length,
+        double width,
+        double height,
+        double capacity,
+        Product product )
+    {
+        IsPickSlot = isPickSlot;
+        Aisle = aisle;
+        Bay = bay;
+        Level = level;
+        Length = length;
+        Width = width;
+        Height = height;
+        Capacity = capacity;
+        Product = product;
+    }
+
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public bool IsPickSlot { get; private set; }
-    public string Aisle { get; private set; } = string.Empty;
-    public string Bay { get; private set; } = string.Empty;
-    public string Level { get; private set; } = string.Empty;
+    public string Aisle { get; private set; }
+    public string Bay { get; private set; }
+    public string Level { get; private set; }
     public double Length { get; private set; }
     public double Width { get; private set; }
     public double Height { get; private set; }
@@ -17,7 +39,7 @@ public sealed class Racking
     public Guid OwnerId { get; private set; }
     public Employee? Owner { get; private set; }
     public Pallet? Pallet { get; private set; }
-    public Product Product { get; private set; } = new();
+    public Product Product { get; private set; }
 
     public bool IsOwnedBy( Employee? employee ) =>
         Owner == employee;

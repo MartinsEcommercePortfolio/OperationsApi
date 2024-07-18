@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Replenishing;
-using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsApi.Endpoints.Operations;
 
@@ -13,7 +12,7 @@ internal static class ReplenishingEndpoints
     {
         app.MapGet( "api/tasks/replenishing/refreshTask",
             static ( HttpContext http ) =>
-            RefreshTask( http.Employee() ) );
+            RefreshTask( http.GetReplenishingEmployee() ) );
         
         app.MapGet( "api/tasks/replenishing/nextTask",
             static async ( IReplenishingRepository repository ) =>
@@ -27,7 +26,7 @@ internal static class ReplenishingEndpoints
                     HttpContext http,
                     IReplenishingRepository repository ) =>
                 await StartReplenishingTask(
-                    http.Employee(),
+                    http.GetReplenishingEmployee(),
                     taskId,
                     rackingId,
                     palletId,
@@ -40,19 +39,20 @@ internal static class ReplenishingEndpoints
                     HttpContext http,
                     IReplenishingRepository repository ) =>
                 await FinishReplenishingTask(
-                    http.Employee(),
+                    http.GetReplenishingEmployee(),
                     rackingId,
                     palletId,
                     repository ) );
     }
 
-    static IResult RefreshTask( Employee employee )
+    static IResult RefreshTask( ReplenishingEmployee employee )
     {
-        var task = employee
-            .TaskAs<ReplenishingTask>();
+        var refreshed = employee.ReplenishingTask is not null
+            && employee.ReplenishingTask.IsStarted
+            && !employee.ReplenishingTask.IsFinished;
 
-        return task.IsStarted && !task.IsFinished
-            ? Results.Ok( ReplenishingTaskSummary.FromModel( task ) )
+        return refreshed
+            ? Results.Ok( ReplenishingTaskSummary.FromModel( employee.ReplenishingTask! ) )
             : Results.Problem();
     }
     static async Task<IResult> GetNextReplenishingTask( IReplenishingRepository repository )
@@ -66,7 +66,7 @@ internal static class ReplenishingEndpoints
             ? Results.Ok( ReplenishingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartReplenishingTask( Employee employee, Guid taskId, Guid rackingId, Guid palletId, IReplenishingRepository repository )
+    static async Task<IResult> StartReplenishingTask( ReplenishingEmployee employee, Guid taskId, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenishing = await repository
             .GetReplenishingOperationsWithTasks();
@@ -75,10 +75,10 @@ internal static class ReplenishingEndpoints
             && employee.StartReplenishing( replenishing, taskId, rackingId, palletId );
         
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( ReplenishingTaskSummary.FromModel( employee.TaskAs<ReplenishingTask>() ) )
+            ? Results.Ok( ReplenishingTaskSummary.FromModel( employee.ReplenishingTask! ) )
             : Results.Problem();
     }
-    static async Task<IResult> FinishReplenishingTask( Employee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
+    static async Task<IResult> FinishReplenishingTask( ReplenishingEmployee employee, Guid rackingId, Guid palletId, IReplenishingRepository repository )
     {
         var replenishing = await repository
             .GetReplenishingOperationsWithTasks();

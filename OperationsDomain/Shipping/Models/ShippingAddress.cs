@@ -1,8 +1,8 @@
-namespace OperationsDomain.Shipping;
+namespace OperationsDomain.Shipping.Models;
 
-public sealed class Address
+public sealed class ShippingAddress
 {
-    public Address( string name, int x, int y )
+    public ShippingAddress( string name, int x, int y )
     {
         Name = name;
         PosX = x;

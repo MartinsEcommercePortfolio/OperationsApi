@@ -1,3 +1,4 @@
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Equipment;
 using OperationsDomain.Warehouse.Infrastructure;

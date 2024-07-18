@@ -1,27 +1,14 @@
-using OperationsDomain.Catalog;
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Operations.Picking.Models;
-using OperationsDomain.Warehouse.Operations.Replenishing.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
 
 public sealed class Pallet
 {
-    public Pallet( Guid id )
-    {
-        Id = id;
-    }
+    public static Pallet Empty() =>
+        new();
 
-    public static Pallet NewEmpty( Employee employee )
-    {
-        Pallet pallet = new( Guid.NewGuid() ) {
-            Id = Guid.NewGuid()
-        };
-        pallet.AssignTo( employee );
-        return pallet;
-    }
-    
-    public Guid Id { get; private set; }
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public Guid? RackingId { get; private set; }
     public Guid? AreaId { get; private set; }
     public Guid? TrailerId { get; private set; }
@@ -31,8 +18,7 @@ public sealed class Pallet
     public Area? Area { get; private set; }
     public Trailer? Trailer { get; private set; }
     public Employee? Employee { get; private set; }
-
-    public Product Product { get; private set; }
+    
     public int ItemCount { get; private set; }
     public List<Item> Items { get; private set; } = [];
     

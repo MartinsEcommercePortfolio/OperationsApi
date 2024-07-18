@@ -1,20 +1,20 @@
-using OperationsDomain.Shipping;
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Infrastructure;
 
 namespace OperationsDomain.Ordering.Types;
 
-public sealed class WarehouseOrderGroup
+public sealed class OrderShippingGroup
 {
-    public WarehouseOrderGroup() { }
-    public WarehouseOrderGroup( Route route, Trailer shippingTrailer, List<WarehouseOrder> orders )
+    public OrderShippingGroup() { }
+    public OrderShippingGroup( ShippingRoute shippingRoute, Trailer shippingTrailer, List<WarehouseOrder> orders )
     {
-        Route = route;
+        ShippingRoute = shippingRoute;
         ShippingTrailer = shippingTrailer;
         Orders = orders;
     }
 
     public Guid Id { get; private set; } = Guid.NewGuid();
-    public Route Route { get; private set; } = default!;
+    public ShippingRoute ShippingRoute { get; private set; } = default!;
     public Dock Dock { get; private set; } = default!;
     public Area Area { get; private set; } = default!;
     public Trailer ShippingTrailer { get; private set; }

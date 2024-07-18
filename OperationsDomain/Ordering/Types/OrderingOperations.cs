@@ -1,6 +1,5 @@
 using OperationsDomain.Catalog;
-using OperationsDomain.Shipping;
-using OperationsDomain.Warehouse.Infrastructure;
+using OperationsDomain.Shipping.Models;
 
 namespace OperationsDomain.Ordering.Types;
 
@@ -10,10 +9,9 @@ public sealed class OrderingOperations
     static readonly TimeSpan MaxPendingTime = TimeSpan.FromHours( 8 );
 
     public Guid Id { get; private set; } = Guid.NewGuid();
-    public List<Route> Routes { get; private set; } = [];
     public List<Product> Products { get; private set; } = [];
     public List<WarehouseOrder> PendingOrders { get; private set; } = [];
-    public List<WarehouseOrderGroup> OrderGroups { get; private set; } = [];
+    public List<WarehouseOrder> ActiveOrders { get; private set; } = [];
 
     public bool AddOrder( WarehouseOrder warehouseOrder )
     {
@@ -22,114 +20,92 @@ public sealed class OrderingOperations
         
         PendingOrders.Add( warehouseOrder );
         return true;
-        /*
-
-        if (route is null)
-            return false;
-
-        var orderGroup = GetOrCreateOrderGroup( warehouseOrder, route );
-        return orderGroup is not null;*/
     }
-    public List<WarehouseOrderGroup> GenerateOrderGroups()
+    public List<(ShippingRoute, List<WarehouseOrder>)> GetReadyOrdersByRoute()
     {
-        Dictionary<Route, HashSet<WarehouseOrder>> ordersByRoute = [];
+        Dictionary<ShippingRoute, List<WarehouseOrder>> ordersByRoute = [];
 
         foreach ( var order in PendingOrders )
         {
-            if (order.Route is null)
-                continue;
-
-            if (!ordersByRoute.TryGetValue( order.Route, out HashSet<WarehouseOrder>? orders ))
+            if (!ordersByRoute.TryGetValue( order.ShippingRoute, out List<WarehouseOrder>? orders ))
             {
                 orders = [];
-                ordersByRoute.Add( order.Route, orders );
+                ordersByRoute.Add( order.ShippingRoute, orders );
             }
 
             orders.Add( order );
         }
 
-        List<KeyValuePair<Route, HashSet<WarehouseOrder>>> toCreate = [];
+        List<(ShippingRoute, List<WarehouseOrder>)> toCreate = [];
 
-        foreach ( KeyValuePair<Route, HashSet<WarehouseOrder>> kvp in ordersByRoute )
+        foreach ( var kvp in ordersByRoute )
         {
             if (kvp.Value.Count == OrderGroupMaxSize)
             {
-                toCreate.Add( kvp );
+                toCreate.Add( (kvp.Key, kvp.Value) );
                 continue;
             }
-            
+
             foreach ( var order in kvp.Value )
             {
-                if (DateTime.Now - order.DateReceived <= MaxPendingTime) 
+                if (DateTime.Now - order.DateReceived < MaxPendingTime)
                     continue;
-                
-                toCreate.Add( kvp );
+
+                var values = kvp.Value
+                    .OrderBy( static o => o.DateCreated )
+                    .Take( OrderGroupMaxSize )
+                    .ToList();
+
+                toCreate.Add( (kvp.Key, values) );
                 break;
             }
         }
 
-        List<WarehouseOrderGroup> newGroups = [];
-        
-        foreach ( var kvp in toCreate )
-        {
-            var group = CreateOrderGroup( kvp.Key, kvp.Value );
-            
-            if (group is null) 
-                continue;
-            
-            OrderGroups.Add( group );
-            newGroups.Add( group );
-        }
-
-        return newGroups;
+        return toCreate;
     }
-    public WarehouseOrderGroup? ShipOrderGroup( Guid groupId )
+    public bool ActivateOrder( WarehouseOrder order )
     {
-        var group = OrderGroups
+        var activated = !ActiveOrders.Contains( order )
+            && PendingOrders.Remove( order );
+        
+        if (activated)
+            ActiveOrders.Add( order );
+        
+        return false;
+    }
+    public OrderShippingGroup? CompleteOrder( Guid groupId )
+    {
+        /*var group = ShippingGroups
             .FirstOrDefault( g => g.Id == groupId );
 
         var shipped = group is not null
             && group.Ship()
-            && OrderGroups.Remove( group );
+            && ShippingGroups.Remove( group );
 
         return shipped
             ? group
-            : null;
+            : null;*/
+        return null;
     }
 
     bool ValidateOrder( WarehouseOrder order )
     {
         foreach ( var item in order.Items )
         {
-            var route = FindRouteForOrder( order );
-            var product = Products.FirstOrDefault( p => p.Id == item.ProductId );
-            if (product is null || product.Stock < item.Quantity || route is null)
+            var product = Products
+                .FirstOrDefault( p => p.Id == item.ProductId );
+
+            var pickReserved = product is not null
+                && product.ReservePickAmount( item.Quantity );
+
+            if (!pickReserved)
                 return false;
-            product.Stock -= item.Quantity;
-            order.SetRoute( route );
         }
 
         return true;
     }
-    Route? FindRouteForOrder( WarehouseOrder order )
-    {
-        return Routes.FirstOrDefault( r =>
-            r.ContainsAddress( order.PosX, order.PosX ) );
-    }
-    Trailer? FindTrailerForRoute( Route route )
+    Trailer? FindTrailerForRoute( ShippingRoute shippingRoute, List<Trailer> trailers )
     {
         return null;
-    }
-    WarehouseOrderGroup? CreateOrderGroup( Route route, HashSet<WarehouseOrder> orders )
-    {
-        var trailer = FindTrailerForRoute( route );
-
-        if (trailer is null)
-            return null;
-
-        var orderGroup = OrderGroups.FirstOrDefault( o =>
-            o.Route == route ) ?? new WarehouseOrderGroup( route, trailer, orders.ToList() );
-        
-        return orderGroup;
     }
 }

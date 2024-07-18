@@ -1,4 +1,5 @@
 using OperationsDomain.Ordering.Types;
+using OperationsDomain.Shipping.Models;
 
 namespace OperationsApi.Endpoints.Ordering.Dtos;
 
@@ -11,6 +12,6 @@ internal readonly record struct WarehouseOrderDto(
     int PosY,
     List<CartItemDto> Items )
 {
-    internal WarehouseOrder ToModel() =>
-        new( OrderId, OrderGroupId, CustomerId, DateCreated, PosX, PosY, CartItemDto.ToModels( Items ) );
+    internal WarehouseOrder ToModel( ShippingRoute shippingRoute ) =>
+        new( OrderId, OrderGroupId, shippingRoute, CustomerId, DateCreated, PosX, PosY, CartItemDto.ToModels( Items ) );
 }

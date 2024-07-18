@@ -10,7 +10,7 @@ public sealed class PickingTask : WarehouseTask
         OrderId = orderId;
         StagingDock = dock;
         StagingArea = area;
-        Pallet = new Pallet( Guid.NewGuid() );
+        Pallet = Pallet.Empty();
         PickLines = lines;
     }
     
@@ -20,19 +20,16 @@ public sealed class PickingTask : WarehouseTask
     public Pallet Pallet { get; private set; }
     public PickingLine? CurrentPickLine { get; private set; }
     public bool IsStaging { get; private set; }
-    public List<PickingLine> PickLines { get; private set; } = [];
+    public List<PickingLine> PickLines { get; private set; }
     
     internal override bool StartWith( Employee employee )
     {
         if (!base.StartWith( employee ))
             return false;
-        Pallet = Pallet.NewEmpty( employee );
+        Pallet = Pallet.Empty();
+        Pallet.AssignTo( employee );
         CurrentPickLine = PickLines.FirstOrDefault();
         return true;
-    }
-    internal void SetOrder( Guid orderId )
-    {
-        OrderId = orderId;
     }
     internal PickingLine? SetPickingLine( Guid lineId )
     {

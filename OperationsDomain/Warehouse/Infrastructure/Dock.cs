@@ -1,3 +1,4 @@
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;

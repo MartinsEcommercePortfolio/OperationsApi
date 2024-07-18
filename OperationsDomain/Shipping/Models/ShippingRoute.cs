@@ -1,15 +1,15 @@
-namespace OperationsDomain.Shipping;
+namespace OperationsDomain.Shipping.Models;
 
-public sealed class Route
+public sealed class ShippingRoute
 {
-    public Route()
+    public ShippingRoute()
     {
         Id = Guid.NewGuid();
         Addresses = [];
     }
     
     public Guid Id { get; private set; }
-    public List<Address> Addresses { get; private set; }
+    public List<ShippingAddress> Addresses { get; private set; }
 
     public bool ContainsAddress( int posX, int posY )
     {

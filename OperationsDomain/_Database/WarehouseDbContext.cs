@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsDomain.Ordering.Types;
+using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Equipment;
@@ -33,7 +34,11 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<ReceivingTask> ActiveReceivingTasks { get; init; }
     public required DbSet<ReplenishingTask> ActiveReplenTasks { get; init; }
     
+    // SHIPPING
+    public required DbSet<ShippingOperations> Shipping { get; init; }
+    
     // ORDERS
+    public required DbSet<OrderingOperations> Ordering { get; init; }
     public required DbSet<WarehouseOrder> PendingOrders { get; init; }
     
     // WAREHOUSE

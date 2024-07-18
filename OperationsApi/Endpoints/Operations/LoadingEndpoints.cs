@@ -1,19 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Loading;
-using OperationsDomain.Warehouse.Operations.Loading.Models;
 
 namespace OperationsApi.Endpoints.Operations;
 
 public static class LoadingEndpoints
 {
-    internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
+    internal static void MapLoadingEndpoints( this IEndpointRouteBuilder app )
     {
         app.MapGet( "api/tasks/loading/refreshTask",
             static ( HttpContext http ) =>
-                RefreshTask( http.Employee() ) );
+                RefreshTask( http.GetLoadingEmployee() ) );
 
         app.MapGet( "api/tasks/loading/nextTask",
             static async ( ILoadingRepository repository ) =>
@@ -27,7 +26,7 @@ public static class LoadingEndpoints
                 HttpContext http,
                 ILoadingRepository repository ) =>
             await StartLoadingTask(
-                http.Employee(), taskId, trailerId, dockId, areaId, repository ) );
+                http.GetLoadingEmployee(), taskId, trailerId, dockId, areaId, repository ) );
 
         app.MapPost( "api/tasks/loading/startLoad", static async (
                 [FromQuery] Guid areaId,
@@ -35,7 +34,7 @@ public static class LoadingEndpoints
                 HttpContext http,
                 ILoadingRepository repository ) =>
             await StartLoadingPallet( 
-                http.Employee(), areaId, palletId, repository ) );
+                http.GetLoadingEmployee(), areaId, palletId, repository ) );
 
         app.MapPost( "api/tasks/loading/finishLoad", static async (
                 [FromQuery] Guid trailerId,
@@ -43,21 +42,23 @@ public static class LoadingEndpoints
                 HttpContext http,
                 ILoadingRepository repository ) =>
             await FinishLoadingPallet( 
-                http.Employee(), trailerId, palletId, repository ) );
+                http.GetLoadingEmployee(), trailerId, palletId, repository ) );
 
         app.MapPost( "api/tasks/loading/finishTask", static async (
                 HttpContext http,
                 ILoadingRepository repository ) =>
             await FinishLoadingTask(
-                http.Employee(), repository ) );
+                http.GetLoadingEmployee(), repository ) );
     }
 
-    static IResult RefreshTask( Employee employee )
+    static IResult RefreshTask( LoadingEmployee employee )
     {
-        var task = employee.TaskAs<LoadingTask>();
+        var refreshed = employee.LoadingTask is not null
+            && employee.LoadingTask.IsStarted
+            && !employee.LoadingTask.IsFinished;
 
-        return task.IsStarted && !task.IsFinished
-            ? Results.Ok( LoadingTaskSummary.FromModel( task ) )
+        return refreshed
+            ? Results.Ok( LoadingTaskSummary.FromModel( employee.LoadingTask! ) )
             : Results.Problem();
     }
     static async Task<IResult> GetNextLoadingTask( ILoadingRepository repository )
@@ -69,7 +70,7 @@ public static class LoadingEndpoints
             ? Results.Ok( LoadingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartLoadingTask( Employee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, ILoadingRepository repository )
+    static async Task<IResult> StartLoadingTask( LoadingEmployee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, ILoadingRepository repository )
     {
         var loading = await repository
             .GetLoadingOperationsWithTasks();
@@ -78,10 +79,10 @@ public static class LoadingEndpoints
             && employee.StartLoading( loading, taskId, trailerId, dockId, areaId );
 
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( LoadingTaskSummary.FromModel( employee.TaskAs<LoadingTask>() ) )
+            ? Results.Ok( LoadingTaskSummary.FromModel( employee.LoadingTask! ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartLoadingPallet( Employee employee, Guid areaId, Guid palletId, ILoadingRepository repository )
+    static async Task<IResult> StartLoadingPallet( LoadingEmployee employee, Guid areaId, Guid palletId, ILoadingRepository repository )
     {
         var loadingStarted = employee
             .StartLoadingPallet( palletId, areaId );
@@ -90,7 +91,7 @@ public static class LoadingEndpoints
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> FinishLoadingPallet( Employee employee, Guid trailerId, Guid palletId, ILoadingRepository repository )
+    static async Task<IResult> FinishLoadingPallet( LoadingEmployee employee, Guid trailerId, Guid palletId, ILoadingRepository repository )
     {
         var receivingCompleted = employee
             .FinishLoadingPallet( trailerId, palletId );
@@ -99,7 +100,7 @@ public static class LoadingEndpoints
             ? Results.Ok( true )
             : Results.Problem();
     }
-    static async Task<IResult> FinishLoadingTask( Employee employee, ILoadingRepository repository )
+    static async Task<IResult> FinishLoadingTask( LoadingEmployee employee, ILoadingRepository repository )
     {
         var loading = await repository
             .GetLoadingOperationsWithTasks();

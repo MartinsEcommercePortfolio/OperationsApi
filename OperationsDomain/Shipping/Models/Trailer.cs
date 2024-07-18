@@ -1,6 +1,7 @@
 using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Warehouse.Infrastructure;
 
-namespace OperationsDomain.Warehouse.Infrastructure;
+namespace OperationsDomain.Shipping.Models;
 
 public sealed class Trailer
 {
@@ -17,6 +18,7 @@ public sealed class Trailer
     public Dock Dock { get; private set; }
     public Employee? Owner { get; private set; }
     public List<Pallet> Pallets { get; private set; }
+    public Queue<Shipment> Shipments { get; private set; } = [];
 
     public static Trailer CreateFrom( string number, Dock dock, List<Pallet> pallets ) =>
         new Trailer( number, dock, pallets );

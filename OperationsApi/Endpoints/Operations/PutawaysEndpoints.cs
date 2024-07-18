@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Warehouse.Employees.Models.Variants;
 using OperationsDomain.Warehouse.Operations.Putaways;
-using OperationsDomain.Warehouse.Operations.Putaways.Models;
 
 namespace OperationsApi.Endpoints.Operations;
 
@@ -13,27 +12,28 @@ internal static class PutawaysEndpoints
     {
         app.MapGet( "api/tasks/putaways/refreshTask",
             static ( HttpContext http ) =>
-            RefreshTask( http.Employee() ) );
+            RefreshTask( http.GetPutawayEmployee() ) );
         
         app.MapPost( "api/tasks/putaways/startTask",
             static async ( [FromQuery] Guid palletId, HttpContext http, IPutawayRepository repository ) =>
-            await StartPutawayTask( http.Employee(), palletId, repository ) );
+            await StartPutawayTask( http.GetPutawayEmployee(), palletId, repository ) );
 
         app.MapPost( "api/tasks/putaways/finishTask",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPutawayRepository repository ) =>
-            await FinishPutaway( http.Employee(), palletId, rackingId, repository ) );
+            await FinishPutaway( http.GetPutawayEmployee(), palletId, rackingId, repository ) );
     }
 
-    static IResult RefreshTask( Employee employee )
+    static IResult RefreshTask( PutawayEmployee employee )
     {
-        var task = employee
-            .TaskAs<PutawayTask>();
+        var refreshed = employee.PutawayTask is not null
+            && employee.PutawayTask.IsStarted
+            && !employee.PutawayTask.IsFinished;
 
-        return task.IsStarted && !task.IsFinished
-            ? Results.Ok( PutawayTaskSummary.FromModel( task ) )
+        return refreshed
+            ? Results.Ok( PutawayTaskSummary.FromModel( employee.PutawayTask! ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartPutawayTask( Employee employee, Guid palletId, IPutawayRepository repository )
+    static async Task<IResult> StartPutawayTask( PutawayEmployee employee, Guid palletId, IPutawayRepository repository )
     {
         var putaways = await repository
             .GetPutawaysOperationsWithPalletsAndRackings();
@@ -46,10 +46,10 @@ internal static class PutawaysEndpoints
             .ConfigureAwait( false );
         
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( PutawayTaskSummary.FromModel( employee.TaskAs<PutawayTask>() ) )
+            ? Results.Ok( PutawayTaskSummary.FromModel( employee.PutawayTask! ) )
             : Results.Problem();
     }
-    static async Task<IResult> FinishPutaway( Employee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
+    static async Task<IResult> FinishPutaway( PutawayEmployee employee, Guid palletId, Guid rackingId, IPutawayRepository repository )
     {
         var putaways = await repository.GetPutawaysOperationsWithTasks();
 

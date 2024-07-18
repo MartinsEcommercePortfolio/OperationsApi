@@ -5,5 +5,5 @@ namespace OperationsDomain.Ordering;
 
 public interface IOrderingRepository : IEfCoreRepository
 {
-    public Task<OrderingOperations?> GetOrderingOperationsWithOrderGroups();
+    public Task<OrderingOperations?> GetOrderingOperationsForNewOrder();
 }

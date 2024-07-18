@@ -1,14 +1,15 @@
 using OperationsDomain.Warehouse.Operations.Putaways.Models;
 
-namespace OperationsDomain.Warehouse.Employees.Models.Variants;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class PutawayEmployee : Employee
 {
+    public PutawayEmployee( string name ) : base( name ) { }
     public PutawayTask? PutawayTask => TaskAs<PutawayTask>();
     
     public async Task<bool> StartPutaway( PutawayOperations putaways, Guid palletId )
     {
-        if (PutawayTask is not null)
+        if (Task is not null)
             return false;
 
         var putawayTask = await putaways.GenerateTask( palletId );
@@ -22,8 +23,9 @@ public sealed class PutawayEmployee : Employee
     public bool FinishPutaway( PutawayOperations putaways, Guid rackingId, Guid palletId )
     {
         return PutawayTask is not null
-            && PutawayTask.CompletePutaway( rackingId, palletId )
+            && PutawayTask.ConfirmPutaway( rackingId, palletId )
             && RackPallet( PutawayTask.PutawayRacking, PutawayTask.Pallet )
+            && PutawayTask.CleanUp( this )
             && putaways.FinishPutawayTask( PutawayTask );
     }
 }

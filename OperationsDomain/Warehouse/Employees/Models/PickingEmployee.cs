@@ -1,9 +1,10 @@
 using OperationsDomain.Warehouse.Operations.Picking.Models;
 
-namespace OperationsDomain.Warehouse.Employees.Models.Variants;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class PickingEmployee : Employee
 {
+    public PickingEmployee( string name ) : base( name ) { }
     public PickingTask? PickingTask => TaskAs<PickingTask>();
 
     // PICKING

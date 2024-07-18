@@ -1,13 +1,11 @@
-using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Loading.Models;
 
 public sealed class LoadingTask : WarehouseTask
 {
-    public LoadingTask( Trailer trailer, Dock dock, List<Pallet> pallets )
+    internal LoadingTask( Trailer trailer, Dock dock, List<Pallet> pallets )
     {
         Trailer = trailer;
         Dock = dock;
@@ -44,9 +42,8 @@ public sealed class LoadingTask : WarehouseTask
 
         return true;
     }
-    internal override bool Finish( Employee employee )
+    internal override bool CleanUp( Employee employee )
     {
         return Trailer.Pallets.All( p => p.UnAssignFrom( employee ) );
     }
-
 }

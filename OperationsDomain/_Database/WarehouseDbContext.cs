@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using OperationsDomain.Ordering.Types;
+using OperationsDomain.Ordering.Models;
 using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse;
 using OperationsDomain.Warehouse.Employees.Models;

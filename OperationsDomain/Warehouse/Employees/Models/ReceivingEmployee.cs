@@ -1,14 +1,15 @@
 using OperationsDomain.Warehouse.Operations.Receiving.Models;
 
-namespace OperationsDomain.Warehouse.Employees.Models.Variants;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class ReceivingEmployee : Employee
 {
+    public ReceivingEmployee( string name ) : base( name ) { }
     public ReceivingTask? ReceivingTask => TaskAs<ReceivingTask>();
 
     public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
-        if (ReceivingTask is not null)
+        if (Task is not null)
             return false;
 
         var task = receiving.GetReceivingTask( taskId );
@@ -38,6 +39,7 @@ public sealed class ReceivingEmployee : Employee
     public bool FinishReceiving( ReceivingOperations receiving )
     {
         return ReceivingTask is not null
+            && ReceivingTask.CleanUp( this )
             && EndTask()
             && receiving.CompleteTask( ReceivingTask );
     }

@@ -5,38 +5,30 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 
 public class Employee
 {
+    public Employee( string name )
+    {
+        Name = name;
+    }
+    
     public Guid Id { get; private set; }
+    public string Name { get; private set; }
     public Guid? PalletEquippedId { get; private set; }
     public Pallet? PalletEquipped { get; private set; }
     public WarehouseTask? Task { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public EmployeeWorkMode WorkMode { get; private set; }
 
     public T? TaskAs<T>() where T : WarehouseTask =>
         Task as T;
 
     public static Employee Null() =>
-        new() {
-            Id = Guid.Empty,
-            Task = null,
-            Name = string.Empty,
-            WorkMode = EmployeeWorkMode.None
-        };
+        new( string.Empty );
     
-    public bool HasTask<T>( out T task ) where T : WarehouseTask, new()
-    {
-        T? t = Task as T;
-        task = t ?? WarehouseTask.Null<T>(); 
-        return t is not null;
-    }
     public bool StartTask( WarehouseTask task )
     {
         if (Task is not null)
             return false;
         
         Task = task;
-        task.StartWith( this );
-        return true;
+        return Task.StartWith( this );
     }
     public bool EndTask()
     {

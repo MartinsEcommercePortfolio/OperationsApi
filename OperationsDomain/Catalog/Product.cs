@@ -10,7 +10,7 @@ public sealed class Product
         VirtualStockPallets = stockPallets;
     }
 
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    public Guid Id { get; private set; }
     public string Title { get; private set; }
     public string Brand { get; private set; }
     public int PhysicalStockPallets { get; private set; }

@@ -1,14 +1,13 @@
 using OperationsDomain.Catalog;
-using OperationsDomain.Shipping.Models;
 
-namespace OperationsDomain.Ordering.Types;
+namespace OperationsDomain.Ordering.Models;
 
 public sealed class OrderingOperations
 {
     const int OrderGroupMaxSize = 12;
     static readonly TimeSpan MaxPendingTime = TimeSpan.FromHours( 8 );
 
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    public Guid Id { get; private set; }
     public List<Product> Products { get; private set; } = [];
     public List<WarehouseOrder> PendingOrders { get; private set; } = [];
     public List<WarehouseOrder> ActiveOrders { get; private set; } = [];

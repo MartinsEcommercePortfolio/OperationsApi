@@ -2,6 +2,12 @@ namespace OperationsDomain.Warehouse.Equipment;
 
 public sealed class Scanner
 {
-    public Guid Id { get; set; }
-    public string Number { get; set; } = string.Empty;
+    public Scanner( string number )
+    {
+        Id = Guid.NewGuid();
+        Number = number;
+    }
+    
+    public Guid Id { get; private set; }
+    public string Number { get; private set; }
 }

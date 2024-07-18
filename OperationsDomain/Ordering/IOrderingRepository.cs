@@ -1,5 +1,5 @@
 using OperationsDomain._Database;
-using OperationsDomain.Ordering.Types;
+using OperationsDomain.Ordering.Models;
 
 namespace OperationsDomain.Ordering;
 

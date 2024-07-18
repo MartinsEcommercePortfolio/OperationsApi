@@ -1,9 +1,10 @@
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 
-namespace OperationsDomain.Warehouse.Employees.Models.Variants;
+namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class LoadingEmployee : Employee
 {
+    public LoadingEmployee( string name ) : base( name ) { }
     public LoadingTask? LoadingTask => TaskAs<LoadingTask>();
 
     public bool StartLoading( LoadingOperations loading, Guid taskId, Guid trailerId, Guid dockId )

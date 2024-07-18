@@ -1,4 +1,4 @@
-namespace OperationsDomain.Ordering.Types;
+namespace OperationsDomain.Ordering.Models;
 
 public sealed class WarehouseOrderItem
 {

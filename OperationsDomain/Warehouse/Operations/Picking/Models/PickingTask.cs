@@ -4,7 +4,7 @@ namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingTask : WarehouseTask
 {
-    public PickingTask( Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets )
+    internal PickingTask( Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets )
     {
         Id = Guid.NewGuid();
         WarehouseOrderId = warehouseOrderId;
@@ -20,8 +20,8 @@ public sealed class PickingTask : WarehouseTask
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> Pallets { get; private set; }
     public List<Pallet> StagedPallets { get; private set; }
-    
-    public Pallet? StartPickingPallet( Guid rackingId, Guid palletId )
+
+    internal Pallet? StartPickingPallet( Guid rackingId, Guid palletId )
     {
         if (CurrentPallet is not null)
             return null;
@@ -34,7 +34,7 @@ public sealed class PickingTask : WarehouseTask
         
         return CurrentPallet;
     }
-    public Pallet? FinishPickingPallet( Guid areaId )
+    internal Pallet? FinishPickingPallet( Guid areaId )
     {
         if (CurrentPallet is null || areaId != StagingArea.Id)
             return null;

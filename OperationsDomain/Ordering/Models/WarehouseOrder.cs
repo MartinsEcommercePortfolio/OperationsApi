@@ -1,12 +1,11 @@
 using OperationsDomain.Warehouse.Infrastructure.Units;
 
-namespace OperationsDomain.Ordering.Types;
+namespace OperationsDomain.Ordering.Models;
 
 public sealed class WarehouseOrder
 {
     public WarehouseOrder( Guid orderId, Guid orderGroupId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
     {
-        Id = new Guid();
         OrderId = orderId;
         OrderGroupId = orderGroupId;
         CustomerId = customerId;

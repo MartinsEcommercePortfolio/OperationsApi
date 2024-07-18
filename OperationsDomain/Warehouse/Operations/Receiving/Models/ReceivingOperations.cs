@@ -1,5 +1,3 @@
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
@@ -16,8 +14,8 @@ public sealed class ReceivingOperations
 
     public ReceivingTask? GetNextReceivingTask() =>
         PendingReceivingTasks.FirstOrDefault();
-    
-    internal bool GenerateReceivingTask( string trailerNumber, Guid dockId, Guid areaId, List<Pallet> pallets )
+
+    public bool GenerateReceivingTask( string trailerNumber, Guid dockId, Guid areaId, List<Pallet> pallets )
     {
         var trailer = Trailers.FirstOrDefault( t => t.Number == trailerNumber );
         var dock = Docks.FirstOrDefault( d => d.Id == dockId );
@@ -41,9 +39,9 @@ public sealed class ReceivingOperations
 
         return true;
     }
-    internal ReceivingTask? GetReceivingTask( Guid taskId ) =>
+    public ReceivingTask? GetReceivingTask( Guid taskId ) =>
         PendingReceivingTasks.FirstOrDefault( t => t.Id == taskId );
-    internal bool ActivateReceivingTask( ReceivingTask receivingTask )
+    public bool ActivateReceivingTask( ReceivingTask receivingTask )
     {
         var accepted = receivingTask.IsStarted 
             && !receivingTask.IsFinished
@@ -55,7 +53,7 @@ public sealed class ReceivingOperations
 
         return accepted;
     }
-    internal bool CompleteTask( ReceivingTask receivingTask )
+    public bool CompleteTask( ReceivingTask receivingTask )
     {
         return receivingTask.IsFinished
             && ActiveReceivingTasks.Remove( receivingTask );

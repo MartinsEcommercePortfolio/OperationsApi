@@ -12,33 +12,31 @@ public sealed class PickingOperations
     public List<PickingTask> ActivePickingTasks { get; private set; } = [];
     public List<PickingTask> CompletedPickingTasks { get; private set; } = [];
 
-    public PickingTask? GeneratePickingTask( Guid orderId, Dictionary<Guid, int> palletCounts )
+    public PickingTask? GenerateNewPickingTask( Guid warehouseOrderId, Dock dock, List<Guid> productIds )
     {
-        var dock = FindDockForTask();
-        if (dock is null)
-            return null;
-
         var area = FindAreaForDock( dock );
         if (area is null)
             return null;
 
-        var pallets = FindPalletsToPick( palletCounts );
-        return pallets is not null
-            ? PickingTask.New( orderId, dock, area, pallets )
-            : null;
-    }
-    public bool AddPendingTask( PickingTask task )
-    {
-        var added = !task.IsStarted
-            && !task.IsFinished
-            && !PendingPickingTasks.Contains( task )
-            && !ActivePickingTasks.Contains( task )
-            && !CompletedPickingTasks.Contains( task );
+        var pallets = new List<Pallet>();
+        
+        foreach ( var id in productIds )
+        {
+            var racking = Rackings
+                .FirstOrDefault( r =>
+                    r.Product.Id == id &&
+                    r.Pallet is not null &&
+                    pallets.Contains( r.Pallet! ) );
+            
+            if (racking?.Pallet is null)
+                return null;
+            
+            pallets.Add( racking.Pallet );
+        }
 
-        if (added)
-            PendingPickingTasks.Add( task );
-
-        return added;
+        var task = PickingTask.New( warehouseOrderId, dock, area, pallets );
+        PendingPickingTasks.Add( task );
+        return task;
     }
     public PickingTask? GetNextPickingTask() => 
         PendingPickingTasks.FirstOrDefault();
@@ -68,31 +66,9 @@ public sealed class PickingOperations
         return completed;
     }
 
-    Dock? FindDockForTask() =>
-        null;
-    Area? FindAreaForDock( Dock dock ) =>
-        null;
-    List<Pallet>? FindPalletsToPick( Dictionary<Guid, int> palletCounts )
+    Area? FindAreaForDock( Dock dock )
     {
-        List<Pallet> pallets = [];
-
-        foreach ( var count in palletCounts )
-        {
-            for ( int i = 0; i < count.Value; i++ )
-            {
-                var racking = Rackings
-                    .FirstOrDefault( r =>
-                        r.Product.Id == count.Key &&
-                        r.Pallet is not null );
-
-                if (racking is null)
-                    return null;
-
-                pallets.Add( racking.Pallet! );
-            }
-
-        }
-        
-        return pallets;
+        Area? area = null;
+        return area;
     }
 }

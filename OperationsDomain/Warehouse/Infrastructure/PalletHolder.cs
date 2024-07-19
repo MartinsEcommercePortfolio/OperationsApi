@@ -3,7 +3,7 @@ using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
 
-public abstract class PalletHolder : InfrastructureUnit
+public abstract class PalletHolder : Unit
 {
     protected PalletHolder( Guid id, Employee? employee, int capacity )
         : base( id, employee )

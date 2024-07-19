@@ -1,13 +1,13 @@
 using OperationsDomain.Warehouse.Infrastructure.Units;
-using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class PickingEmployee : Employee
 {
-    public PickingEmployee( Guid id, string name, Pallet? palletEquipped, PickingTask? task )
+    PickingEmployee( Guid id, string name, Pallet? palletEquipped, PickingTask? task )
         : base( id, name, palletEquipped, task ) { }
+    
     public PickingTask? PickingTask => 
         TaskAs<PickingTask>();
     

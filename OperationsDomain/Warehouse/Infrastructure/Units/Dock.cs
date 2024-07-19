@@ -2,7 +2,7 @@ using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure.Units;
 
-public sealed class Dock : InfrastructureUnit
+public sealed class Dock : Unit
 {
     Dock( Guid id, Employee? employee, string number ) 
         : base( id, employee )

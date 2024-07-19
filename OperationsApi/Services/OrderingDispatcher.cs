@@ -1,5 +1,7 @@
+using OperationsApi.Services.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Ordering;
+using OperationsDomain.Ordering.Models;
 using OperationsDomain.Shipping;
 using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse.Operations.Picking;
@@ -15,7 +17,7 @@ internal sealed class OrderingDispatcher(
     readonly IServiceProvider _provider = provider;
     readonly ILogger<OrderingDispatcher> _logger = logger;
 
-    static readonly TimeSpan ExecutionInterval = TimeSpan.FromMinutes( 10 );
+    static readonly TimeSpan ExecutionInterval = TimeSpan.FromMinutes( 3 );
 
     protected override async Task ExecuteAsync( CancellationToken stoppingToken )
     {
@@ -28,111 +30,134 @@ internal sealed class OrderingDispatcher(
         {
             _logger.LogInformation( "OrderingDispatcher is executing." );
 
-            //await HandlePendingOrders();
-            //await HandleCompletedOrders();
+            try
+            {
+                await using AsyncServiceScope scope = _provider.CreateAsyncScope();
+
+                var http = GetHttpHandler( scope );
+                
+                var orderingRepo = GetOrderingRepository( scope );
+                var pickingRepo = GetPickingRepository( scope );
+                var shippingRepo = GetShippingRepository( scope );
+
+                await HandlePendingOrders( http, orderingRepo, pickingRepo, shippingRepo );
+                await HandlePickedOrders( http, orderingRepo, pickingRepo, shippingRepo );
+                await HandleDelayedOrders( http, orderingRepo );
+            }
+            catch ( Exception e )
+            {
+                _logger.LogError( e, "OrderingDispatcher threw an exception during execution." );
+            }
+            
             await Task.Delay( ExecutionInterval, stoppingToken );
         }
 
         _logger.LogInformation( "OrderingDispatcher has stopped." );
     }
     
-    /*async Task HandlePendingOrders()
+    async Task HandlePendingOrders( HttpHandler http, IOrderingRepository orderingRepo, IPickingRepository pickingRepo, IShippingRepository shippingRepo )
     {
-        await using AsyncServiceScope scope = _provider.CreateAsyncScope();
-
-        var http = GetHttpHandler( scope );
-        var orderingRepo = GetOrderingRepository( scope );
-        var shippingRepo = GetShippingRepository( scope );
-        var pickingRepo = GetPickingRepository( scope );
-        
-        var ordering = await orderingRepo.GetOrderingOperationsForNewOrder();
-        var shipping = await shippingRepo.GetShippingOperationsWithRoutes();
+        var ordering = await orderingRepo.GetOrderingOperationsAll();
         var picking = await pickingRepo.GetPickingOperationsWithTasks();
+        var shipping = await shippingRepo.GetShippingOperationsWithRoutes();
 
         if (ordering is null || shipping is null || picking is null)
+        {
+            _logger.LogError( "OrderingDispatcher failed to generate models from repositories during execution." );
             return;
+        }
+        
+        List<WarehouseOrder> orders = ordering.PendingOrders;
 
-        var orders = ordering.GetReadyOrdersByRoute();
-        var shipments = CreateShipments( orders, shipping );
-        var tasks = CreatePickingTasks( orders, picking );
+        foreach ( var o in orders )
+        {
+            await using var transaction = await orderingRepo.Context.Database.BeginTransactionAsync();
+            
+            var trailer = shipping.FindAvailableTrailer();
+            if (trailer is null)
+            {
+                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() exited early because no trailers were found during execution." );
+                await transaction.RollbackAsync();
+                return;
+            }
+            
+            o.AssignTrailer( trailer );
+            var task = GeneratePickingTaskForOrder( o, shipping, picking );
+            if (task is null)
+            {
+                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() failed to generate picking task during execution." );
+                await transaction.RollbackAsync();
+                continue;
+            }
+            
+            if (!ordering.ActivateOrder( o ))
+            {
+                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() failed to activate order during execution." );
+                await transaction.RollbackAsync();
+                continue;
+            }
 
-        var success = shipments is not null
-            && tasks is not null
-            && ActivateOrders( orders, ordering )
-            && AddPendingTasks( tasks, picking );
+            if (!await orderingRepo.SaveAsync() || !await pickingRepo.SaveAsync() || !await shippingRepo.SaveAsync())
+            {
+                await transaction.RollbackAsync();
+                throw new Exception( "OrderingDispatcher HandlePendingOrders() failed to save changes." );
+            }
 
-        if (!success)
-            throw new Exception( "OrderingDispatcher failed to handle pending orders." );
+            await transaction.CommitAsync();
+            _logger.LogInformation( "OrderingDispatcher HandlePendingOrders() successfully handled pending order." );
 
-        await orderingRepo.SaveAsync();
-        await shippingRepo.SaveAsync();
-        await pickingRepo.SaveAsync();
+            if (!await http.TryPut<bool>( Consts.OrderingUpdate, new OrderUpdateDto( o.OrderId, o.OrderGroupId, 0 ) ))
+                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() order update http call failed during execution." );
+        }
     }
-    async Task HandleCompletedOrders()
+    async Task HandlePickedOrders( HttpHandler http, IOrderingRepository orderingRepo, IPickingRepository pickingRepo, IShippingRepository shippingRepo )
     {
         // call to http (simulation) to take control of trailer (with its load)
         // if (respond success) remove the order and notify ordering api orders have been shipped
         // subtract item quantities from real product counts respectively (update inventory)
     }
-
-    static List<Shipment> CreateShipments( Dictionary<Guid, List<WarehouseOrder>> ordersByRouteId, ShippingOperations shipping )
+    async Task HandleDelayedOrders( HttpHandler http, IOrderingRepository orderingRepo )
     {
-        List<Shipment> shipments = [];
-        
-        foreach ( var kvp in ordersByRouteId )
+        var ordering = await orderingRepo.GetOrderingOperationsAll();
+
+        if (ordering is null)
         {
-            var shippingRoute = shipping.GetRouteById( kvp.Key );
-            ArgumentNullException.ThrowIfNull( shippingRoute );
-            
-            var shipment = shipping.CreateShipment( shippingRoute, kvp.Value );
-            ArgumentNullException.ThrowIfNull( shipment );
-            
-            shipments.Add( shipment );
+            _logger.LogError( "OrderingDispatcher failed to get OrderingOperations during execution." );
+            return;
         }
-        
-        return shipments;
-    }
-    static List<PickingTask>? CreatePickingTasks( Dictionary<Guid, List<WarehouseOrder>> ordersByRouteId, PickingOperations picking )
-    {
-        List<PickingTask> tasks = [];
 
-        foreach ( var kvp in ordersByRouteId )
-            foreach ( var order in kvp.Value )
-            {
-                var task = picking.GeneratePickingTask( order.OrderId, order.Items
-                    .Select( static w => (w.ProductId, w.Quantity) )
-                    .ToList() );
-                ArgumentNullException.ThrowIfNull( task );
-                
-                tasks.Add( task );
-            }
-        
-        return tasks;
-    }
-    static bool ActivateOrders( Dictionary<Guid, List<WarehouseOrder>> ordersByRouteId, OrderingOperations ordering )
-    {
-        foreach ( var kvp in ordersByRouteId )
-            foreach ( var order in kvp.Value )
-                if (!ordering.ActivateOrder( order ))
-                    throw new Exception( $"Failed to activate order: {order} {order.OrderId}" );
-        
-        return true;
-    }
-    static bool AddPendingTasks( List<PickingTask> tasks, PickingOperations picking )
-    {
-        foreach ( var t in tasks )
-            if (!picking.AddPendingTask( t ))
-                throw new Exception( $"Failed to add pending picking task: {t} {t.Employee}" );
-        
-        return true;
-    }
+        var delayedOrders = ordering.CheckForDelayedOrders();
+        var dtos = delayedOrders
+            .Select( static o => new OrderDelayedDto {
+                OrderId = o.OrderId,
+                OrderGroupId = o.OrderGroupId
+            } )
+            .ToList();
 
-    HttpHandler GetHttpHandler( AsyncServiceScope scope ) =>
+        if (!await http.TryPut<bool>( Consts.OrderingDelays, dtos ))
+            _logger.LogWarning( "OrderingDispatcher delayed order http call failed during execution." );
+    }
+    
+    static PickingTask? GeneratePickingTaskForOrder( WarehouseOrder order, ShippingOperations shipping, PickingOperations picking )
+    {
+
+        var dock = shipping.FindAvailableDock();
+
+        if (dock is null || dock.IsOwned())
+            return null;
+
+        var productIds = order.Items
+            .Select( static i => i.ProductId )
+            .ToList();
+
+        return picking.GenerateNewPickingTask( order.Id, dock, productIds );
+    }
+    static HttpHandler GetHttpHandler( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<HttpHandler>() ?? throw new Exception( $"Failed to get {nameof( HttpHandler )} from provider." );
-    IOrderingRepository GetOrderingRepository( AsyncServiceScope scope ) =>
+    static IOrderingRepository GetOrderingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IOrderingRepository>() ?? throw new Exception( $"Failed to get {nameof( IOrderingRepository )} from provider." );
-    IShippingRepository GetShippingRepository( AsyncServiceScope scope ) =>
+    static IShippingRepository GetShippingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IShippingRepository>() ?? throw new Exception( $"Failed to get {nameof( IShippingRepository )} from provider." );
-    IPickingRepository GetPickingRepository( AsyncServiceScope scope ) =>
-        scope.ServiceProvider.GetService<IPickingRepository>() ?? throw new Exception( $"Failed to get {nameof( IPickingRepository )} from provider." );*/
+    static IPickingRepository GetPickingRepository( AsyncServiceScope scope ) =>
+        scope.ServiceProvider.GetService<IPickingRepository>() ?? throw new Exception( $"Failed to get {nameof( IPickingRepository )} from provider." );
 }

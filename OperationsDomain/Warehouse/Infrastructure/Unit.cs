@@ -2,9 +2,9 @@ using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure;
 
-public abstract class InfrastructureUnit
+public abstract class Unit
 {
-    protected InfrastructureUnit( Guid id, Employee? owner )
+    protected Unit( Guid id, Employee? owner )
     {
         Id = id;
         Owner = owner;
@@ -13,6 +13,8 @@ public abstract class InfrastructureUnit
     public Guid Id { get; protected init; }
     public Employee? Owner { get; protected set; }
 
+    public bool IsOwned() =>
+        Owner is not null;
     public bool IsOwnedBy( Employee employee ) =>
         Owner == employee;
     public bool AssignTo( Employee employee )

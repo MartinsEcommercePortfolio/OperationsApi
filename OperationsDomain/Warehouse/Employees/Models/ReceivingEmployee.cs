@@ -5,9 +5,11 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class ReceivingEmployee : Employee
 {
-    public ReceivingEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
+    ReceivingEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
         : base( id, name, palletEquipped, task ) { }
-    public ReceivingTask? ReceivingTask => TaskAs<ReceivingTask>();
+    
+    public ReceivingTask? ReceivingTask => 
+        TaskAs<ReceivingTask>();
 
     public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {

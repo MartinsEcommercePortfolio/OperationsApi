@@ -3,7 +3,7 @@ using OperationsDomain.Warehouse.Employees.Models;
 
 namespace OperationsDomain.Warehouse.Infrastructure.Units;
 
-public sealed class Pallet : InfrastructureUnit
+public sealed class Pallet : Unit
 {
     Pallet( Guid id, Employee? employee, Product product, int itemCount )
         : base( id, employee )

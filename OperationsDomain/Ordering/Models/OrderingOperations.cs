@@ -4,7 +4,6 @@ namespace OperationsDomain.Ordering.Models;
 
 public sealed class OrderingOperations
 {
-    const int OrderGroupMaxSize = 12;
     static readonly TimeSpan MaxPendingTime = TimeSpan.FromHours( 8 );
 
     public Guid Id { get; private set; }
@@ -12,8 +11,20 @@ public sealed class OrderingOperations
     public List<WarehouseOrder> PendingOrders { get; private set; } = [];
     public List<WarehouseOrder> ActiveOrders { get; private set; } = [];
     public List<WarehouseOrder> PickedOrders { get; private set; } = [];
+    public List<WarehouseOrder> DelayedOrders { get; private set; } = [];
 
-    public bool AddOrder( WarehouseOrder warehouseOrder )
+    public List<WarehouseOrder> CheckForDelayedOrders()
+    {
+        List<WarehouseOrder> newlyDelayed = [];
+        
+        foreach ( var order in PendingOrders )
+            if (DateTime.Now - order.DateUpdated > MaxPendingTime && !DelayedOrders.Contains( order ))
+                newlyDelayed.Add( order );
+
+        DelayedOrders.AddRange( newlyDelayed );
+        return newlyDelayed;
+    }
+    public bool AddNewOrder( WarehouseOrder warehouseOrder )
     {
         if (!ValidateOrder( warehouseOrder ))
             return false;
@@ -21,57 +32,16 @@ public sealed class OrderingOperations
         PendingOrders.Add( warehouseOrder );
         return true;
     }
-    public Dictionary<Guid, List<WarehouseOrder>> GetReadyOrdersByRoute()
-    {
-        Dictionary<Guid, List<WarehouseOrder>> ordersByRouteId = [];
-
-        foreach ( var order in PendingOrders )
-        {
-            if (!ordersByRouteId.TryGetValue( order.ShippingRouteId, out List<WarehouseOrder>? orders ))
-            {
-                orders = [];
-                ordersByRouteId.Add( order.ShippingRouteId, orders );
-            }
-
-            orders.Add( order );
-        }
-
-        Dictionary<Guid, List<WarehouseOrder>> toReturn = [];
-
-        foreach ( var kvp in ordersByRouteId )
-        {
-            if (kvp.Value.Count == OrderGroupMaxSize)
-            {
-                toReturn.Add( kvp.Key, kvp.Value );
-                continue;
-            }
-
-            foreach ( var order in kvp.Value )
-            {
-                if (DateTime.Now - order.DateReceived < MaxPendingTime)
-                    continue;
-
-                var values = kvp.Value
-                    .OrderBy( static o => o.DateCreated )
-                    .Take( OrderGroupMaxSize )
-                    .ToList();
-
-                toReturn.Add( kvp.Key, values );
-                break;
-            }
-        }
-
-        return toReturn;
-    }
     public bool ActivateOrder( WarehouseOrder order )
     {
         var activated = !ActiveOrders.Contains( order )
-            && PendingOrders.Remove( order );
-        
+            && PendingOrders.Remove( order )
+            && order.Update( OrderStatus.Fulfilling );
+
         if (activated)
             ActiveOrders.Add( order );
-        
-        return false;
+
+        return activated;
     }
     public bool CompleteOrder( Guid orderId )
     {
@@ -82,10 +52,9 @@ public sealed class OrderingOperations
 
         if (completed)
             PickedOrders.Add( order! );
-
-        return completed;
+        
+        return true;
     }
-
     bool ValidateOrder( WarehouseOrder order )
     {
         foreach ( var item in order.Items )

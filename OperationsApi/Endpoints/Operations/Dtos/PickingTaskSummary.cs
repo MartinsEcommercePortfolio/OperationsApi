@@ -16,7 +16,7 @@ internal readonly record struct PickingTaskSummary(
     static List<PickSummary> GetPickSummaries( List<Pallet> pallets )
     {
         List<PickSummary> summaries = [];
-        summaries.AddRange( from m in pallets select PickSummary.FromModel( m ) );
+        summaries.AddRange( from m in pallets select PickSummary.FromModel( m, m.Racking ) );
         return summaries;
     }
 }

@@ -6,7 +6,7 @@ internal readonly record struct PickSummary(
     PalletDto Pallet,
     RackingDto Racking )
 {
-    internal static PickSummary FromModel( Pallet pallet ) => new(
+    internal static PickSummary FromModel( Pallet pallet, Racking racking ) => new(
         PalletDto.FromModel( pallet ),
-        RackingDto.FromModel( pallet.Racking ) );
+        RackingDto.FromModel( racking ) );
 }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -7,7 +8,39 @@ public abstract class DatabaseService<TService>( WarehouseDbContext dbContext, I
 {
     protected readonly ILogger<TService> Logger = logger;
     protected readonly WarehouseDbContext DbContext = dbContext;
-    
+
+    public DbContext Context => DbContext;
+
+    public bool ClearChanges()
+    {
+        var entries = DbContext.ChangeTracker.Entries()
+            .Where( static e => e.State != EntityState.Unchanged )
+            .ToList();
+        
+        foreach ( var entry in entries )
+        {
+            switch ( entry.State )
+            {
+                case EntityState.Modified:
+                    entry.State = EntityState.Unchanged;
+                    break;
+                case EntityState.Added:
+                    entry.State = EntityState.Detached;
+                    break;
+                case EntityState.Deleted:
+                    entry.Reload();
+                    break;
+                case EntityState.Detached:
+                    throw new ArgumentOutOfRangeException();
+                case EntityState.Unchanged:
+                    throw new ArgumentOutOfRangeException();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        return true;
+    }
     public async Task<bool> SaveAsync()
     {
         try

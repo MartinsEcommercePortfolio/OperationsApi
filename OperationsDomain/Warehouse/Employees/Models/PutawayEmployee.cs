@@ -5,9 +5,11 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class PutawayEmployee : Employee
 {
-    public PutawayEmployee( Guid id, string name, Pallet? palletEquipped, PutawayTask? task ) 
+    PutawayEmployee( Guid id, string name, Pallet? palletEquipped, PutawayTask? task ) 
         : base( id, name, palletEquipped, task ) { }
-    public PutawayTask? PutawayTask => TaskAs<PutawayTask>();
+    
+    public PutawayTask? PutawayTask => 
+        TaskAs<PutawayTask>();
     
     public async Task<bool> StartPutaway( PutawayOperations putaways, Guid palletId )
     {

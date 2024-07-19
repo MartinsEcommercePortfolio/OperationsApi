@@ -7,5 +7,6 @@ internal static class Consts
     internal const string ShipToSimulation = SimulationApiBase + "";
     
     internal const string OrderingApiBase = "";
-    internal const string UpdateOrders = OrderingApiBase + "";
+    internal const string OrderingDelays = OrderingApiBase + "";
+    internal const string OrderingUpdate = OrderingApiBase + "";
 }

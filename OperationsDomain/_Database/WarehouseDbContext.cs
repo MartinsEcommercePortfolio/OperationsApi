@@ -4,7 +4,6 @@ using OperationsDomain.Shipping.Models;
 using OperationsDomain.Warehouse;
 using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Equipment;
-using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Infrastructure.Units;
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 using OperationsDomain.Warehouse.Operations.Picking.Models;

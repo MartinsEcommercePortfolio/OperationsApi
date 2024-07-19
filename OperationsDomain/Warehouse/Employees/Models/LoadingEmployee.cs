@@ -5,8 +5,9 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class LoadingEmployee : Employee
 {
-    public LoadingEmployee( Guid id, string name, Pallet? palletEquipped, LoadingTask? task ) 
+    LoadingEmployee( Guid id, string name, Pallet? palletEquipped, LoadingTask? task ) 
         : base( id, name, palletEquipped, task ) { }
+    
     public LoadingTask? LoadingTask => 
         TaskAs<LoadingTask>();
 

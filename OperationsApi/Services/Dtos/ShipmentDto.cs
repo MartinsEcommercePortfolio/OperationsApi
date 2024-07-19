@@ -1,6 +1,3 @@
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse.Infrastructure;
-
 namespace OperationsApi.Services.Dtos;
 
 internal readonly record struct ShipmentDto(

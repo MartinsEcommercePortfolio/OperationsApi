@@ -147,7 +147,7 @@ internal static class PickingEndpoints
             return Results.Problem();
 
         var ordering = await orderingRepository
-            .GetOrderingOperationsForNewOrder();
+            .GetOrderingOperationsAll();
 
         var orderUpdated = ordering is not null
             && ordering.CompleteOrder( employee.PickingTask!.WarehouseOrderId );

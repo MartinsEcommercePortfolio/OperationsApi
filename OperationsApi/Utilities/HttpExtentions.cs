@@ -13,25 +13,25 @@ internal static class HttpExtentions
     public static ReceivingEmployee GetReceivingEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return new ReceivingEmployee( string.Empty );
-        return userObj as ReceivingEmployee ?? new ReceivingEmployee( string.Empty );
+            return (ReceivingEmployee) Employee.Null();
+        return userObj as ReceivingEmployee ?? (ReceivingEmployee) Employee.Null();
     }
     public static PutawayEmployee GetPutawayEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return new PutawayEmployee( string.Empty );
-        return userObj as PutawayEmployee ?? new PutawayEmployee( string.Empty );
+            return (PutawayEmployee) Employee.Null();
+        return userObj as PutawayEmployee ?? (PutawayEmployee) Employee.Null();
     }
     public static PickingEmployee GetPickingEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return new PickingEmployee( string.Empty );
-        return userObj as PickingEmployee ?? new PickingEmployee( string.Empty );
+            return (PickingEmployee) Employee.Null();
+        return userObj as PickingEmployee ?? (PickingEmployee) Employee.Null();
     }
     public static LoadingEmployee GetLoadingEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return new LoadingEmployee( string.Empty );
-        return userObj as LoadingEmployee ?? new LoadingEmployee( string.Empty );
+            return (LoadingEmployee) Employee.Null();
+        return userObj as LoadingEmployee ?? (LoadingEmployee) Employee.Null();
     }
 }

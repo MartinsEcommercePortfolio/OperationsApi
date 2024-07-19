@@ -1,18 +1,23 @@
+using OperationsDomain.Warehouse.Employees.Models;
 using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
 
 public sealed class PickingTask : WarehouseTask
 {
-    internal PickingTask( Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets )
+    PickingTask(
+        Guid id, Employee? employee, bool isStarted, bool isFinished, Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets )
+        : base( id, employee, isStarted, isFinished )
     {
-        Id = Guid.NewGuid();
         WarehouseOrderId = warehouseOrderId;
         StagingDock = dock;
         StagingArea = area;
         Pallets = pallets;
         StagedPallets = [];
     }
+
+    public static PickingTask New( Guid warehouseOrderId, Dock dock, Area area, List<Pallet> pallets ) =>
+        new( Guid.NewGuid(), null, false, false, warehouseOrderId, dock, area, pallets );
     
     public Guid WarehouseOrderId { get; private set; }
     public Dock StagingDock { get; private set; }
@@ -21,6 +26,22 @@ public sealed class PickingTask : WarehouseTask
     public List<Pallet> Pallets { get; private set; }
     public List<Pallet> StagedPallets { get; private set; }
 
+    internal override bool StartWith( Employee employee )
+    {
+        return base.StartWith( employee )
+            && StagingDock.AssignTo( employee )
+            && Pallets.All( p =>
+                p.AssignTo( employee ) &&
+                p.Racking is not null &&
+                p.Racking.AssignTo( employee ) );
+    }
+    internal override bool CleanUp( Employee employee )
+    {
+        return base.CleanUp( employee )
+            && StagingDock.UnAssignFrom( employee )
+            && Pallets.All( p =>
+                p.UnAssignFrom( employee ) );
+    }
     internal Pallet? StartPickingPallet( Guid rackingId, Guid palletId )
     {
         if (CurrentPallet is not null)

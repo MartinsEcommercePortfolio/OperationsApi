@@ -15,13 +15,13 @@ public sealed class ReceivingOperations
     public ReceivingTask? GetNextReceivingTask() =>
         PendingReceivingTasks.FirstOrDefault();
 
-    public bool GenerateReceivingTask( string trailerNumber, Guid dockId, Guid areaId, List<Pallet> pallets )
+    public bool GenerateReceivingTask( Guid trailerId, Guid dockId, Guid areaId, List<Pallet> pallets )
     {
-        var trailer = Trailers.FirstOrDefault( t => t.Number == trailerNumber );
+        var trailer = Trailers.FirstOrDefault( t => t.Id == trailerId );
         var dock = Docks.FirstOrDefault( d => d.Id == dockId );
         var area = Areas.FirstOrDefault( a => a.Id == areaId );
 
-        var validTask = trailer is null
+        var validTask = trailer is not null
             && dock is not null
             && area is not null
             && dock.Owner is null
@@ -30,11 +30,10 @@ public sealed class ReceivingOperations
 
         if (!validTask)
             return false;
+        
+        Trailers.Add( trailer! );
 
-        trailer = new Trailer( trailerNumber, dock!, pallets );
-        Trailers.Add( trailer );
-
-        var task = new ReceivingTask( trailer, dock!, area! );
+        var task = ReceivingTask.New( trailer!, dock!, area! );
         PendingReceivingTasks.Add( task );
 
         return true;

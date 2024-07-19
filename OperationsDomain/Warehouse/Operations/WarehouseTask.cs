@@ -4,25 +4,37 @@ namespace OperationsDomain.Warehouse.Operations;
 
 public abstract class WarehouseTask
 {
-    public Guid Id { get; protected set; }
-    public Guid EmployeeId { get; protected set; }
-    public Employee Employee { get; protected set; } = default!;
+    protected WarehouseTask( Guid id, Employee? employee, bool isStarted, bool isFinished )
+    {
+        Id = id;
+        Employee = employee;
+        EmployeeId = employee?.Id;
+        IsStarted = isStarted;
+        IsFinished = isFinished;
+    }
+    
+    public Guid Id { get; protected init; }
+    public Guid? EmployeeId { get; protected set; }
+    public Employee? Employee { get; protected set; }
     public bool IsStarted { get; protected set; }
     public bool IsFinished { get; protected set; }
-
-    internal bool StartWith( Employee employee )
+    
+    internal virtual bool StartWith( Employee employee )
     {
-        if (IsStarted || IsFinished)
+        IsStarted = Employee is null
+            && !IsStarted
+            && !IsFinished;
+
+        if (!IsStarted)
             return false;
-        
-        EmployeeId = employee.Id;
+
         Employee = employee;
-        IsStarted = true;
+        EmployeeId = Employee.Id;
         
         return true;
     }
     internal virtual bool CleanUp( Employee employee )
     {
-        return true;
+        return employee == Employee;
     }
 }

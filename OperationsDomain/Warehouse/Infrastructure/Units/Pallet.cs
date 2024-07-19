@@ -5,12 +5,15 @@ namespace OperationsDomain.Warehouse.Infrastructure.Units;
 
 public sealed class Pallet : InfrastructureUnit
 {
-    public Pallet( Product product, int itemCount )
+    Pallet( Guid id, Employee? employee, Product product, int itemCount )
+        : base( id, employee )
     {
-        Id = Guid.NewGuid();
         Product = product;
         ItemCount = itemCount;
-    } 
+    }
+
+    public static Pallet New( Product product, int itemCount ) =>
+        new( Guid.NewGuid(), null, product, itemCount );
     
     public Guid? RackingId { get; private set; }
     public Guid? AreaId { get; private set; }

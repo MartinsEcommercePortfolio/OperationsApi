@@ -12,5 +12,5 @@ internal readonly record struct WarehouseOrderDto(
     List<CartItemDto> Items )
 {
     internal WarehouseOrder ToModel() =>
-        new( OrderId, OrderGroupId, CustomerId, DateCreated, PosX, PosY, CartItemDto.ToModels( Items ) );
+        new( Guid.NewGuid(), OrderId, OrderGroupId, CustomerId, DateCreated, PosX, PosY, CartItemDto.ToModels( Items ) );
 }

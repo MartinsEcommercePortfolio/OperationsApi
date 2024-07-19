@@ -5,7 +5,8 @@ namespace OperationsDomain.Warehouse.Infrastructure;
 
 public abstract class PalletHolder : InfrastructureUnit
 {
-    protected PalletHolder( int capacity )
+    protected PalletHolder( Guid id, Employee? employee, int capacity )
+        : base( id, employee )
     {
         PalletCapacity = capacity;
         Pallets = [];

@@ -5,10 +5,16 @@ namespace OperationsDomain.Warehouse.Employees.Models;
 
 public class Employee
 {
-    public Employee( string name )
+    protected Employee( Guid id, string name, Pallet? palletEquipped, WarehouseTask? task )
     {
+        Id = id;
         Name = name;
+        PalletEquipped = palletEquipped;
+        Task = task;
     }
+
+    public static Employee Null() =>
+        new( Guid.Empty, string.Empty, null, null );
     
     public Guid Id { get; private set; }
     public string Name { get; private set; }
@@ -18,9 +24,6 @@ public class Employee
 
     public T? TaskAs<T>() where T : WarehouseTask =>
         Task as T;
-
-    public static Employee Null() =>
-        new( string.Empty );
     
     public bool StartTask( WarehouseTask task )
     {

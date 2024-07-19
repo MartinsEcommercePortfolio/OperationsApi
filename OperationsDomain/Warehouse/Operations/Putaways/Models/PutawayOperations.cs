@@ -18,7 +18,7 @@ public sealed class PutawayOperations
         var racking = await FindRackingForPutaway( pallet );
 
         return racking is not null && pallet.Area is not null
-            ? new PutawayTask( pallet, pallet.Area, racking )
+            ? PutawayTask.New( pallet, pallet.Area, racking )
             : null;
     }
     internal bool ActivateTask( PutawayTask task )
@@ -47,8 +47,7 @@ public sealed class PutawayOperations
             return Rackings
                 .FirstOrDefault( r => 
                     r.IsAvailable() &&
-                    r.Level != "0" &&
-                    r.PalletFits( pallet ) );
+                    r.Level != "0");
         } );
     }
 }

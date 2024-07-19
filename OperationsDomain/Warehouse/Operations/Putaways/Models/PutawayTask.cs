@@ -5,7 +5,9 @@ namespace OperationsDomain.Warehouse.Operations.Putaways.Models;
 
 public sealed class PutawayTask : WarehouseTask
 {
-    internal PutawayTask( Pallet pallet, Area area, Racking racking )
+    PutawayTask(
+        Guid id, Employee? employee, bool isStarted, bool isFinished, Pallet pallet, Area area, Racking racking )
+        : base( id, employee, isStarted, isFinished )
     {
         Pallet = pallet;
         PickupArea = area;
@@ -14,6 +16,9 @@ public sealed class PutawayTask : WarehouseTask
         PickupAreaId = area.Id;
         PutawayRackingId = racking.Id;
     }
+
+    public static PutawayTask New( Pallet pallet, Area area, Racking racking ) =>
+        new( Guid.NewGuid(), null, false, false, pallet, area, racking );
 
     public Pallet Pallet { get; private set; }
     public Area PickupArea { get; private set; }

@@ -5,33 +5,45 @@ namespace OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 public sealed class ReceivingTask : WarehouseTask
 {
-    internal ReceivingTask() {}
-    internal ReceivingTask( Trailer trailer, Dock dock, Area area )
+    ReceivingTask(
+        Guid id, Employee? employee, bool isStarted, bool isFinished, Trailer trailer, Dock dock, Area area )
+        : base( id, employee, isStarted, isFinished )
     {
         Trailer = trailer;
         Dock = dock;
         Area = area;
     }
     
-    public Trailer Trailer { get; private set; } = null!;
-    public Dock Dock { get; private set; } = null!;
-    public Area Area { get; private set; } = null!;
+    public static ReceivingTask New( Trailer trailer, Dock dock, Area area ) => 
+        new( Guid.NewGuid(), null, false, false, trailer, dock, area );
+    
+    public Trailer Trailer { get; private set; }
+    public Dock Dock { get; private set; }
+    public Area Area { get; private set; }
     public Pallet? CurrentPallet { get; private set; }
     public List<Pallet> StagedPallets { get; private set; } = [];
-
+    
+    internal override bool StartWith( Employee employee )
+    {
+        return base.StartWith( employee )
+            && Dock.AssignTo( employee )
+            && Trailer.AssignTo( employee )
+            && Trailer.Pallets.All( p => p.AssignTo( employee ) );
+    }
     internal override bool CleanUp( Employee employee )
     {
-        return Dock.UnAssignFrom( employee )
+        return base.CleanUp( employee )
+            && Dock.UnAssignFrom( employee )
             && Trailer.Pallets.All( p => p.UnAssignFrom( employee ) );
     }
-    internal bool InitializeReceiving( Employee employee, Guid trailerId, Guid dockId, Guid areaId )
+    internal bool VerifyStart( Guid trailerId, Guid dockId, Guid areaId )
     {
-        return trailerId == Trailer.Id
+        return Employee is not null
+            && IsStarted
+            && !IsFinished
+            && trailerId == Trailer.Id
             && dockId == Dock.Id
-            && areaId == Area.Id
-            && Dock.AssignTo( Employee )
-            && Trailer.AssignTo( Employee )
-            && Trailer.Pallets.All( p => p.AssignTo( employee ) );
+            && areaId == Area.Id;
     }
     internal Pallet? StartReceivingPallet( Guid trailerId, Guid palletId )
     {

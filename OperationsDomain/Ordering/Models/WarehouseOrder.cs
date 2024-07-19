@@ -4,8 +4,9 @@ namespace OperationsDomain.Ordering.Models;
 
 public sealed class WarehouseOrder
 {
-    public WarehouseOrder( Guid orderId, Guid orderGroupId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
+    public WarehouseOrder( Guid id, Guid orderId, Guid orderGroupId, string? customerId, DateTime dateCreated, int posX, int posY, List<WarehouseOrderItem> items )
     {
+        Id = id;
         OrderId = orderId;
         OrderGroupId = orderGroupId;
         CustomerId = customerId;

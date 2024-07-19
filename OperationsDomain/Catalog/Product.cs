@@ -2,13 +2,15 @@ namespace OperationsDomain.Catalog;
 
 public sealed class Product
 {
-    public Product( string title, string brand, int stockPallets = 0 )
+    Product( Guid id, string title, string brand )
     {
+        Id = id;
         Title = title;
         Brand = brand;
-        PhysicalStockPallets = stockPallets;
-        VirtualStockPallets = stockPallets;
     }
+
+    public static Product New( string title, string brand ) =>
+        new( Guid.NewGuid(), title, brand );
 
     public Guid Id { get; private set; }
     public string Title { get; private set; }

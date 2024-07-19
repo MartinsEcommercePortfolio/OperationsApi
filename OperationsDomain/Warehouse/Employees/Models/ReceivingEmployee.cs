@@ -1,10 +1,12 @@
+using OperationsDomain.Warehouse.Infrastructure.Units;
 using OperationsDomain.Warehouse.Operations.Receiving.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class ReceivingEmployee : Employee
 {
-    public ReceivingEmployee( string name ) : base( name ) { }
+    public ReceivingEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
+        : base( id, name, palletEquipped, task ) { }
     public ReceivingTask? ReceivingTask => TaskAs<ReceivingTask>();
 
     public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
@@ -15,9 +17,16 @@ public sealed class ReceivingEmployee : Employee
         var task = receiving.GetReceivingTask( taskId );
         
         return task is not null
-            && task.InitializeReceiving( this, trailerId, dockId, areaId )
             && StartTask( task )
+            && task.VerifyStart( trailerId, dockId, areaId )
             && receiving.ActivateReceivingTask( task );
+    }
+    public bool FinishReceiving( ReceivingOperations receiving )
+    {
+        return ReceivingTask is not null
+            && ReceivingTask.CleanUp( this )
+            && EndTask()
+            && receiving.CompleteTask( ReceivingTask );
     }
     public bool StartReceivingPallet( Guid trailerId, Guid palletId )
     {
@@ -35,12 +44,5 @@ public sealed class ReceivingEmployee : Employee
         return ReceivingTask?.CurrentPallet is not null
             && StagePallet( ReceivingTask.Area, ReceivingTask.CurrentPallet )
             && ReceivingTask.FinishReceivingPallet( areaId, palletId );
-    }
-    public bool FinishReceiving( ReceivingOperations receiving )
-    {
-        return ReceivingTask is not null
-            && ReceivingTask.CleanUp( this )
-            && EndTask()
-            && receiving.CompleteTask( ReceivingTask );
     }
 }

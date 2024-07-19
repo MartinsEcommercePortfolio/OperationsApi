@@ -1,11 +1,14 @@
+using OperationsDomain.Warehouse.Infrastructure.Units;
 using OperationsDomain.Warehouse.Operations.Loading.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class LoadingEmployee : Employee
 {
-    public LoadingEmployee( string name ) : base( name ) { }
-    public LoadingTask? LoadingTask => TaskAs<LoadingTask>();
+    public LoadingEmployee( Guid id, string name, Pallet? palletEquipped, LoadingTask? task ) 
+        : base( id, name, palletEquipped, task ) { }
+    public LoadingTask? LoadingTask => 
+        TaskAs<LoadingTask>();
 
     public bool StartLoading( LoadingOperations loading, Guid taskId, Guid trailerId, Guid dockId )
     {
@@ -15,9 +18,9 @@ public sealed class LoadingEmployee : Employee
         var task = loading.GetTask( taskId );
         
         return task is not null
-            && task.InitializeLoadingTask( this, trailerId, dockId )
             && StartTask( task )
-            && loading.AcceptTask( task );
+            && task.VerifyLoadingTask( trailerId, dockId )
+            && loading.ActivateTask( task );
     }
     public bool StartLoadingPallet( Guid palletId )
     {

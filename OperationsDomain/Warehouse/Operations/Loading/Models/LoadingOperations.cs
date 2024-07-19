@@ -11,7 +11,7 @@ public sealed class LoadingOperations
     
     internal LoadingTask? GetTask( Guid taskId ) =>
         PendingLoadingTasks.FirstOrDefault( t => t.Id == taskId );
-    internal bool AcceptTask( LoadingTask task )
+    internal bool ActivateTask( LoadingTask task )
     {
         var accepted = task.IsStarted
             && !task.IsFinished

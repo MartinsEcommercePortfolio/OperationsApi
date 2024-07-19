@@ -2,11 +2,14 @@ namespace OperationsDomain.Warehouse.Equipment;
 
 public sealed class Scanner
 {
-    public Scanner( string number )
+    Scanner( Guid id, string number )
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Number = number;
     }
+
+    public static Scanner New( string number ) =>
+        new( Guid.NewGuid(), number );
     
     public Guid Id { get; private set; }
     public string Number { get; private set; }

@@ -5,49 +5,26 @@ namespace OperationsDomain.Warehouse.Infrastructure.Units;
 
 public sealed class Racking : PalletHolder
 {
-    public Racking(
-        string aisle,
-        string bay,
-        string level,
-        double length,
-        double width,
-        double height,
-        double capacity,
-        Product product ) 
-        : base( 1 )
+    Racking( Guid id, Employee? employee, Product product, string aisle, string bay, string level ) 
+        : base( id, employee, 1 )
     {
         Id = new Guid();
         Aisle = aisle;
         Bay = bay;
         Level = level;
-        Length = length;
-        Width = width;
-        Height = height;
-        Capacity = capacity;
         Product = product;
     }
-    
+
+    public static Racking New( Product product, string aisle, string bay, string level ) =>
+        new( Guid.NewGuid(), null, product, aisle, bay, level );
+
+    public Product Product { get; private set; }  
+    public Pallet? Pallet { get; private set; }
     public string Aisle { get; private set; }
     public string Bay { get; private set; }
     public string Level { get; private set; }
-    public double Length { get; private set; }
-    public double Width { get; private set; }
-    public double Height { get; private set; }
-    public double Capacity { get; private set; }
-    public Pallet? Pallet { get; private set; }
-    public Product Product { get; private set; }    
     
     public bool IsAvailable() =>
         Owner is null &&
         Pallet is null;
-    public bool PalletFits( Pallet pallet ) =>
-        Length > pallet.Length &&
-        Width > pallet.Width &&
-        Height > pallet.Height;
-    public override bool AddPallet( Employee employee, Pallet pallet )
-    {
-        return PalletFits( pallet )
-            && Capacity > pallet.Weight
-            && base.AddPallet( employee, pallet );
-    }
 }

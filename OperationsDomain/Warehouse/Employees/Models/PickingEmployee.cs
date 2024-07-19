@@ -1,16 +1,19 @@
+using OperationsDomain.Warehouse.Infrastructure.Units;
+using OperationsDomain.Warehouse.Operations;
 using OperationsDomain.Warehouse.Operations.Picking.Models;
 
 namespace OperationsDomain.Warehouse.Employees.Models;
 
 public sealed class PickingEmployee : Employee
 {
-    public PickingEmployee( string name ) : base( name ) { }
-    public PickingTask? PickingTask => TaskAs<PickingTask>();
-
-    // PICKING
+    public PickingEmployee( Guid id, string name, Pallet? palletEquipped, PickingTask? task )
+        : base( id, name, palletEquipped, task ) { }
+    public PickingTask? PickingTask => 
+        TaskAs<PickingTask>();
+    
     public bool StartPicking( PickingOperations picking, Guid taskId )
     {
-        if (PickingTask is not null)
+        if (Task is not null)
             return false;
 
         var task = picking.GetPendingTask( taskId );

@@ -1,4 +1,3 @@
-using OperationsDomain.Warehouse.Infrastructure;
 using OperationsDomain.Warehouse.Infrastructure.Units;
 
 namespace OperationsDomain.Warehouse.Operations.Picking.Models;
@@ -25,7 +24,7 @@ public sealed class PickingOperations
 
         var pallets = FindPalletsToPick( palletCounts );
         return pallets is not null
-            ? new PickingTask( orderId, dock, area, pallets )
+            ? PickingTask.New( orderId, dock, area, pallets )
             : null;
     }
     public bool AddPendingTask( PickingTask task )

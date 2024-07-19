@@ -7,7 +7,7 @@ internal readonly record struct CartItemDto(
     int Quantity )
 {
     internal WarehouseOrderItem ToModel() =>
-        new( ItemId, Quantity );
+        WarehouseOrderItem.New( ItemId, Quantity );
     internal static List<WarehouseOrderItem> ToModels( List<CartItemDto> dtos )
     {
         List<WarehouseOrderItem> items = [];

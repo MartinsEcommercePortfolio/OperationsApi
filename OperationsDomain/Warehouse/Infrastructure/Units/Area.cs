@@ -4,10 +4,10 @@ namespace OperationsDomain.Warehouse.Infrastructure.Units;
 
 public sealed class Area : PalletHolder
 {
-    public Area() : base( 100 )
+    Area( Guid id, Employee? employee, string number ) 
+        : base( id, employee, 100 )
     {
-        Id = new Guid();
-        Number = string.Empty;
+        Number = number;
         Pallets = [];
     }
 

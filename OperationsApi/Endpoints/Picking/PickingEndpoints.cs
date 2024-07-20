@@ -25,7 +25,7 @@ internal static class PickingEndpoints
             static async (
                     [FromQuery] Guid taskId,
                     HttpContext http,
-                    HttpHandler httpHandler,
+                    HttpMessenger httpHandler,
                     IOrderingRepository orderingRepository,
                     IPickingRepository repository ) =>
                 await StartPickingTask(
@@ -100,7 +100,7 @@ internal static class PickingEndpoints
             ? Results.Ok( PickingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartPickingTask( PickingEmployee employee, Guid taskId, HttpHandler httpHandler, IOrderingRepository orderingRepository, IPickingRepository pickingRepository )
+    static async Task<IResult> StartPickingTask( PickingEmployee employee, Guid taskId, HttpMessenger httpMessenger, IOrderingRepository orderingRepository, IPickingRepository pickingRepository )
     {
         var ordering = await orderingRepository
             .GetOrderingOperationsAll();
@@ -123,7 +123,7 @@ internal static class PickingEndpoints
             return Results.Problem();
 
         // NOTIFY ORDERING API
-        if (!await httpHandler.TryPut<bool>( Consts.OrderingUpdate, OrderUpdateDto.FromModel( order ) ))
+        if (!await httpMessenger.TryPut<bool>( Consts.OrderingUpdate, OrderUpdateDto.FromModel( order ) ))
             EndpointLogger.LogError( "OrderingDispatcher HandlePendingOrders() order update http call failed during execution." );
         
         return await orderingRepository.SaveAsync()

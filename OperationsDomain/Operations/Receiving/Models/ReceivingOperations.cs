@@ -11,28 +11,20 @@ public sealed class ReceivingOperations : Warehouse
     public ReceivingTask? GetNextTask() =>
         PendingIntakeTasks.FirstOrDefault();
 
-    public bool GenerateTask( Guid trailerId, Guid dockId, Guid areaId, List<Pallet> pallets )
+    public bool AddNewTask( Trailer trailer )
     {
-        var trailer = Warehouse.ReceivingTrailers.FirstOrDefault( t => t.Id == trailerId );
-        var dock = Warehouse.ReceivingDocks.FirstOrDefault( d => d.Id == dockId );
-        var area = Warehouse.ReceivingAreas.FirstOrDefault( a => a.Id == areaId );
+        if (trailer.Dock is null)
+            return false;
+        
+        var area = FindClosestArea( trailer.Dock );
 
-        var validTask = trailer is not null
-            && dock is not null
-            && area is not null
-            && dock.Owner is null
-            && dock.Trailer is null
-            && area.Owner is null;
-
-        if (!validTask)
+        if (area is null)
             return false;
 
-        Warehouse.ReceivingTrailers.Add( trailer! );
-
-        var task = ReceivingTask.New( trailer!, dock!, area! );
+        var task = ReceivingTask.New( trailer, trailer.Dock, area );
         PendingIntakeTasks.Add( task );
 
-        return true;
+        return trailer.AssignTask( task.Id );
     }
     public ReceivingTask? GetTask( Guid taskId ) =>
         PendingIntakeTasks.FirstOrDefault( t => t.Id == taskId );
@@ -52,5 +44,12 @@ public sealed class ReceivingOperations : Warehouse
     {
         return receivingTask.IsFinished
             && ActiveIntakeTasks.Remove( receivingTask );
+    }
+
+    Area? FindClosestArea( Dock dock )
+    {
+        return ReceivingAreas
+            .Where( static a => !a.IsOwned() )
+            .MinBy( b => Math.Abs( b.Number - dock.Number ) );
     }
 }

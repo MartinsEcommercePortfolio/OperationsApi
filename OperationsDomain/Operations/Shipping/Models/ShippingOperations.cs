@@ -11,7 +11,7 @@ public sealed class ShippingOperations
     public List<Trailer> OutboundTrailers { get; private set; } = [];
     
     public Trailer? FindAvailableTrailer() =>
-        Trailers.FirstOrDefault( static t => t.State is TrailerState.Parked );
+        Trailers.FirstOrDefault( static t => t.Status is TrailerStatus.Parked );
     public Dock? FindAvailableDock() =>
         Docks.FirstOrDefault( static d => !d.IsOwned() );
 }

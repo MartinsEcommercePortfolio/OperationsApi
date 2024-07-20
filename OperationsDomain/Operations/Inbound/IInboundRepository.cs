@@ -5,5 +5,5 @@ namespace OperationsDomain.Operations.Inbound;
 
 public interface IInboundRepository : IEfCoreRepository
 {
-    public Task<InboundOperations?> GetReceivingOperations();
+    public Task<InboundOperations?> GetInboundOperations();
 }

@@ -8,7 +8,7 @@ namespace OperationsDomain.Operations.Inbound;
 internal sealed class InboundRepository( WarehouseDbContext dbContext, ILogger<InboundRepository> logger ) 
     : DatabaseService<InboundRepository>( dbContext, logger ), IInboundRepository
 {
-    public async Task<InboundOperations?> GetReceivingOperations()
+    public async Task<InboundOperations?> GetInboundOperations()
     {
         try
         {

@@ -4,19 +4,26 @@ namespace OperationsDomain.Units;
 
 public sealed class Trailer : Unit
 {
-    Trailer( Guid id, int number, Employee? employee, TrailerState state, Dock? dock ) 
+    Trailer( Guid id, int number, Employee? employee, TrailerStatus status, DateTime lastUpdated, Dock? dock, Guid? warehouseAssignmentId, int capacity, List<Pallet> pallets ) 
         : base( id, number, employee )
     {
         Id = Guid.NewGuid();
-        State = state;
+        Status = status;
+        LastUpdated = lastUpdated;
         Dock = dock;
+        WarehouseAssignmentId = warehouseAssignmentId;
+        PalletCapacity = capacity;
+        Pallets = pallets;
     }
 
-    public static Trailer New( int number ) =>
-        new( Guid.NewGuid(), number, null, TrailerState.Parked, null );
+    public static Trailer NewReceiving( int number ) =>
+        new( Guid.NewGuid(), number, null, TrailerStatus.Parked, DateTime.Now, null, null, 0, [] );
 
-    public TrailerState State { get; private set; } 
+    public TrailerStatus Status { get; private set; }
+    public DateTime LastUpdated { get; private set; }
+    
     public Dock? Dock { get; private set; }
+    public Guid? WarehouseAssignmentId { get; private set; }
 
     public int PalletCapacity { get; private set; }
     public List<Pallet> Pallets { get; private set; }
@@ -41,28 +48,48 @@ public sealed class Trailer : Unit
     }
     public bool DockTo( Dock dock )
     {
-        var docked = State != TrailerState.Docked
+        var docked = Status != TrailerStatus.Docked
             && Dock is null;
 
         if (!docked)
             return false;
         
         Dock = dock;
-        State = TrailerState.Docked;
+        Status = TrailerStatus.Docked;
+        LastUpdated = DateTime.Now;
 
         return true;
     }
     public bool UnDock( Dock dock )
     {
-        var undocked = State == TrailerState.Docked
+        var undocked = Status == TrailerStatus.Docked
             && Dock == dock;
 
         if (!undocked)
             return false;
         
         Dock = null;
-        State = TrailerState.Travelling;
+        Status = TrailerStatus.Travelling;
+        LastUpdated = DateTime.Now;
         
+        return true;
+    }
+    public bool AssignTask( Guid id )
+    {
+        if (WarehouseAssignmentId is not null)
+            return false;
+
+        WarehouseAssignmentId = id;
+
+        return true;
+    }
+    public bool UnAssignTask( Guid id )
+    {
+        if (WarehouseAssignmentId != id)
+            return false;
+
+        WarehouseAssignmentId = null;
+
         return true;
     }
 }

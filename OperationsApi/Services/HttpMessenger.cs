@@ -1,9 +1,9 @@
 namespace OperationsApi.Services;
 
-internal sealed class HttpHandler( IConfiguration configuration, ILogger<HttpHandler> logger )
+internal sealed class HttpMessenger( IConfiguration configuration, ILogger<HttpMessenger> logger )
 {
     readonly HttpClient _http = GetHttpClient( configuration );
-    readonly ILogger<HttpHandler> _logger = logger;
+    readonly ILogger<HttpMessenger> _logger = logger;
 
     internal async Task<T?> TryGet<T>( string url )
     {

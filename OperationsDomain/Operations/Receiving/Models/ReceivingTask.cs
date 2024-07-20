@@ -1,5 +1,4 @@
 using OperationsDomain.Employees.Models;
-using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain.Operations.Receiving.Models;

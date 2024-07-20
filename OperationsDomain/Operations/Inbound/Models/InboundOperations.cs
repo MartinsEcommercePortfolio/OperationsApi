@@ -5,54 +5,63 @@ namespace OperationsDomain.Operations.Inbound.Models;
 public sealed class InboundOperations
 {
     public Guid Id { get; private set; }
-    public List<int> NewTrailers { get; private set; } = [];
+    public List<Guid> AwaitingDock { get; private set; } = [];
+    public List<Guid> AwaitingTask { get; private set; } = [];
+    public List<Guid> Docked { get; private set; } = [];
     public List<Trailer> Trailers { get; private set; } = [];
     public List<Dock> Docks { get; private set; } = [];
-    public List<Area> Areas { get; private set; } = [];
 
+    public List<Trailer> GetTrailersAwaitingDock() =>
+        Trailers.Where( t => AwaitingDock.Contains( t.Id ) ).ToList();
+    public List<Trailer> GetTrailersAwaitingTask() =>
+        Trailers.Where( t => AwaitingTask.Contains( t.Id ) ).ToList();
     public int? ReceiveTrailer( int trailerNumber )
     {
-        var existing = NewTrailers.Any( t => t == trailerNumber )
-            || Trailers.Any( t => t.Number == trailerNumber );
-        
-        if (existing)
+        if (Trailers.Any( t => t.Number == trailerNumber ))
             return null;
 
-        NewTrailers.Add( trailerNumber );
+        // pallets are handled in sim and received one by one (trailer is black box for receiving)
+        var trailer = Trailer.NewReceiving( trailerNumber );
+        Trailers.Add( trailer );
+
+        var dockReserved = ReserveDock( trailer, out var dock );
+
+        if (dockReserved)
+            return dock!.Number;
         
-        var dock = Docks.FirstOrDefault( static d =>
+        AwaitingDock.Add( trailer.Id );
+
+        return -1;
+    }
+    public bool ReserveDock( Trailer trailer, out Dock? dock )
+    {
+        dock = Docks.FirstOrDefault( static d =>
             !d.IsOwned() &&
             !d.TrailerNumber.HasValue &&
             d.Trailer is null );
 
-        var reserved = dock is not null
-            && dock.Reserve( trailerNumber );
-
-        return reserved
-            ? dock!.Number
-            : null;
+        return dock is not null
+            && dock.Reserve( trailer.Number );
     }
     public Trailer? DockTrailer( int trailerNumber, Guid dockId )
     {
-        var validNumber = Trailers.All( t => t.Number != trailerNumber ) 
-            && NewTrailers.Remove( trailerNumber );
+        var trailer = Trailers.FirstOrDefault( t => t.Number == trailerNumber );
+        var dock = Docks.FirstOrDefault( d => d.Id == dockId && d.TrailerNumber == trailerNumber );
 
-        if (!validNumber)
+        if (trailer is null || dock is null)
             return null;
 
-        var dock = Docks.FirstOrDefault( d =>
-            d.Id == dockId && d.TrailerNumber == trailerNumber );
+        var docked = !Docked.Contains( trailer.Id )
+            && dock.AssignTrailer( trailer )
+            && trailer.DockTo( dock );
 
-        if (dock is null)
+        if (!docked)
             return null;
 
-        var trailer = Trailer.New( trailerNumber );
-        Trailers.Add( trailer );
+        AwaitingTask.Add( trailer.Id );
+        Docked.Add( trailer.Id );
 
-        return dock.AssignTrailer( trailer )
-            && trailer.DockTo( dock )
-                ? trailer
-                : null;
+        return trailer;
     }
     public bool UnDockTrailer( int trailerNumber, Guid dockId )
     {
@@ -64,6 +73,13 @@ public sealed class InboundOperations
             && dock.Id != dockId
             && dock.UnAssignTrailer( trailer )
             && trailer.UnDock( dock )
+            && Docked.Remove( trailer.Id )
             && Trailers.Remove( trailer );
+    }
+    public bool ConfirmTaskAssigned( Trailer trailer )
+    {
+        return !AwaitingDock.Contains( trailer.Id )
+            && Docked.Contains( trailer.Id )
+            && AwaitingTask.Remove( trailer.Id );
     }
 }

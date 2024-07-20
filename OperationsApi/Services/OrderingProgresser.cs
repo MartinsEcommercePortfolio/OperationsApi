@@ -23,20 +23,20 @@ internal sealed class OrderingProgresser(
 
     protected override async Task ExecuteAsync( CancellationToken stoppingToken )
     {
-        _logger.LogInformation( "OrderingDispatcher has started." );
+        _logger.LogInformation( "OrderingProgresser has started." );
         
         stoppingToken.Register( () =>
-            _logger.LogInformation( "OrderingDispatcher is stopping." ) );
+            _logger.LogInformation( "OrderingProgresser is stopping." ) );
         
         while ( !stoppingToken.IsCancellationRequested )
         {
-            _logger.LogInformation( "OrderingDispatcher is executing." );
+            _logger.LogInformation( "OrderingProgresser is executing." );
 
             try
             {
                 await using AsyncServiceScope scope = _provider.CreateAsyncScope();
 
-                var http = GetHttpHandler( scope );
+                var messenger = GetHttpMessenger( scope );
                 
                 var orderingRepo = GetOrderingRepository( scope );
                 var pickingRepo = GetPickingRepository( scope );
@@ -45,18 +45,18 @@ internal sealed class OrderingProgresser(
 
                 await HandlePendingOrders( orderingRepo, pickingRepo, shippingRepo );
                 await HandlePickedOrders( orderingRepo, pickingRepo, loadingRepo );
-                await HandleLoadedOrders( http, orderingRepo, loadingRepo, shippingRepo );
-                await HandleDelayedOrders( http, orderingRepo );
+                await HandleLoadedOrders( messenger, orderingRepo, loadingRepo, shippingRepo );
+                await HandleDelayedOrders( messenger, orderingRepo );
             }
             catch ( Exception e )
             {
-                _logger.LogError( e, "OrderingDispatcher threw an exception during execution." );
+                _logger.LogError( e, "OrderingProgresser threw an exception during execution." );
             }
             
             await Task.Delay( ExecutionInterval, stoppingToken );
         }
 
-        _logger.LogInformation( "OrderingDispatcher has stopped." );
+        _logger.LogInformation( "OrderingProgresser has stopped." );
     }
     
     async Task HandlePendingOrders( IOrderingRepository orderingRepo, IPickingRepository pickingRepo, IShippingRepository shippingRepo )
@@ -67,7 +67,7 @@ internal sealed class OrderingProgresser(
 
         if (ordering is null || picking is null || shipping is null)
         {
-            _logger.LogError( "OrderingDispatcher HandlePendingOrders() failed to generate models from repositories during execution." );
+            _logger.LogError( "OrderingProgresser HandlePendingOrders() failed to generate models from repositories during execution." );
             return;
         }
         
@@ -81,9 +81,9 @@ internal sealed class OrderingProgresser(
             var trailer = shipping.FindAvailableTrailer();
             if (trailer is null)
             {
-                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() exited early because no trailers were found during execution." );
+                _logger.LogWarning( "OrderingProgresser HandlePendingOrders() exited early because no trailers were found during execution." );
                 await transaction.RollbackAsync();
-                return;
+                continue;
             }
             o.AssignTrailer( trailer );
             
@@ -91,7 +91,7 @@ internal sealed class OrderingProgresser(
             var task = GeneratePickingTaskForOrder( o, shipping, picking );
             if (task is null)
             {
-                _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() failed to generate picking task during execution." );
+                _logger.LogWarning( "OrderingProgresser HandlePendingOrders() failed to generate picking task during execution." );
                 await transaction.RollbackAsync();
                 continue;
             }
@@ -104,11 +104,11 @@ internal sealed class OrderingProgresser(
             if (!saved)
             {
                 await transaction.RollbackAsync();
-                throw new Exception( "OrderingDispatcher HandlePendingOrders() failed to save changes." );
+                throw new Exception( "OrderingProgresser HandlePendingOrders() failed to save changes." );
             }
 
             await transaction.CommitAsync();
-            _logger.LogInformation( "OrderingDispatcher HandlePendingOrders() successfully handled pending order." );
+            _logger.LogInformation( "OrderingProgresser HandlePendingOrders() successfully handled pending order." );
         }
     }
     async Task HandlePickedOrders( IOrderingRepository orderingRepo, IPickingRepository pickingRepo, ILoadingRepository loadingRepo )
@@ -119,7 +119,7 @@ internal sealed class OrderingProgresser(
 
         if (ordering is null || picking is null || loading is null)
         {
-            _logger.LogError( "OrderingDispatcher HandlePickedOrders() failed to generate models from repositories during execution." );
+            _logger.LogError( "OrderingProgresser HandlePickedOrders() failed to generate models from repositories during execution." );
             return;
         }
         
@@ -141,7 +141,7 @@ internal sealed class OrderingProgresser(
             
             if (!taskGenerated)
             {
-                _logger.LogWarning( "OrderingDispatcher HandlePickedOrders() failed to generate new LoadingTask during execution." );
+                _logger.LogWarning( "OrderingProgresser HandlePickedOrders() failed to generate new LoadingTask during execution." );
                 await transaction.RollbackAsync();
                 continue;
             }
@@ -153,14 +153,14 @@ internal sealed class OrderingProgresser(
             if (!saved)
             {
                 await transaction.RollbackAsync();
-                throw new Exception( "OrderingDispatcher HandlePickedOrders() failed to save changes." );
+                throw new Exception( "OrderingProgresser HandlePickedOrders() failed to save changes." );
             }
 
             await transaction.CommitAsync();
-            _logger.LogInformation( "OrderingDispatcher HandlePickedOrders() successfully handled picked order." );
+            _logger.LogInformation( "OrderingProgresser HandlePickedOrders() successfully handled picked order." );
         }
     }
-    async Task HandleLoadedOrders( HttpHandler http, IOrderingRepository orderingRepo, ILoadingRepository loadingRepo, IShippingRepository shippingRepo )
+    async Task HandleLoadedOrders( HttpMessenger messenger, IOrderingRepository orderingRepo, ILoadingRepository loadingRepo, IShippingRepository shippingRepo )
     {
         var ordering = await orderingRepo.GetOrderingOperationsAll();
         var loading = await loadingRepo.GetLoadingOperationsWithTasks();
@@ -168,7 +168,7 @@ internal sealed class OrderingProgresser(
 
         if (ordering is null || loading is null || shipping is null)
         {
-            _logger.LogError( "OrderingDispatcher HandleLoadedOrders() failed to generate models from repositories during execution." );
+            _logger.LogError( "OrderingProgresser HandleLoadedOrders() failed to generate models from repositories during execution." );
             return;
         }
 
@@ -183,11 +183,11 @@ internal sealed class OrderingProgresser(
             var shipped = order is not null
                 && loading.RemoveTask( load )
                 && ordering.DispatchOrder( order )
-                && await http.TryPut<bool>( Consts.ShipToSimulation, null );
+                && await messenger.TryPut<bool>( Consts.ShipToSimulation, null );
             
             if (!shipped)
             {
-                _logger.LogError( "OrderingDispatcher HandleLoadedOrders() failed to dispatch order during execution." );
+                _logger.LogError( "OrderingProgresser HandleLoadedOrders() failed to dispatch order during execution." );
                 await transaction.RollbackAsync();
                 continue;
             }
@@ -199,20 +199,20 @@ internal sealed class OrderingProgresser(
             if (!saved)
             {
                 await transaction.RollbackAsync();
-                throw new Exception( "OrderingDispatcher HandleLoadedOrders() failed to save changes." );
+                throw new Exception( "OrderingProgresser HandleLoadedOrders() failed to save changes." );
             }
 
             await transaction.CommitAsync();
-            _logger.LogInformation( "OrderingDispatcher HandleLoadedOrders() successfully dispatched order." );
+            _logger.LogInformation( "OrderingProgresser HandleLoadedOrders() successfully dispatched order." );
         }
     }
-    async Task HandleDelayedOrders( HttpHandler http, IOrderingRepository orderingRepo )
+    async Task HandleDelayedOrders( HttpMessenger messenger, IOrderingRepository orderingRepo )
     {
         var ordering = await orderingRepo.GetOrderingOperationsAll();
 
         if (ordering is null)
         {
-            _logger.LogError( "OrderingDispatcher failed to get OrderingOperations during execution." );
+            _logger.LogError( "OrderingProgresser failed to get OrderingOperations during execution." );
             return;
         }
 
@@ -224,8 +224,8 @@ internal sealed class OrderingProgresser(
             } )
             .ToList();
 
-        if (!await http.TryPut<bool>( Consts.OrderingDelays, dtos ))
-            _logger.LogWarning( "OrderingDispatcher delayed order http call failed during execution." );
+        if (!await messenger.TryPut<bool>( Consts.OrderingDelays, dtos ))
+            _logger.LogWarning( "OrderingProgresser delayed order http call failed during execution." );
     }
     
     static PickingTask? GeneratePickingTaskForOrder( WarehouseOrder order, ShippingOperations shipping, PickingOperations picking )
@@ -241,8 +241,8 @@ internal sealed class OrderingProgresser(
         
         return picking.GenerateNewPickingTask( order.Id, dock, productIds );
     }
-    static HttpHandler GetHttpHandler( AsyncServiceScope scope ) =>
-        scope.ServiceProvider.GetService<HttpHandler>() ?? throw new Exception( $"Failed to get {nameof( HttpHandler )} from provider." );
+    static HttpMessenger GetHttpMessenger( AsyncServiceScope scope ) =>
+        scope.ServiceProvider.GetService<HttpMessenger>() ?? throw new Exception( $"Failed to get {nameof( HttpMessenger )} from provider." );
     static IOrderingRepository GetOrderingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IOrderingRepository>() ?? throw new Exception( $"Failed to get {nameof( IOrderingRepository )} from provider." );
     static IPickingRepository GetPickingRepository( AsyncServiceScope scope ) =>

@@ -26,7 +26,7 @@ public static class LoadingEndpoints
                 [FromQuery] Guid trailerId,
                 [FromQuery] Guid dockId,
                 HttpContext http,
-                HttpHandler httpHandler,
+                HttpMessenger httpHandler,
                 IOrderingRepository orderingRepository,
                 ILoadingRepository repository ) =>
             await StartLoadingTask(
@@ -85,7 +85,7 @@ public static class LoadingEndpoints
             ? Results.Ok( LoadingTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
-    static async Task<IResult> StartLoadingTask( LoadingEmployee employee, Guid taskId, Guid trailerId, Guid dockId, HttpHandler httpHandler, IOrderingRepository orderingRepository, ILoadingRepository loadingRepository )
+    static async Task<IResult> StartLoadingTask( LoadingEmployee employee, Guid taskId, Guid trailerId, Guid dockId, HttpMessenger httpMessenger, IOrderingRepository orderingRepository, ILoadingRepository loadingRepository )
     {
         var ordering = await orderingRepository
             .GetOrderingOperationsAll();
@@ -108,7 +108,7 @@ public static class LoadingEndpoints
             return Results.Problem();
         
         // NOTIFY ORDERING API
-        if (!await httpHandler.TryPut<bool>( Consts.OrderingUpdate, OrderUpdateDto.FromModel( order ) ))
+        if (!await httpMessenger.TryPut<bool>( Consts.OrderingUpdate, OrderUpdateDto.FromModel( order ) ))
             EndpointLogger.LogError( "OrderingDispatcher HandlePendingOrders() order update http call failed during execution." );
 
         return loadingStarted && await loadingRepository.SaveAsync()

@@ -39,10 +39,11 @@ internal static class InboundEndpoints
 
     static async Task<IResult> ReceiveTrailer( int trailerNumber, IInboundRepository inboundRepository )
     {
-        InboundOperations? receiving = await inboundRepository.GetReceivingOperations();
+        InboundOperations? receiving = await inboundRepository.GetInboundOperations();
         if (receiving is null)
             return Results.NotFound();
-
+        
+        // -1 if received but no dock available
         var dockNumber = receiving.ReceiveTrailer( trailerNumber );
 
         return dockNumber is not null && await inboundRepository.SaveAsync()
@@ -51,7 +52,7 @@ internal static class InboundEndpoints
     }
     static async Task<IResult> DockTrailer( int trailerNumber, Guid dockId, IInboundRepository inboundRepository )
     {
-        var receiving = await inboundRepository.GetReceivingOperations();
+        var receiving = await inboundRepository.GetInboundOperations();
         if (receiving is null)
             return Results.NotFound();
 
@@ -63,7 +64,7 @@ internal static class InboundEndpoints
     }
     static async Task<IResult> UnDockTrailer( int trailerNumber, Guid dockId, IInboundRepository inboundRepository )
     {
-        var receiving = await inboundRepository.GetReceivingOperations();
+        var receiving = await inboundRepository.GetInboundOperations();
         if (receiving is null)
             return Results.NotFound();
 

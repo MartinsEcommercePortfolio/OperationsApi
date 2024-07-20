@@ -1,34 +1,34 @@
-using OperationsDomain.Operations.Intake.Models;
+using OperationsDomain.Operations.Receiving.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 
 public sealed class IntakeEmployee : Employee
 {
-    IntakeEmployee( Guid id, string name, Pallet? palletEquipped, IntakeTask? task )
+    IntakeEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
         : base( id, name, palletEquipped, task ) { }
     
-    public IntakeTask? ReceivingTask => 
-        TaskAs<IntakeTask>();
+    public ReceivingTask? ReceivingTask => 
+        TaskAs<ReceivingTask>();
 
-    public bool StartIntake( IntakeOperations intake, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    public bool StartIntake( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
         if (Task is not null)
             return false;
 
-        var task = intake.GetTask( taskId );
+        var task = receiving.GetTask( taskId );
         
         return task is not null
             && StartTask( task )
             && task.VerifyStart( trailerId, dockId, areaId )
-            && intake.ActivateTask( task );
+            && receiving.ActivateTask( task );
     }
-    public bool FinishIntake( IntakeOperations intake )
+    public bool FinishIntake( ReceivingOperations receiving )
     {
         return ReceivingTask is not null
             && ReceivingTask.CleanUp( this )
             && EndTask()
-            && intake.CompleteTask( ReceivingTask );
+            && receiving.CompleteTask( ReceivingTask );
     }
     public bool UnloadPallet( Guid trailerId, Guid palletId )
     {

@@ -13,15 +13,15 @@ internal static class PickingEndpoints
 {
     internal static void MapPickingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/picking/refreshTask",
+        app.MapGet( "api/picking/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.GetPickingEmployee() ) );
         
-        app.MapGet( "api/tasks/picking/nextTask",
+        app.MapGet( "api/picking/nextTask",
             static async ( IPickingRepository repository ) =>
             await GetNextTask( repository ) );
 
-        app.MapPost( "api/tasks/picking/startTask",
+        app.MapPost( "api/picking/startTask",
             static async (
                     [FromQuery] Guid taskId,
                     HttpContext http,
@@ -35,7 +35,7 @@ internal static class PickingEndpoints
                     orderingRepository,
                     repository ) );
 
-        app.MapPost( "api/tasks/picking/startPick",
+        app.MapPost( "api/picking/startPick",
             static async (
                     [FromQuery] Guid lineId,
                     [FromQuery] Guid rackingId,
@@ -47,7 +47,7 @@ internal static class PickingEndpoints
                     rackingId,
                     repository ) );
 
-        app.MapPost( "api/tasks/picking/pickItem",
+        app.MapPost( "api/picking/pickItem",
             static async (
                     [FromQuery] Guid rackingId,
                     [FromQuery] Guid itemId,
@@ -59,7 +59,7 @@ internal static class PickingEndpoints
                     itemId,
                     repository ) );
 
-        app.MapPost( "api/tasks/picking/finishPick",
+        app.MapPost( "api/picking/finishPick",
             static async (
                     [FromQuery] Guid lineId,
                     HttpContext http,
@@ -69,7 +69,7 @@ internal static class PickingEndpoints
                     lineId,
                     repository ) );
 
-        app.MapPost( "api/tasks/picking/finishTask",
+        app.MapPost( "api/picking/finishTask",
             static async (
                     HttpContext http,
                     IPickingRepository pickingRepository ) =>

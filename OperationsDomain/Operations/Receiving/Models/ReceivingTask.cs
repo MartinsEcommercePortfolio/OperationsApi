@@ -2,11 +2,11 @@ using OperationsDomain.Employees.Models;
 using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Units;
 
-namespace OperationsDomain.Operations.Intake.Models;
+namespace OperationsDomain.Operations.Receiving.Models;
 
-public sealed class IntakeTask : WarehouseTask
+public sealed class ReceivingTask : WarehouseTask
 {
-    IntakeTask(
+    ReceivingTask(
         Guid id, Employee? employee, bool isStarted, bool isFinished, Trailer trailer, Dock dock, Area area )
         : base( id, employee, isStarted, isFinished )
     {
@@ -15,7 +15,7 @@ public sealed class IntakeTask : WarehouseTask
         Area = area;
     }
     
-    public static IntakeTask New( Trailer trailer, Dock dock, Area area ) => 
+    public static ReceivingTask New( Trailer trailer, Dock dock, Area area ) => 
         new( Guid.NewGuid(), null, false, false, trailer, dock, area );
     
     public Trailer Trailer { get; private set; }

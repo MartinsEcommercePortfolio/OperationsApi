@@ -1,4 +1,5 @@
 using OperationsDomain.Operations.Shipping.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain.Operations.Loading.Models;
 

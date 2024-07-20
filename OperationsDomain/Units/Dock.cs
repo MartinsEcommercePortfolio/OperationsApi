@@ -1,5 +1,4 @@
 using OperationsDomain.Employees.Models;
-using OperationsDomain.Operations.Shipping.Models;
 
 namespace OperationsDomain.Units;
 
@@ -13,6 +12,42 @@ public sealed class Dock : Unit
 
     public static Dock New( int number ) =>
         new( Guid.NewGuid(), number, null );
-    
+
+    public int? TrailerNumber { get; private set; }
     public Trailer? Trailer { get; private set; }
+
+    public bool Reserve( int trailerNumber )
+    {
+        if (TrailerNumber is not null)
+            return false;
+        
+        TrailerNumber = trailerNumber;
+        
+        return true;
+    }
+    public bool UnReserve( int trailerNumber )
+    {
+        if (TrailerNumber != trailerNumber)
+            return false;
+
+        TrailerNumber = null;
+
+        return true;
+    }
+    public bool AssignTrailer( Trailer trailer )
+    {
+        if (Trailer is not null)
+            return false;
+
+        Trailer = trailer;
+        return true;
+    }
+    public bool UnAssignTrailer( Trailer trailer )
+    {
+        if (Trailer != trailer)
+            return false;
+
+        Trailer = null;
+        return true;
+    }
 }

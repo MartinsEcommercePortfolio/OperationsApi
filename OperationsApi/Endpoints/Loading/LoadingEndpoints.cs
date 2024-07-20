@@ -13,15 +13,15 @@ public static class LoadingEndpoints
 {
     internal static void MapLoadingEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/loading/refreshTask",
+        app.MapGet( "api/loading/refreshTask",
             static ( HttpContext http ) =>
                 RefreshTask( http.GetLoadingEmployee() ) );
 
-        app.MapGet( "api/tasks/loading/nextTask",
+        app.MapGet( "api/loading/nextTask",
             static async ( ILoadingRepository repository ) =>
                 await GetNextLoadingTask( repository ) );
 
-        app.MapPost( "api/tasks/loading/startTask", static async (
+        app.MapPost( "api/loading/startTask", static async (
                 [FromQuery] Guid taskId,
                 [FromQuery] Guid trailerId,
                 [FromQuery] Guid dockId,
@@ -38,7 +38,7 @@ public static class LoadingEndpoints
                 orderingRepository,
                 repository ) );
 
-        app.MapPost( "api/tasks/loading/startLoad", static async (
+        app.MapPost( "api/loading/startLoad", static async (
                 [FromQuery] Guid palletId,
                 HttpContext http,
                 ILoadingRepository repository ) =>
@@ -47,7 +47,7 @@ public static class LoadingEndpoints
                 palletId, 
                 repository ) );
 
-        app.MapPost( "api/tasks/loading/finishLoad", static async (
+        app.MapPost( "api/loading/finishLoad", static async (
                 [FromQuery] Guid trailerId,
                 [FromQuery] Guid palletId,
                 HttpContext http,
@@ -58,7 +58,7 @@ public static class LoadingEndpoints
                 palletId, 
                 repository ) );
 
-        app.MapPost( "api/tasks/loading/finishTask", static async (
+        app.MapPost( "api/loading/finishTask", static async (
                 HttpContext http,
                 ILoadingRepository repository ) =>
             await FinishLoadingTask(

@@ -13,7 +13,6 @@ internal sealed class OrderingRepository( WarehouseDbContext dbContext, ILogger<
         try
         {
             return await DbContext.Ordering
-                .Include( static o => o.Products )
                 .Include( static o => o.PendingOrders )
                 .Include( static o => o.PickingOrders )
                 .Include( static o => o.LoadingOrders )

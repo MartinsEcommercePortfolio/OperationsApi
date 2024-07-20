@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Equipment;
-using OperationsDomain.Operations.Intake.Models;
+using OperationsDomain.Operations.Receiving.Models;
 using OperationsDomain.Operations.Loading.Models;
 using OperationsDomain.Operations.Picking.Models;
 using OperationsDomain.Operations.Putaways.Models;
+using OperationsDomain.Operations.Inbound.Models;
 using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Ordering.Models;
 using OperationsDomain.Units;
@@ -23,12 +24,12 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<LoadingTask> PendingLoadingTasks { get; init; }
     public required DbSet<PickingTask> PendingPickingTasks { get; init; }
     public required DbSet<PutawayTask> PendingPutawayTasks { get; init; }
-    public required DbSet<IntakeTask> PendingReceivingTasks { get; init; }
+    public required DbSet<ReceivingTask> PendingReceivingTasks { get; init; }
     
     public required DbSet<LoadingTask> ActiveLoadingTasks { get; init; }
     public required DbSet<PickingTask> ActivePickingTasks { get; init; }
     public required DbSet<PutawayTask> ActivePutawayTasks { get; init; }
-    public required DbSet<IntakeTask> ActiveReceivingTasks { get; init; }
+    public required DbSet<ReceivingTask> ActiveReceivingTasks { get; init; }
     
     // SHIPPING
     public required DbSet<ShippingOperations> Shipping { get; init; }
@@ -41,10 +42,11 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     
     // WAREHOUSE
     public required DbSet<Warehouse> Warehouses { get; init; }
-    public required DbSet<IntakeOperations> Receiving { get; set; }
-    public required DbSet<PutawayOperations> Putaways { get; set; }
-    public required DbSet<PickingOperations> Picking { get; set; }
-    public required DbSet<LoadingOperations> Loading { get; set; }
+    public required DbSet<InboundOperations> Receiving { get; init; }
+    public required DbSet<ReceivingOperations> Intake { get; init; }
+    public required DbSet<PutawayOperations> Putaways { get; init; }
+    public required DbSet<PickingOperations> Picking { get; init; }
+    public required DbSet<LoadingOperations> Loading { get; init; }
     public required DbSet<Trailer> Trailers { get; init; }
     public required DbSet<Dock> Docks { get; init; }
     public required DbSet<Area> Areas { get; init; }

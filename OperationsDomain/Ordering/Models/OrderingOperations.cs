@@ -7,7 +7,6 @@ public sealed class OrderingOperations
     static readonly TimeSpan MaxPendingTime = TimeSpan.FromHours( 8 );
 
     public Guid Id { get; private set; }
-    public List<Product> Products { get; private set; } = [];
     public List<WarehouseOrder> PendingOrders { get; private set; } = [];
     public List<WarehouseOrder> PickingOrders { get; private set; } = [];
     public List<WarehouseOrder> LoadingOrders { get; private set; } = [];
@@ -27,7 +26,7 @@ public sealed class OrderingOperations
     }
     public bool AddNewOrder( WarehouseOrder warehouseOrder )
     {
-        if (!ValidateOrder( warehouseOrder ))
+        if (!ValidateOrder( warehouseOrder, [] ))
             return false;
         
         PendingOrders.Add( warehouseOrder );
@@ -81,11 +80,11 @@ public sealed class OrderingOperations
         
         return true;
     }
-    bool ValidateOrder( WarehouseOrder order )
+    bool ValidateOrder( WarehouseOrder order, List<Product> products )
     {
         foreach ( var item in order.Items )
         {
-            var product = Products
+            var product = products
                 .FirstOrDefault( p => p.Id == item.ProductId );
 
             var pickReserved = product is not null

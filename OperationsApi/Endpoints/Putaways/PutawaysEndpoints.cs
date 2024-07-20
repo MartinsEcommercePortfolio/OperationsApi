@@ -10,15 +10,15 @@ internal static class PutawaysEndpoints
 {
     internal static void MapPutawaysEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapGet( "api/tasks/putaways/refreshTask",
+        app.MapGet( "api/putaways/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.GetPutawayEmployee() ) );
         
-        app.MapPost( "api/tasks/putaways/startTask",
+        app.MapPost( "api/putaways/startTask",
             static async ( [FromQuery] Guid palletId, HttpContext http, IPutawayRepository repository ) =>
             await StartPutawayTask( http.GetPutawayEmployee(), palletId, repository ) );
 
-        app.MapPost( "api/tasks/putaways/finishTask",
+        app.MapPost( "api/putaways/finishTask",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid rackingId, HttpContext http, IPutawayRepository repository ) =>
             await FinishPutaway( http.GetPutawayEmployee(), palletId, rackingId, repository ) );
     }

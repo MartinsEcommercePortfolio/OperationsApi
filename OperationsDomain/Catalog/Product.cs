@@ -16,31 +16,31 @@ public sealed class Product
     public string Title { get; private set; }
     public string Brand { get; private set; }
     public int PhysicalStockPallets { get; private set; }
-    public int VirtualStockPallets { get; private set; }
+    public int PublicStockPallets { get; private set; }
     public int ReservedStockPallets { get; private set; }
 
     public bool InsertQuantity( int quantity )
     {
         PhysicalStockPallets += quantity;
-        VirtualStockPallets += quantity;
+        PublicStockPallets += quantity;
         return true;
     }
     public bool ReserveQuantity( int quantity )
     {
-        if (VirtualStockPallets <= quantity || PhysicalStockPallets <= quantity)
+        if (PublicStockPallets <= quantity || PhysicalStockPallets <= quantity)
             return false;
 
-        VirtualStockPallets -= quantity;
+        PublicStockPallets -= quantity;
         ReservedStockPallets += quantity;
         return true;
     }
-    public bool PickQuantity( int quantity )
+    public bool Pick()
     {
-        if (PhysicalStockPallets < quantity)
+        if (PhysicalStockPallets <= 0)
             return false;
 
-        ReservedStockPallets -= quantity;
-        PhysicalStockPallets -= quantity;
+        ReservedStockPallets--;
+        PhysicalStockPallets--;
         return true;
     }
 }

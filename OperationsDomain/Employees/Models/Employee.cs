@@ -1,5 +1,5 @@
-using OperationsDomain.Infrastructure.Units;
-using OperationsDomain.Operations;
+using OperationsDomain.Outbound.Shipping.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 

@@ -1,5 +1,5 @@
-using OperationsDomain.Infrastructure.Units;
-using OperationsDomain.Operations.Putaways.Models;
+using OperationsDomain.Inbound.Putaways.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 

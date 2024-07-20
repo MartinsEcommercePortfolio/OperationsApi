@@ -7,7 +7,7 @@ internal static class ShippingEndpoints
         
     }
 
-    static async Task<IResult> ReceiveShipment()
+    static async Task<IResult> IntakeShipment()
     {
         return Results.Problem();
     }

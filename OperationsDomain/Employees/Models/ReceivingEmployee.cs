@@ -1,5 +1,5 @@
-using OperationsDomain.Infrastructure.Units;
-using OperationsDomain.Operations.Receiving.Models;
+using OperationsDomain.Inbound.Intake.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 

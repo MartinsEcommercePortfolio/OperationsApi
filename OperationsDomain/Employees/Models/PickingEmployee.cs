@@ -1,5 +1,5 @@
-using OperationsDomain.Infrastructure.Units;
-using OperationsDomain.Operations.Picking.Models;
+using OperationsDomain.Outbound.Picking.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 
@@ -22,26 +22,27 @@ public sealed class PickingEmployee : Employee
             && StartTask( task )
             && picking.ActivateTask( task );
     }
-    public bool StartPickingPallet( Guid rackingId, Guid palletId )
-    {
-        var pallet = PickingTask?.StartPickingPallet( rackingId, palletId );
-
-        return pallet is not null
-            && pallet.Racking is not null
-            && UnRackPallet( pallet.Racking, pallet );
-    }
-    public bool FinishPickingPallet( Guid areaId )
-    {
-        var pallet = PickingTask?.FinishPickingPallet( areaId );
-
-        return pallet is not null
-            && PickingTask is not null
-            && StagePallet( PickingTask.StagingArea, pallet );
-    }
     public bool FinishPicking( PickingOperations picking )
     {
         return PickingTask is not null
             && picking.HandleCompletedTask( PickingTask )
             && EndTask();
+    }
+    public bool PickPallet( Guid rackingId, Guid palletId )
+    {
+        var pallet = PickingTask?.Pick( rackingId, palletId );
+
+        return pallet is not null
+            && pallet.Racking is not null
+            && pallet.Product.Pick()
+            && UnRackPallet( pallet.Racking, pallet );
+    }
+    public bool StagePallet( Guid areaId )
+    {
+        var pallet = PickingTask?.Stage( areaId );
+
+        return pallet is not null
+            && PickingTask is not null
+            && StagePallet( PickingTask.StagingArea, pallet );
     }
 }

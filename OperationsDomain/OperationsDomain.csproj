@@ -10,4 +10,9 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.7" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Inbound\Receiving\" />
+      <Folder Include="Outbound\" />
+    </ItemGroup>
+
 </Project>

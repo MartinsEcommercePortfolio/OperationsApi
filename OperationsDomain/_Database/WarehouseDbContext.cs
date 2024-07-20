@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Equipment;
-using OperationsDomain.Infrastructure.Units;
-using OperationsDomain.Operations.Loading.Models;
-using OperationsDomain.Operations.Ordering.Models;
-using OperationsDomain.Operations.Picking.Models;
-using OperationsDomain.Operations.Putaways.Models;
-using OperationsDomain.Operations.Receiving.Models;
-using OperationsDomain.Operations.Shipping.Models;
+using OperationsDomain.Inbound.Intake.Models;
+using OperationsDomain.Inbound.Putaways.Models;
+using OperationsDomain.Ordering.Models;
+using OperationsDomain.Outbound.Loading.Models;
+using OperationsDomain.Outbound.Picking.Models;
+using OperationsDomain.Outbound.Shipping.Models;
+using OperationsDomain.Units;
 
 namespace OperationsDomain._Database;
 
@@ -40,7 +40,7 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required List<WarehouseOrder> PickedOrders { get; init; }
     
     // WAREHOUSE
-    public required DbSet<Root> Warehouses { get; init; }
+    public required DbSet<Warehouse> Warehouses { get; init; }
     public required DbSet<ReceivingOperations> Receiving { get; set; }
     public required DbSet<PutawayOperations> Putaways { get; set; }
     public required DbSet<PickingOperations> Picking { get; set; }

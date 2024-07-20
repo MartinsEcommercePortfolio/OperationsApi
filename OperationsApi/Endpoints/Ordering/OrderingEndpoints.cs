@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Ordering.Dtos;
-using OperationsDomain.Operations.Ordering;
+using OperationsDomain.Ordering;
 
 namespace OperationsApi.Endpoints.Ordering;
 

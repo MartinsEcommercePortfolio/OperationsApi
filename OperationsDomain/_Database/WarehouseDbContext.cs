@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Equipment;
-using OperationsDomain.Inbound.Intake.Models;
-using OperationsDomain.Inbound.Putaways.Models;
+using OperationsDomain.Operations.Intake.Models;
+using OperationsDomain.Operations.Loading.Models;
+using OperationsDomain.Operations.Picking.Models;
+using OperationsDomain.Operations.Putaways.Models;
+using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Ordering.Models;
-using OperationsDomain.Outbound.Loading.Models;
-using OperationsDomain.Outbound.Picking.Models;
-using OperationsDomain.Outbound.Shipping.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain._Database;

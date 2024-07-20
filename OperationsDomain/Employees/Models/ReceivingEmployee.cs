@@ -1,4 +1,4 @@
-using OperationsDomain.Inbound.Intake.Models;
+using OperationsDomain.Operations.Intake.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;

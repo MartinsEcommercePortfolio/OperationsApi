@@ -4,8 +4,8 @@ using OperationsApi.Endpoints.Ordering.Dtos;
 using OperationsApi.Services;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
+using OperationsDomain.Operations.Loading;
 using OperationsDomain.Ordering;
-using OperationsDomain.Outbound.Loading;
 
 namespace OperationsApi.Endpoints.Loading;
 

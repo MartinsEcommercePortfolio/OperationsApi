@@ -1,4 +1,4 @@
-using OperationsDomain.Outbound.Picking.Models;
+using OperationsDomain.Operations.Picking.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;

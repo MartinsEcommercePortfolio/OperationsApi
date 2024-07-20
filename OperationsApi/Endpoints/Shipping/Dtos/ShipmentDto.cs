@@ -1,5 +1,5 @@
 using OperationsApi.Endpoints.Dtos;
-using OperationsDomain.Outbound.Shipping.Models;
+using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Units;
 
 namespace OperationsApi.Endpoints.Shipping.Dtos;

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Putaways.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
-using OperationsDomain.Inbound.Putaways;
+using OperationsDomain.Operations.Putaways;
 
 namespace OperationsApi.Endpoints.Putaways;
 

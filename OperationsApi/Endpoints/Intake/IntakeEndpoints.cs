@@ -2,28 +2,36 @@ using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Intake.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
-using OperationsDomain.Inbound.Intake;
-using OperationsDomain.Outbound.Shipping.Models;
+using OperationsDomain.Operations.Intake;
+using OperationsDomain.Operations.Shipping.Models;
 
 namespace OperationsApi.Endpoints.Intake;
 
 internal static class IntakeEndpoints
 {
-    internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
+    // sim tells api delivery is here
+    // api sends trailer to lot
+    // api sends trailer to dock
+    // api receives pallets
+    // api creates intake task
+    // api unloads
+    // sim confirms trailer left
+    
+    internal static void MapIntakeEndpoints( this IEndpointRouteBuilder app )
     {
-        app.MapPost( "api/tasks/receiving/receiveInventory",
+        app.MapPost( "api/tasks/intake/receiveInventory",
             static async ( [FromQuery] Guid trailerId, [FromQuery] Guid palletId, HttpContext http, IReceivingRepository repository ) =>
             await StartReceivingPallet( http.GetReceivingEmployee(), trailerId, palletId, repository ) );
         
-        app.MapGet( "api/tasks/receiving/refreshTask",
+        app.MapGet( "api/tasks/intake/refreshTask",
             static ( HttpContext http ) =>
             RefreshTask( http.GetReceivingEmployee() ) );
         
-        app.MapGet( "api/tasks/receiving/nextTask",
+        app.MapGet( "api/tasks/intake/nextTask",
             static async ( IReceivingRepository repository ) =>
             await GetNextReceivingTask( repository ) );
 
-        app.MapPost( "api/tasks/receiving/startTask",
+        app.MapPost( "api/tasks/intake/startTask",
             static async ( 
                     [FromQuery] Guid taskId,
                     [FromQuery] Guid trailerId,
@@ -33,15 +41,15 @@ internal static class IntakeEndpoints
                     IReceivingRepository repository ) =>
             await StartReceivingTask( http.GetReceivingEmployee(), taskId, trailerId, dockId, areaId, repository ) );
 
-        app.MapPost( "api/tasks/receiving/startReceive",
+        app.MapPost( "api/tasks/intake/startReceive",
             static async ( [FromQuery] Guid trailerId, [FromQuery] Guid palletId, HttpContext http, IReceivingRepository repository ) =>
             await StartReceivingPallet( http.GetReceivingEmployee(), trailerId, palletId, repository ) );
 
-        app.MapPost( "api/tasks/receiving/finishReceive",
+        app.MapPost( "api/tasks/intake/finishReceive",
             static async ( [FromQuery] Guid palletId, [FromQuery] Guid areaId, HttpContext http, IReceivingRepository repository ) =>
             await FinishReceivingPallet( http.GetReceivingEmployee(), palletId, areaId, repository ) );
 
-        app.MapGet( "api/tasks/receiving/finishTask",
+        app.MapGet( "api/tasks/intake/finishTask",
             static async ( HttpContext http, IReceivingRepository repository ) =>
             await CompleteReceivingTask( http.GetReceivingEmployee(), repository ) );
     }

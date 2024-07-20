@@ -11,8 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Inbound\Receiving\" />
-      <Folder Include="Outbound\" />
+      <Folder Include="Operations\Receiving\" />
     </ItemGroup>
 
 </Project>

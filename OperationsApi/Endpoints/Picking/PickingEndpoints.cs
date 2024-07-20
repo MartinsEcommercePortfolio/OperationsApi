@@ -4,8 +4,8 @@ using OperationsApi.Endpoints.Picking.Dtos;
 using OperationsApi.Services;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
+using OperationsDomain.Operations.Picking;
 using OperationsDomain.Ordering;
-using OperationsDomain.Outbound.Picking;
 
 namespace OperationsApi.Endpoints.Picking;
 

@@ -1,13 +1,13 @@
 using OperationsApi.Services.Dtos;
 using OperationsApi.Utilities;
+using OperationsDomain.Operations.Loading;
+using OperationsDomain.Operations.Loading.Models;
+using OperationsDomain.Operations.Picking;
+using OperationsDomain.Operations.Picking.Models;
+using OperationsDomain.Operations.Shipping;
+using OperationsDomain.Operations.Shipping.Models;
 using OperationsDomain.Ordering;
 using OperationsDomain.Ordering.Models;
-using OperationsDomain.Outbound.Loading;
-using OperationsDomain.Outbound.Loading.Models;
-using OperationsDomain.Outbound.Picking;
-using OperationsDomain.Outbound.Picking.Models;
-using OperationsDomain.Outbound.Shipping;
-using OperationsDomain.Outbound.Shipping.Models;
 
 namespace OperationsApi.Services;
 

@@ -1,4 +1,4 @@
-using OperationsDomain.Inbound.Intake.Models;
+using OperationsDomain.Operations.Intake.Models;
 
 namespace OperationsApi.Endpoints.Intake.Dtos;
 

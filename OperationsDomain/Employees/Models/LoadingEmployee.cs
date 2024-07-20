@@ -1,4 +1,4 @@
-using OperationsDomain.Outbound.Loading.Models;
+using OperationsDomain.Operations.Loading.Models;
 using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;

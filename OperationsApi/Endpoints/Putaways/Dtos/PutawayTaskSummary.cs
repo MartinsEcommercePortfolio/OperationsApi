@@ -1,5 +1,5 @@
 using OperationsApi.Endpoints.Dtos;
-using OperationsDomain.Inbound.Putaways.Models;
+using OperationsDomain.Operations.Putaways.Models;
 
 namespace OperationsApi.Endpoints.Putaways.Dtos;
 

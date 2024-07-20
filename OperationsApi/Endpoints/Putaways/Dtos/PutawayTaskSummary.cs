@@ -1,6 +1,7 @@
+using OperationsApi.Endpoints.Dtos;
 using OperationsDomain.Inbound.Putaways.Models;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Putaways.Dtos;
 
 internal readonly record struct PutawayTaskSummary(
     Guid PalletId,

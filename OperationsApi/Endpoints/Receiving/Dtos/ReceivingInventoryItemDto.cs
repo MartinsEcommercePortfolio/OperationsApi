@@ -1,4 +1,4 @@
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Receiving.Dtos;
 
 internal readonly record struct ReceivingInventoryItemDto(
     Guid InventoryId,

@@ -1,8 +1,8 @@
-using OperationsDomain;
+using OperationsApi.Endpoints.Dtos;
 using OperationsDomain.Outbound.Shipping.Models;
 using OperationsDomain.Units;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Shipping.Dtos;
 
 internal readonly record struct ShipmentDto(
     Guid TrailerId,

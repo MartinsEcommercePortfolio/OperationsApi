@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using OperationsApi.Endpoints.Warehouse.Dtos;
+using OperationsApi.Endpoints.Intake.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Inbound.Intake;
 using OperationsDomain.Outbound.Shipping.Models;
 
-namespace OperationsApi.Endpoints.Warehouse;
+namespace OperationsApi.Endpoints.Intake;
 
-internal static class ReceivingEndpoints
+internal static class IntakeEndpoints
 {
     internal static void MapReceivingEndpoints( this IEndpointRouteBuilder app )
     {
@@ -57,7 +57,7 @@ internal static class ReceivingEndpoints
             && !employee.ReceivingTask.IsFinished;
 
         return refreshed
-            ? Results.Ok( ReceivingTaskSummary.FromModel( employee.ReceivingTask! ) )
+            ? Results.Ok( IntakeTaskSummary.FromModel( employee.ReceivingTask! ) )
             : Results.Problem();
     }
     static async Task<IResult> GetNextReceivingTask( IReceivingRepository repository )
@@ -66,7 +66,7 @@ internal static class ReceivingEndpoints
         var nextTask = receiving?.GetNextReceivingTask();
         
         return nextTask is not null
-            ? Results.Ok( ReceivingTaskSummary.FromModel( nextTask ) )
+            ? Results.Ok( IntakeTaskSummary.FromModel( nextTask ) )
             : Results.Problem();
     }
     static async Task<IResult> StartReceivingTask( ReceivingEmployee employee, Guid taskId, Guid trailerId, Guid dockId, Guid areaId, IReceivingRepository repository )
@@ -78,7 +78,7 @@ internal static class ReceivingEndpoints
             && employee.StartReceiving( receiving, taskId, trailerId, dockId, areaId );
         
         return taskStarted && await repository.SaveAsync()
-            ? Results.Ok( ReceivingTaskSummary.FromModel( employee.ReceivingTask! ) )
+            ? Results.Ok( IntakeTaskSummary.FromModel( employee.ReceivingTask! ) )
             : Results.Problem();
     }
     static async Task<IResult> StartReceivingPallet( ReceivingEmployee employee, Guid trailerId, Guid palletId, IReceivingRepository repository )

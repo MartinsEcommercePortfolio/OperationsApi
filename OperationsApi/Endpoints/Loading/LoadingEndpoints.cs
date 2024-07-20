@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using OperationsApi.Endpoints.Warehouse.Dtos;
+using OperationsApi.Endpoints.Loading.Dtos;
+using OperationsApi.Endpoints.Ordering.Dtos;
 using OperationsApi.Services;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Ordering;
 using OperationsDomain.Outbound.Loading;
 
-namespace OperationsApi.Endpoints.Warehouse;
+namespace OperationsApi.Endpoints.Loading;
 
 public static class LoadingEndpoints
 {

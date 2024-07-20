@@ -1,6 +1,6 @@
 using OperationsDomain.Outbound.Loading.Models;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Loading.Dtos;
 
 internal readonly record struct LoadingTaskSummary(
     int Trailer,

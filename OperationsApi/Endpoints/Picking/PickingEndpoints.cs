@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using OperationsApi.Endpoints.Warehouse.Dtos;
+using OperationsApi.Endpoints.Ordering.Dtos;
+using OperationsApi.Endpoints.Picking.Dtos;
 using OperationsApi.Services;
 using OperationsApi.Utilities;
 using OperationsDomain.Employees.Models;
 using OperationsDomain.Ordering;
 using OperationsDomain.Outbound.Picking;
 
-namespace OperationsApi.Endpoints.Warehouse;
+namespace OperationsApi.Endpoints.Picking;
 
 internal static class PickingEndpoints
 {

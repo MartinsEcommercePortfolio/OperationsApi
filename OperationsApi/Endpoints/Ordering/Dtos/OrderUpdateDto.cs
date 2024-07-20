@@ -1,6 +1,6 @@
 using OperationsDomain.Ordering.Models;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Ordering.Dtos;
 
 internal readonly record struct OrderUpdateDto(
     Guid OrderId,

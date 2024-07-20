@@ -1,14 +1,14 @@
 using OperationsDomain.Inbound.Intake.Models;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Intake.Dtos;
 
-internal readonly record struct ReceivingTaskSummary(
+internal readonly record struct IntakeTaskSummary(
     int TrailerNumber,
     int DockNumber,
     int AreaNumber,
     int PalletCount )
 {
-    public static ReceivingTaskSummary FromModel( ReceivingTask model ) => new(
+    public static IntakeTaskSummary FromModel( ReceivingTask model ) => new(
         model.Trailer.Number,
         model.Dock.Number,
         model.Area.Number,

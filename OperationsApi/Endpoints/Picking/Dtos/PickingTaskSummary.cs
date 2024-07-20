@@ -1,23 +1,22 @@
-using OperationsDomain;
 using OperationsDomain.Outbound.Picking.Models;
 using OperationsDomain.Units;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Picking.Dtos;
 
 internal readonly record struct PickingTaskSummary(
     int DockNumber,
     int AreaNumber,
-    List<PickSummary> PickSummaries )
+    List<PickingSummary> PickSummaries )
 {
     internal static PickingTaskSummary FromModel( PickingTask model ) => new(
         model.StagingDock.Number,
         model.StagingArea.Number,
         GetPickSummaries( model.Pallets ) );
 
-    static List<PickSummary> GetPickSummaries( List<Pallet> pallets )
+    static List<PickingSummary> GetPickSummaries( List<Pallet> pallets )
     {
-        List<PickSummary> summaries = [];
-        summaries.AddRange( from m in pallets select PickSummary.FromModel( m, m.Racking ) );
+        List<PickingSummary> summaries = [];
+        summaries.AddRange( from m in pallets select PickingSummary.FromModel( m, m.Racking ) );
         return summaries;
     }
 }

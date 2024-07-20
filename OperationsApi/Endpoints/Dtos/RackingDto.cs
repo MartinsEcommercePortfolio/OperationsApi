@@ -1,7 +1,6 @@
-using OperationsDomain;
 using OperationsDomain.Units;
 
-namespace OperationsApi.Endpoints.Warehouse.Dtos;
+namespace OperationsApi.Endpoints.Dtos;
 
 internal readonly record struct RackingDto(
     Guid Id,

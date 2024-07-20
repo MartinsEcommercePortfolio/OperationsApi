@@ -1,5 +1,5 @@
-using OperationsDomain.Warehouse.Employees;
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Employees;
+using OperationsDomain.Employees.Models;
 
 namespace OperationsApi.Middleware;
 

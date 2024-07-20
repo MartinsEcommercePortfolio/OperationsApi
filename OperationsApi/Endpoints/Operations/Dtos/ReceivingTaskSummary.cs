@@ -1,4 +1,4 @@
-using OperationsDomain.Warehouse.Operations.Receiving.Models;
+using OperationsDomain.Operations.Receiving.Models;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;
 

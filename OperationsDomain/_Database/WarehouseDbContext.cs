@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using OperationsDomain.Ordering.Models;
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse;
-using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Equipment;
-using OperationsDomain.Warehouse.Infrastructure.Units;
-using OperationsDomain.Warehouse.Operations.Loading.Models;
-using OperationsDomain.Warehouse.Operations.Picking.Models;
-using OperationsDomain.Warehouse.Operations.Putaways.Models;
-using OperationsDomain.Warehouse.Operations.Receiving.Models;
+using OperationsDomain.Employees.Models;
+using OperationsDomain.Equipment;
+using OperationsDomain.Infrastructure.Units;
+using OperationsDomain.Operations.Loading.Models;
+using OperationsDomain.Operations.Ordering.Models;
+using OperationsDomain.Operations.Picking.Models;
+using OperationsDomain.Operations.Putaways.Models;
+using OperationsDomain.Operations.Receiving.Models;
+using OperationsDomain.Operations.Shipping.Models;
 
 namespace OperationsDomain._Database;
 

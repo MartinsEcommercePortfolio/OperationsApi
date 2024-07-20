@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Operations.Putaways;
+using OperationsDomain.Employees.Models;
+using OperationsDomain.Operations.Putaways;
 
 namespace OperationsApi.Endpoints.Operations;
 

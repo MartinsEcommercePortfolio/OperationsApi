@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OperationsApi.Endpoints.Operations.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Ordering;
-using OperationsDomain.Warehouse.Employees.Models;
-using OperationsDomain.Warehouse.Operations.Picking;
+using OperationsDomain.Employees.Models;
+using OperationsDomain.Operations.Ordering;
+using OperationsDomain.Operations.Picking;
 
 namespace OperationsApi.Endpoints.Operations;
 

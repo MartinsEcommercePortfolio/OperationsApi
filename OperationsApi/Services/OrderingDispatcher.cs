@@ -1,11 +1,13 @@
 using OperationsApi.Services.Dtos;
 using OperationsApi.Utilities;
-using OperationsDomain.Ordering;
-using OperationsDomain.Ordering.Models;
-using OperationsDomain.Shipping;
-using OperationsDomain.Shipping.Models;
-using OperationsDomain.Warehouse.Operations.Picking;
-using OperationsDomain.Warehouse.Operations.Picking.Models;
+using OperationsDomain.Operations.Loading;
+using OperationsDomain.Operations.Loading.Models;
+using OperationsDomain.Operations.Ordering;
+using OperationsDomain.Operations.Ordering.Models;
+using OperationsDomain.Operations.Picking;
+using OperationsDomain.Operations.Picking.Models;
+using OperationsDomain.Operations.Shipping;
+using OperationsDomain.Operations.Shipping.Models;
 
 namespace OperationsApi.Services;
 
@@ -38,10 +40,12 @@ internal sealed class OrderingDispatcher(
                 
                 var orderingRepo = GetOrderingRepository( scope );
                 var pickingRepo = GetPickingRepository( scope );
+                var loadingRepo = GetLoadingRepository( scope );
                 var shippingRepo = GetShippingRepository( scope );
 
                 await HandlePendingOrders( http, orderingRepo, pickingRepo, shippingRepo );
-                await HandlePickedOrders( http, orderingRepo, pickingRepo, shippingRepo );
+                await HandlePickedOrders( http, orderingRepo, pickingRepo, loadingRepo );
+                await HandleLoadedOrders( http, orderingRepo, loadingRepo, shippingRepo );
                 await HandleDelayedOrders( http, orderingRepo );
             }
             catch ( Exception e )
@@ -61,9 +65,9 @@ internal sealed class OrderingDispatcher(
         var picking = await pickingRepo.GetPickingOperationsWithTasks();
         var shipping = await shippingRepo.GetShippingOperationsWithRoutes();
 
-        if (ordering is null || shipping is null || picking is null)
+        if (ordering is null || picking is null || shipping is null)
         {
-            _logger.LogError( "OrderingDispatcher failed to generate models from repositories during execution." );
+            _logger.LogError( "OrderingDispatcher HandlePendingOrders() failed to generate models from repositories during execution." );
             return;
         }
         
@@ -97,7 +101,11 @@ internal sealed class OrderingDispatcher(
                 continue;
             }
 
-            if (!await orderingRepo.SaveAsync() || !await pickingRepo.SaveAsync() || !await shippingRepo.SaveAsync())
+            var saved = await orderingRepo.SaveAsync()
+                && await pickingRepo.SaveAsync()
+                && await shippingRepo.SaveAsync();
+
+            if (!saved)
             {
                 await transaction.RollbackAsync();
                 throw new Exception( "OrderingDispatcher HandlePendingOrders() failed to save changes." );
@@ -110,11 +118,93 @@ internal sealed class OrderingDispatcher(
                 _logger.LogWarning( "OrderingDispatcher HandlePendingOrders() order update http call failed during execution." );
         }
     }
-    async Task HandlePickedOrders( HttpHandler http, IOrderingRepository orderingRepo, IPickingRepository pickingRepo, IShippingRepository shippingRepo )
+    async Task HandlePickedOrders( HttpHandler http, IOrderingRepository orderingRepo, IPickingRepository pickingRepo, ILoadingRepository loadingRepo )
+    {
+        var ordering = await orderingRepo.GetOrderingOperationsAll();
+        var picking = await pickingRepo.GetPickingOperationsWithTasks();
+        var loading = await loadingRepo.GetLoadingOperationsWithTasks();
+
+        if (ordering is null || picking is null || loading is null)
+        {
+            _logger.LogError( "OrderingDispatcher HandlePickedOrders() failed to generate models from repositories during execution." );
+            return;
+        }
+        
+        var completedPicks = picking.CompletedPickingTasks;
+        
+        foreach ( PickingTask pick in completedPicks )
+        {
+            await using var transaction = await orderingRepo.Context.Database.BeginTransactionAsync();
+            
+            var order = ordering.FulfillingOrders.FirstOrDefault( o => o.Id == pick.WarehouseOrderId );
+            var trailer = loading.Trailers.FirstOrDefault( t => t.Id == order?.TrailerId );
+            
+            if (order is null || trailer is null)
+                continue;
+            
+            var loadingTask = LoadingTask.New( order.Id, trailer, pick.StagingDock, pick.Pallets );
+            var taskGenerated = loading.AddNewTask( loadingTask )
+                && picking.RemoveCompletedTask( pick );
+            
+            if (!taskGenerated)
+            {
+                _logger.LogWarning( "OrderingDispatcher HandlePickedOrders() failed to generate new LoadingTask during execution." );
+                await transaction.RollbackAsync();
+                continue;
+            }
+
+            var saved = await orderingRepo.SaveAsync()
+                && await pickingRepo.SaveAsync()
+                && await loadingRepo.SaveAsync();
+
+            if (!saved)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception( "OrderingDispatcher HandlePickedOrders() failed to save changes." );
+            }
+
+            await transaction.CommitAsync();
+            _logger.LogInformation( "OrderingDispatcher HandlePickedOrders() successfully handled picked order." );
+        }
+    }
+    async Task HandleLoadedOrders( HttpHandler http, IOrderingRepository orderingRepo, ILoadingRepository loadingRepo, IShippingRepository shippingRepo )
     {
         // call to http (simulation) to take control of trailer (with its load)
         // if (respond success) remove the order and notify ordering api orders have been shipped
         // subtract item quantities from real product counts respectively (update inventory)
+        
+        OrderingOperations? ordering = await orderingRepo.GetOrderingOperationsAll();
+        var loading = await loadingRepo.GetLoadingOperationsWithTasks();
+        var shipping = await shippingRepo.GetShippingOperationsWithRoutes();
+
+        if (ordering is null || loading is null || shipping is null)
+        {
+            _logger.LogError( "OrderingDispatcher HandleLoadedOrders() failed to generate models from repositories during execution." );
+            return;
+        }
+
+        var completedLoads = loading.CompletedLoadingTasks;
+
+        foreach ( var load in completedLoads )
+        {
+            var order = ordering.FulfillingOrders.FirstOrDefault( o => o.Id == load.WarehouseOrderId );
+
+            if (order is null)
+            {
+                _logger.LogError( "OrderingDispatcher HandleLoadedOrders() failed to find order for load during execution." );
+                continue;
+            }
+            
+            var simulationAcceptedShipment = await http.TryPut<bool>( Consts.ShipToSimulation, null );
+
+            if (!simulationAcceptedShipment)
+            {
+                _logger.LogError( "OrderingDispatcher HandleLoadedOrders() http simulationAcceptedShipment failed load during execution." );
+                continue;
+            }
+            
+            
+        }
     }
     async Task HandleDelayedOrders( HttpHandler http, IOrderingRepository orderingRepo )
     {
@@ -140,7 +230,6 @@ internal sealed class OrderingDispatcher(
     
     static PickingTask? GeneratePickingTaskForOrder( WarehouseOrder order, ShippingOperations shipping, PickingOperations picking )
     {
-
         var dock = shipping.FindAvailableDock();
 
         if (dock is null || dock.IsOwned())
@@ -149,15 +238,17 @@ internal sealed class OrderingDispatcher(
         var productIds = order.Items
             .Select( static i => i.ProductId )
             .ToList();
-
+        
         return picking.GenerateNewPickingTask( order.Id, dock, productIds );
     }
     static HttpHandler GetHttpHandler( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<HttpHandler>() ?? throw new Exception( $"Failed to get {nameof( HttpHandler )} from provider." );
     static IOrderingRepository GetOrderingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IOrderingRepository>() ?? throw new Exception( $"Failed to get {nameof( IOrderingRepository )} from provider." );
-    static IShippingRepository GetShippingRepository( AsyncServiceScope scope ) =>
-        scope.ServiceProvider.GetService<IShippingRepository>() ?? throw new Exception( $"Failed to get {nameof( IShippingRepository )} from provider." );
     static IPickingRepository GetPickingRepository( AsyncServiceScope scope ) =>
         scope.ServiceProvider.GetService<IPickingRepository>() ?? throw new Exception( $"Failed to get {nameof( IPickingRepository )} from provider." );
+    static ILoadingRepository GetLoadingRepository( AsyncServiceScope scope ) =>
+        scope.ServiceProvider.GetService<ILoadingRepository>() ?? throw new Exception( $"Failed to get {nameof( ILoadingRepository )} from provider." );
+    static IShippingRepository GetShippingRepository( AsyncServiceScope scope ) =>
+        scope.ServiceProvider.GetService<IShippingRepository>() ?? throw new Exception( $"Failed to get {nameof( IShippingRepository )} from provider." );
 }

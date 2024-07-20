@@ -1,5 +1,5 @@
-using OperationsDomain.Warehouse.Infrastructure.Units;
-using OperationsDomain.Warehouse.Operations.Picking.Models;
+using OperationsDomain.Infrastructure.Units;
+using OperationsDomain.Operations.Picking.Models;
 
 namespace OperationsApi.Endpoints.Operations.Dtos;
 

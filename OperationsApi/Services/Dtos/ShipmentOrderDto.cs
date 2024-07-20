@@ -1,4 +1,4 @@
-using OperationsDomain.Ordering.Models;
+using OperationsDomain.Operations.Ordering.Models;
 
 namespace OperationsApi.Services.Dtos;
 

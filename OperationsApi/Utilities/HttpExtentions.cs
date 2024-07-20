@@ -1,4 +1,4 @@
-using OperationsDomain.Warehouse.Employees.Models;
+using OperationsDomain.Employees.Models;
 
 namespace OperationsApi.Utilities;
 

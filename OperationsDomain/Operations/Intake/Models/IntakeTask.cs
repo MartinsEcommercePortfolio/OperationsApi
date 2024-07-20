@@ -4,9 +4,9 @@ using OperationsDomain.Units;
 
 namespace OperationsDomain.Operations.Intake.Models;
 
-public sealed class ReceivingTask : WarehouseTask
+public sealed class IntakeTask : WarehouseTask
 {
-    ReceivingTask(
+    IntakeTask(
         Guid id, Employee? employee, bool isStarted, bool isFinished, Trailer trailer, Dock dock, Area area )
         : base( id, employee, isStarted, isFinished )
     {
@@ -15,7 +15,7 @@ public sealed class ReceivingTask : WarehouseTask
         Area = area;
     }
     
-    public static ReceivingTask New( Trailer trailer, Dock dock, Area area ) => 
+    public static IntakeTask New( Trailer trailer, Dock dock, Area area ) => 
         new( Guid.NewGuid(), null, false, false, trailer, dock, area );
     
     public Trailer Trailer { get; private set; }
@@ -46,7 +46,7 @@ public sealed class ReceivingTask : WarehouseTask
             && dockId == Dock.Id
             && areaId == Area.Id;
     }
-    internal Pallet? StartReceivingPallet( Guid trailerId, Guid palletId )
+    internal Pallet? StartUnloadingPallet( Guid trailerId, Guid palletId )
     {
         CurrentPallet = Trailer.GetPallet( palletId );
 
@@ -59,7 +59,7 @@ public sealed class ReceivingTask : WarehouseTask
             ? CurrentPallet
             : null;
     }
-    internal bool FinishReceivingPallet( Guid areaId, Guid palletId )
+    internal bool FinishUnloadingPallet( Guid areaId, Guid palletId )
     {
         var staged = CurrentPallet is not null
             && palletId == CurrentPallet.Id

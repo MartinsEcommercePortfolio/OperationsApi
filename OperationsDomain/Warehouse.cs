@@ -24,7 +24,7 @@ public sealed class Warehouse
     public List<Racking> Rackings { get; private set; } = [];
     public List<Pallet> Pallets { get; private set; } = [];
 
-    public ReceivingOperations ReceivingOperations { get; set; } = default!;
+    public IntakeOperations IntakeOperations { get; set; } = default!;
     public PutawayOperations PutawayOperations { get; set; } = default!;
     public PickingOperations ReplenishingOperations { get; set; } = default!;
     public PickingOperations PickingOperations { get; set; } = default!;

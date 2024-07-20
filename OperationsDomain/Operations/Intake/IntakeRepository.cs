@@ -5,25 +5,25 @@ using OperationsDomain.Operations.Intake.Models;
 
 namespace OperationsDomain.Operations.Intake;
 
-internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger<ReceivingRepository> logger ) 
-    : DatabaseService<ReceivingRepository>( dbContext, logger ), IReceivingRepository
+internal sealed class IntakeRepository( WarehouseDbContext dbContext, ILogger<IntakeRepository> logger ) 
+    : DatabaseService<IntakeRepository>( dbContext, logger ), IIntakeRepository
 {
-    public async Task<ReceivingOperations?> GetReceivingOperationsWithTasks()
+    public async Task<IntakeOperations?> GetReceivingOperationsWithTasks()
     {
         try
         {
             return await DbContext.Receiving
-                .Include( static w => w.PendingReceivingTasks )
-                .Include( static w => w.ActiveReceivingTasks )
+                .Include( static w => w.PendingIntakeTasks )
+                .Include( static w => w.ActiveIntakeTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }
         catch ( Exception e )
         {
-            return ProcessDbException<ReceivingOperations?>( e, null );
+            return ProcessDbException<IntakeOperations?>( e, null );
         }
     }
-    public async Task<ReceivingOperations?> GetReceivingSectionOperationsPallets()
+    public async Task<IntakeOperations?> GetReceivingSectionOperationsPallets()
     {
         try
         {
@@ -34,7 +34,7 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         }
         catch ( Exception e )
         {
-            return ProcessDbException<ReceivingOperations?>( e, null );
+            return ProcessDbException<IntakeOperations?>( e, null );
         }
     }
 }

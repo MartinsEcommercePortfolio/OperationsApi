@@ -8,7 +8,7 @@ internal readonly record struct IntakeTaskSummary(
     int AreaNumber,
     int PalletCount )
 {
-    public static IntakeTaskSummary FromModel( ReceivingTask model ) => new(
+    public static IntakeTaskSummary FromModel( IntakeTask model ) => new(
         model.Trailer.Number,
         model.Dock.Number,
         model.Area.Number,

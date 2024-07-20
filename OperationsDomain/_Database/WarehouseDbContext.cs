@@ -23,12 +23,12 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     public required DbSet<LoadingTask> PendingLoadingTasks { get; init; }
     public required DbSet<PickingTask> PendingPickingTasks { get; init; }
     public required DbSet<PutawayTask> PendingPutawayTasks { get; init; }
-    public required DbSet<ReceivingTask> PendingReceivingTasks { get; init; }
+    public required DbSet<IntakeTask> PendingReceivingTasks { get; init; }
     
     public required DbSet<LoadingTask> ActiveLoadingTasks { get; init; }
     public required DbSet<PickingTask> ActivePickingTasks { get; init; }
     public required DbSet<PutawayTask> ActivePutawayTasks { get; init; }
-    public required DbSet<ReceivingTask> ActiveReceivingTasks { get; init; }
+    public required DbSet<IntakeTask> ActiveReceivingTasks { get; init; }
     
     // SHIPPING
     public required DbSet<ShippingOperations> Shipping { get; init; }
@@ -41,7 +41,7 @@ public class WarehouseDbContext( DbContextOptions<WarehouseDbContext> options )
     
     // WAREHOUSE
     public required DbSet<Warehouse> Warehouses { get; init; }
-    public required DbSet<ReceivingOperations> Receiving { get; set; }
+    public required DbSet<IntakeOperations> Receiving { get; set; }
     public required DbSet<PutawayOperations> Putaways { get; set; }
     public required DbSet<PickingOperations> Picking { get; set; }
     public required DbSet<LoadingOperations> Loading { get; set; }

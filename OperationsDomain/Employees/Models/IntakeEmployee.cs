@@ -3,48 +3,48 @@ using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 
-public sealed class ReceivingEmployee : Employee
+public sealed class IntakeEmployee : Employee
 {
-    ReceivingEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
+    IntakeEmployee( Guid id, string name, Pallet? palletEquipped, IntakeTask? task )
         : base( id, name, palletEquipped, task ) { }
     
-    public ReceivingTask? ReceivingTask => 
-        TaskAs<ReceivingTask>();
+    public IntakeTask? ReceivingTask => 
+        TaskAs<IntakeTask>();
 
-    public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    public bool StartIntake( IntakeOperations intake, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
         if (Task is not null)
             return false;
 
-        var task = receiving.GetReceivingTask( taskId );
+        var task = intake.GetTask( taskId );
         
         return task is not null
             && StartTask( task )
             && task.VerifyStart( trailerId, dockId, areaId )
-            && receiving.ActivateReceivingTask( task );
+            && intake.ActivateTask( task );
     }
-    public bool FinishReceiving( ReceivingOperations receiving )
+    public bool FinishIntake( IntakeOperations intake )
     {
         return ReceivingTask is not null
             && ReceivingTask.CleanUp( this )
             && EndTask()
-            && receiving.CompleteTask( ReceivingTask );
+            && intake.CompleteTask( ReceivingTask );
     }
-    public bool StartReceivingPallet( Guid trailerId, Guid palletId )
+    public bool UnloadPallet( Guid trailerId, Guid palletId )
     {
-        var pallet = ReceivingTask?.StartReceivingPallet( trailerId, palletId );
+        var pallet = ReceivingTask?.StartUnloadingPallet( trailerId, palletId );
 
         return pallet is not null
             && ReceivingTask is not null
             && UnloadPallet( ReceivingTask.Trailer, pallet );
     }
-    public bool FinishReceivingPallet( Guid areaId, Guid palletId )
+    public bool StagePallet( Guid areaId, Guid palletId )
     {
         if (ReceivingTask is null)
             return false;
         
         return ReceivingTask?.CurrentPallet is not null
             && StagePallet( ReceivingTask.Area, ReceivingTask.CurrentPallet )
-            && ReceivingTask.FinishReceivingPallet( areaId, palletId );
+            && ReceivingTask.FinishUnloadingPallet( areaId, palletId );
     }
 }

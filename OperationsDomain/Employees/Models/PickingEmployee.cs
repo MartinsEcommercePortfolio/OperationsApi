@@ -16,7 +16,7 @@ public sealed class PickingEmployee : Employee
         if (Task is not null)
             return false;
 
-        var task = picking.GetPendingTask( taskId );
+        var task = picking.GetTask( taskId );
         
         return task is not null
             && StartTask( task )

@@ -123,9 +123,9 @@ internal sealed class OrderingProgresser(
             return;
         }
         
-        var completedPicks = picking.CompletedPickingTasks;
+        var completedPicks = picking.GetCompletedTasks();
         
-        foreach ( PickingTask pick in completedPicks )
+        foreach ( var pick in completedPicks )
         {
             await using var transaction = await orderingRepo.Context.Database.BeginTransactionAsync();
             
@@ -172,7 +172,7 @@ internal sealed class OrderingProgresser(
             return;
         }
 
-        var completedTasks = loading.CompletedLoadingTasks;
+        var completedTasks = loading.GetCompletedTasks();
 
         foreach ( var load in completedTasks )
         {

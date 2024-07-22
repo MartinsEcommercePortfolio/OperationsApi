@@ -8,10 +8,13 @@ public sealed class PickingOperations
     public List<Dock> Docks { get; private set; } = [];
     public List<Area> Areas { get; private set; } = [];
     public List<Racking> Rackings { get; private set; } = [];
-    public List<PickingTask> PendingPickingTasks { get; private set; } = [];
-    public List<PickingTask> ActivePickingTasks { get; private set; } = [];
-    public List<PickingTask> CompletedPickingTasks { get; private set; } = [];
+    public List<PickingTask> Tasks { get; private set; } = [];
+    public List<Guid> PendingTasks { get; private set; } = [];
+    public List<Guid> ActiveTasks { get; private set; } = [];
+    public List<Guid> CompletedTasks { get; private set; } = [];
 
+    public List<PickingTask> GetCompletedTasks() =>
+        Tasks.Where( t => CompletedTasks.Contains( t.Id ) ).ToList();
     public PickingTask? GenerateNewPickingTask( Guid warehouseOrderId, Dock dock, List<Guid> productIds )
     {
         var area = FindAreaForDock( dock );
@@ -35,37 +38,39 @@ public sealed class PickingOperations
         }
 
         var task = PickingTask.New( warehouseOrderId, dock, area, pallets );
-        PendingPickingTasks.Add( task );
+        Tasks.Add( task );
+        PendingTasks.Add( task.Id );
         return task;
     }
-    public PickingTask? GetNextPickingTask() => 
-        PendingPickingTasks.FirstOrDefault();
+    public PickingTask? GetNextPickingTask() =>
+        Tasks.FirstOrDefault( t => PendingTasks.Contains( t.Id ) );
     public bool RemoveCompletedTask( PickingTask task )
     {
-        return CompletedPickingTasks.Remove( task );
+        return CompletedTasks.Remove( task.Id )
+            && Tasks.Remove( task );
     }
     
-    internal PickingTask? GetPendingTask( Guid taskId ) =>
-        PendingPickingTasks.FirstOrDefault( t => t.Id == taskId );
+    internal PickingTask? GetTask( Guid taskId ) =>
+        Tasks.FirstOrDefault( t => t.Id == taskId );
     internal bool ActivateTask( PickingTask task )
     {
         var accepted = task.IsStarted
             && !task.IsFinished
-            && !ActivePickingTasks.Contains( task )
-            && PendingPickingTasks.Remove( task );
+            && !ActiveTasks.Contains( task.Id )
+            && PendingTasks.Remove( task.Id );
         
         if (accepted)
-            ActivePickingTasks.Add( task );
+            ActiveTasks.Add( task.Id );
 
         return accepted;
     }
     internal bool HandleCompletedTask( PickingTask task )
     {
         var completed = task.IsFinished
-            && ActivePickingTasks.Remove( task );
+            && ActiveTasks.Remove( task.Id );
 
         if (completed)
-            CompletedPickingTasks.Add( task );
+            CompletedTasks.Add( task.Id );
 
         return completed;
     }

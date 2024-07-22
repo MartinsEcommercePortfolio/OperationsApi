@@ -13,8 +13,8 @@ internal sealed class LoadingRepository( WarehouseDbContext dbContext, ILogger<L
         try
         {
             return await DbContext.Loading
-                .Include( static l => l.PendingLoadingTasks )
-                .Include( static l => l.ActiveLoadingTasks )
+                .Include( static l => l.PendingTasks )
+                .Include( static l => l.ActiveTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }

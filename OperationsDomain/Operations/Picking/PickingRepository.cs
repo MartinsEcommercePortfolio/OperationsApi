@@ -13,8 +13,8 @@ internal class PickingRepository( WarehouseDbContext dbContext, ILogger<PickingR
         try
         {
             return await DbContext.Picking
-                .Include( static p => p.PendingPickingTasks )
-                .Include( static p => p.ActivePickingTasks )
+                .Include( static p => p.PendingTasks )
+                .Include( static p => p.ActiveTasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }

@@ -2,6 +2,7 @@ using OperationsApi.Services.Dtos;
 using OperationsApi.Utilities;
 using OperationsDomain.Operations.Inbound;
 using OperationsDomain.Operations.Receiving;
+using OperationsDomain.Operations.Receiving.Models;
 
 namespace OperationsApi.Services;
 
@@ -37,6 +38,7 @@ internal sealed class ReceivingProgresser(
 
                 await HandleTrailersAwaitingDock( messenger, inboundRepository );
                 await HandleTrailersAwaitingTask( inboundRepository, receivingRepository );
+                await HandleCompletedReceivements( messenger, inboundRepository, receivingRepository );
             }
             catch ( Exception e )
             {
@@ -117,6 +119,53 @@ internal sealed class ReceivingProgresser(
             {
                 await transaction.RollbackAsync();
                 throw new Exception( "ReceivingProgresser HandleTrailersAwaitingTask() failed to save changes." );
+            }
+
+            await transaction.CommitAsync();
+            _logger.LogInformation( "ReceivingProgresser HandleTrailersAwaitingTask() successfully handled waiting trailer." );
+        }
+    }
+    async Task HandleCompletedReceivements( HttpMessenger messenger, IInboundRepository inboundRepository, IReceivingRepository receivingRepository )
+    {
+        var inbound = await inboundRepository.GetInboundOperations();
+        var receiving = await receivingRepository.GetReceivingOperationsWithTasks();
+
+        if (inbound is null || receiving is null)
+        {
+            _logger.LogError( "ReceivingProgresser HandleCompletedReceivements() failed to generate models from repositories during execution." );
+            return;
+        }
+
+        var completedReceivingTasks = receiving.GetCompletedTasks();
+        var notified = new List<ReceivingTask>();
+        
+        foreach ( var task in completedReceivingTasks )
+        {
+            var trailerNotified = await messenger.TryPut<bool>( Consts.NotifySimulationUndockTrailer, task.Trailer.Number );
+            if (!trailerNotified)
+            {
+                _logger.LogError( "ReceivingProgresser HandleCompletedReceivements() failed to notify trailer to leave during execution." );
+                continue;
+            }
+
+            notified.Add( task );
+        }
+
+        foreach ( var task in notified )
+        {
+            await using var transaction = await inboundRepository.Context.Database.BeginTransactionAsync();
+            
+            if (!receiving.RemoveTask( task ))
+            {
+                _logger.LogWarning( "ReceivingProgresser HandleCompletedReceivements() failed to remove receiving task during execution." );
+                await transaction.RollbackAsync();
+                continue;
+            }
+
+            if (!await receivingRepository.SaveAsync())
+            {
+                await transaction.RollbackAsync();
+                throw new Exception( "ReceivingProgresser HandleCompletedReceivements() failed to save changes." );
             }
 
             await transaction.CommitAsync();

@@ -10,11 +10,11 @@ internal static class HttpExtentions
             return Employee.Null();
         return userObj as Employee ?? Employee.Null();
     }
-    public static IntakeEmployee GetReceivingEmployee( this HttpContext http )
+    public static ReceivingEmployee GetReceivingEmployee( this HttpContext http )
     {
         if (!http.Items.TryGetValue( "Employee", out var userObj ))
-            return (IntakeEmployee) Employee.Null();
-        return userObj as IntakeEmployee ?? (IntakeEmployee) Employee.Null();
+            return (ReceivingEmployee) Employee.Null();
+        return userObj as ReceivingEmployee ?? (ReceivingEmployee) Employee.Null();
     }
     public static PutawayEmployee GetPutawayEmployee( this HttpContext http )
     {

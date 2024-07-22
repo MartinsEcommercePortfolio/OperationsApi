@@ -6,5 +6,4 @@ namespace OperationsDomain.Operations.Receiving;
 public interface IReceivingRepository : IEfCoreRepository
 {
     public Task<ReceivingOperations?> GetReceivingOperationsWithTasks();
-    public Task<ReceivingOperations?> GetReceivingSectionOperationsPallets();
 }

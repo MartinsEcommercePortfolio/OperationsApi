@@ -2,15 +2,20 @@ using OperationsDomain.Units;
 
 namespace OperationsDomain.Operations.Receiving.Models;
 
-public sealed class ReceivingOperations : Warehouse
+public sealed class ReceivingOperations
 {
-    public Warehouse Warehouse { get; set; } = default!; 
-    public List<ReceivingTask> PendingIntakeTasks { get; private set; } = [];
-    public List<ReceivingTask> ActiveIntakeTasks { get; private set; } = [];
+    public List<Area> Areas { get; private set; } = [];
+    public List<ReceivingTask> Tasks { get; private set; } = [];
+    public List<Guid> PendingTasks { get; private set; } = [];
+    public List<Guid> ActiveTasks { get; private set; } = [];
+    public List<Guid> CompletedTasks { get; private set; } = [];
 
+    public List<ReceivingTask> GetCompletedTasks() =>
+        Tasks.Where( t => CompletedTasks.Contains( t.Id ) ).ToList();
     public ReceivingTask? GetNextTask() =>
-        PendingIntakeTasks.FirstOrDefault();
-
+        Tasks.FirstOrDefault();
+    public ReceivingTask? GetTask( Guid taskId ) =>
+        Tasks.FirstOrDefault( t => t.Id == taskId );
     public bool AddNewTask( Trailer trailer )
     {
         if (trailer.Dock is null)
@@ -22,33 +27,43 @@ public sealed class ReceivingOperations : Warehouse
             return false;
 
         var task = ReceivingTask.New( trailer, trailer.Dock, area );
-        PendingIntakeTasks.Add( task );
+        Tasks.Add( task );
+        PendingTasks.Add( task.Id );
 
         return trailer.AssignTask( task.Id );
     }
-    public ReceivingTask? GetTask( Guid taskId ) =>
-        PendingIntakeTasks.FirstOrDefault( t => t.Id == taskId );
     public bool ActivateTask( ReceivingTask receivingTask )
     {
         var accepted = receivingTask.IsStarted 
             && !receivingTask.IsFinished
-            && !ActiveIntakeTasks.Contains( receivingTask ) 
-            && PendingIntakeTasks.Remove( receivingTask );
+            && !ActiveTasks.Contains( receivingTask.Id )
+            && !CompletedTasks.Contains( receivingTask.Id ) 
+            && PendingTasks.Remove( receivingTask.Id );
 
         if (accepted)
-            ActiveIntakeTasks.Add( receivingTask );
+            ActiveTasks.Add( receivingTask.Id );
 
         return accepted;
     }
     public bool CompleteTask( ReceivingTask receivingTask )
     {
-        return receivingTask.IsFinished
-            && ActiveIntakeTasks.Remove( receivingTask );
-    }
+        var completed = receivingTask.IsFinished
+            && ActiveTasks.Remove( receivingTask.Id );
 
+        if (completed)
+            CompletedTasks.Add( receivingTask.Id );
+
+        return completed;
+    }
+    public bool RemoveTask( ReceivingTask receivingTask )
+    {
+        return receivingTask.IsFinished
+            && CompletedTasks.Remove( receivingTask.Id )
+            && Tasks.Remove( receivingTask );
+    }
     Area? FindClosestArea( Dock dock )
     {
-        return ReceivingAreas
+        return Areas
             .Where( static a => !a.IsOwned() )
             .MinBy( b => Math.Abs( b.Number - dock.Number ) );
     }

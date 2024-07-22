@@ -3,15 +3,15 @@ using OperationsDomain.Units;
 
 namespace OperationsDomain.Employees.Models;
 
-public sealed class IntakeEmployee : Employee
+public sealed class ReceivingEmployee : Employee
 {
-    IntakeEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
+    ReceivingEmployee( Guid id, string name, Pallet? palletEquipped, ReceivingTask? task )
         : base( id, name, palletEquipped, task ) { }
     
     public ReceivingTask? ReceivingTask => 
         TaskAs<ReceivingTask>();
 
-    public bool StartIntake( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
+    public bool StartReceiving( ReceivingOperations receiving, Guid taskId, Guid trailerId, Guid dockId, Guid areaId )
     {
         if (Task is not null)
             return false;
@@ -23,7 +23,7 @@ public sealed class IntakeEmployee : Employee
             && task.VerifyStart( trailerId, dockId, areaId )
             && receiving.ActivateTask( task );
     }
-    public bool FinishIntake( ReceivingOperations receiving )
+    public bool FinishReceiving( ReceivingOperations receiving )
     {
         return ReceivingTask is not null
             && ReceivingTask.CleanUp( this )

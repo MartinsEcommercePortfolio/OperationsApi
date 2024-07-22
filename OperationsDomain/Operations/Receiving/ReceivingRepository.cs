@@ -13,22 +13,7 @@ internal sealed class ReceivingRepository( WarehouseDbContext dbContext, ILogger
         try
         {
             return await DbContext.Intake
-                .Include( static w => w.PendingIntakeTasks )
-                .Include( static w => w.ActiveIntakeTasks )
-                .FirstOrDefaultAsync()
-                .ConfigureAwait( false );
-        }
-        catch ( Exception e )
-        {
-            return ProcessDbException<ReceivingOperations?>( e, null );
-        }
-    }
-    public async Task<ReceivingOperations?> GetReceivingSectionOperationsPallets()
-    {
-        try
-        {
-            return await DbContext.Intake
-                .Include( static r => r.Pallets )
+                .Include( static w => w.Tasks )
                 .FirstOrDefaultAsync()
                 .ConfigureAwait( false );
         }
